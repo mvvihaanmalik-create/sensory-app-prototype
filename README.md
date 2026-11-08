@@ -25,8 +25,12 @@ The build produces a single self-contained `dist/index.html`. Dependencies and g
 - Home card gestures and hero motion
 - Map sheet dragging and snap states
 - Full motion and Reduce motion controls
+- Foxy Loxy venue: Overview, Menu, Reviews, and Photos tabs
+- Fixed Reserve button with independently scrolling venue content
+- Home card and ranking entry points, back navigation with Home position restored
+- Local save/helpful states, review and photo filters, and selectable crowd bars
 
-Search and Venue Details are not implemented yet.
+Search is not implemented yet. Venue image areas remain the placeholders in the supplied Figma screens. Reserve and Write a review provide prototype feedback; reservation processing and review submission are not connected.
 
 ## Design source
 

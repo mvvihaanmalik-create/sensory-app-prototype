@@ -1,6 +1,6 @@
 # Sensory app (UXDG 370): coded prototype handoff
 
-React + Vite prototype of the finalised Figma screens (Home, Map, Profile) inside an iPhone 18 Pro Max frame (440 × 956 pt screen). The code prototype is now the main prototype. Figma remains the design source; the Figma click-through prototype is no longer being maintained.
+React + Vite prototype of the finalised Figma screens (Home, Map, Profile, and Foxy Loxy venue details) inside an iPhone 18 Pro Max frame (440 × 956 pt screen). Figma remains the design source. Both Figma connections and the coded prototype have been worked on; keep future code changes grounded in the current Final flow screens.
 
 ## For the next Claude session (paste this in)
 
@@ -26,7 +26,11 @@ File: https://www.figma.com/design/piKIGYS9mjqhShrqGn6kGk/Design (page "Final fl
 | For you stack | 685:328 | Variants Front=A/B/C |
 | Map · Sheet half / full / hidden | 568:1905 / 700:2542 / 704:2310 | Sheet top = 616 / 302 / 956 |
 | Profile | 737:2790 | Section "Profile", built from the glass components |
-| Venue details (not built yet) | 666:15068 (V2), 666:15231 (WIP) | Not linked in the flow yet |
+| Earlier venue explorations | 666:15068 (V2), 666:15231 (WIP) | Reference iterations; use the 789:* screens below for code |
+| Foxy Loxy · Overview | 789:3121 | Implemented; opens from the Foxy Loxy Home card and ranking row |
+| Foxy Loxy · Menu | 789:3335 | Popular dishes, menu photo placeholders, full menu link |
+| Foxy Loxy · Reviews | 789:3478 | Summary, AI summary, filters, helpful states |
+| Foxy Loxy · Photos | 789:3725 | Category filters and the source masonry placeholders |
 
 The Figma MCP can't download asset URLs in Claude's sandbox (figma.com is blocked). What worked: `use_figma` with `node.exportAsync({format:'SVG_STRING'})` for vectors, and `return await node.screenshot({scale:1.3})` for raster images (the image lands in /tmp/claude-tool-results/).
 
@@ -37,6 +41,9 @@ src/App.jsx       stage, device frame, side panel, screen routing, shared tab ba
 src/Home.jsx      Home: hero (scene + fountain motion), categories, For you card stack, rankings, promo, map shortcut
 src/Map.jsx       Map: tiles, pins, glass controls, sense switcher, draggable sheet (snap 302/616/956)
 src/Profile.jsx   Profile: header, stat tiles, sensory profile tiles, settings rows, alerts toggle
+src/Venue.jsx     Shared venue header and four tab panels; fixed toolbar and Reserve dock
+src/venue.css     Venue layouts adapted from the current Figma screens
+src/venueAssets.js Exact Figma SVG export imports (files in src/assets/venue/)
 src/ui.jsx        Glass component, Icon, TabBar, StatusBar, colours, GENTLE spring
 src/fountain.js   Exact keyframes for the Morning hero motion (from Figma get_motion_context)
 src/svgs.js       All icons/illustrations exported from Figma
@@ -58,9 +65,13 @@ src/assets/       scene-morning.jpg, map-tiles.jpg
 - Map: drag/flick the sheet between up, half and away; tap its header to toggle up/half. When the sheet is away, the filters and recenter button slide in, and dragging up from the bottom brings it back. Chips, sense filter and hearts are selectable (visual only).
 - Tab bar: Home, Map, Profile (Search has no screen yet).
 - Profile: the "Coming soon" alerts switch only nudges.
+- Venue: the front Foxy Loxy Home card and its ranking row open Overview. Back returns to the preserved Home position; venue tab changes preserve the common scroll area. Hash links support all four venue views and browser history.
+- Reserve stays at y=866 within the 956pt phone screen while all venue content scrolls behind it. Bottom padding leaves the last content above the button at the scroll end.
+- Venue save state persists locally, Helpful toggles, review/photo filters work, crowd bars can be selected, and address opens the existing Map. Photo and dish blocks deliberately remain the Figma placeholders.
 
 ## Known gaps / next steps
 
-- Search screen and Venue details are not built.
+- Search is not built. The older 666:* venue iterations are references; the implemented venue flow is the 789:* section above.
+- Reserve and Write a review show prototype feedback only; there is no reservation backend or review submission. Crowd patterns and venue review content are sample values carried from Figma, not live data.
 - Home's other hero contexts (Afternoon, Evening, Night, events) aren't included; their lower sections still use the old layout in Figma.
 - The "App comfort" row in Figma's Profile is a detached Settings row (to get a sliders icon). An icon-swap property on Glass / Settings row would fix that.

@@ -1,0 +1,105 @@
+.venue{background:#f7f5f1;color:#2a2650;font-family:'Figtree',sans-serif;line-height:normal}
+.venue .v-asset{display:block;flex:none;max-width:none}
+.venue button:focus-visible,.venue a:focus-visible,.venue select:focus-visible{outline:2px solid #5b52c9;outline-offset:3px}
+.venue .v-placeholder{background:#dbdbde;flex:none;border-radius:24px}
+.venue .v-hero{height:320px;width:440px;border-radius:0}
+.venue .v-content{display:flex;flex-direction:column;align-items:stretch;gap:20px;padding:24px 24px 140px}
+.venue .v-title{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.venue .v-title h1{font-size:28px;font-weight:600;line-height:normal}
+.venue .v-title p{font-size:14px;font-weight:400;color:#5e5a7e;white-space:nowrap}
+.venue .v-card,.venue .v-sense,.venue .v-tabs{position:relative;flex:none;width:100%}
+.venue .v-card>.g-c{padding:20px}
+.venue .v-senses{height:105px;display:flex;align-items:center;gap:12px}
+.venue .v-sense{flex:1;min-width:0;width:auto;height:105px}
+.venue .v-sense span{font-size:13px;font-weight:400;color:#5e5a7e}
+.venue .v-sense strong{font-size:15px;font-weight:500}
+.venue .v-photo-strip{display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;margin-right:-24px;padding-right:24px;flex:none}
+.venue .v-photo-strip>button{height:280px}
+.venue .v-fold-spacer{height:104px;flex:none}
+.venue .v-crowd>.g-c{gap:16px}
+.venue .v-crowd-header{display:flex;align-items:center;gap:10px;height:44px}
+.venue .v-crowd-header>strong{flex:1;font-size:17px;font-weight:600}
+.venue .v-day{height:44px;position:relative;display:flex;align-items:center;gap:6px;padding:0 12px 0 16px;border-radius:22px;background:rgba(255,255,255,.85);box-shadow:0 2px 8px rgba(42,38,80,.06)}
+.venue .v-day select{font:500 14px 'Figtree',sans-serif;border:0;color:#2a2650;background:transparent;appearance:none;padding:0;cursor:pointer;width:29px}
+.venue .v-day>.v-asset{pointer-events:none}
+.venue .v-crowd-info{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex:none;border-radius:22px}
+.venue .v-crowd-status{font-size:14px;color:#5e5a7e}
+.venue .v-chart{display:flex;flex-direction:column;gap:8px}
+.venue .v-bars{width:318px;height:104px;display:flex;align-items:flex-end;justify-content:space-between}
+.venue .v-bars>button{width:14px;border-radius:7px;background:rgba(42,38,80,.16);min-width:14px;position:relative}
+.venue .v-bars>button::after{content:'';position:absolute;inset:-8px -2px}
+.venue .v-chart-axis{position:relative;width:318px;height:16px;font-size:12px;color:#5e5a7e}
+.venue .v-chart-axis>span{position:absolute;top:0}
+.venue .v-chart-hint{font-size:13px;text-align:center;color:#5e5a7e;min-height:16px}
+.venue .v-tabs{height:57px}
+.venue .v-tabs>.g-c{height:100%}
+.venue .v-tablist{display:flex;align-items:center;width:100%;height:44px}
+.venue .v-tablist>button{height:44px;flex:1;min-width:0;border-radius:22px;position:relative;font-weight:500;font-size:14px;color:rgba(42,38,80,.65)}
+.venue .v-tablist>button[aria-selected=true]{color:#2a2650;font-weight:600}
+.venue .v-tablist>button>span:last-child{position:relative;z-index:1}
+.venue .v-tab-pill{position:absolute;inset:0;border-radius:22px;background:rgba(255,255,255,.9);box-shadow:0 2px 8px rgba(42,38,80,.06)}
+.venue .v-tab-content{display:flex;flex-direction:column;gap:16px;align-items:stretch;padding-top:8px}
+.venue .v-overview{gap:20px}
+.venue h2{font-size:28px;font-weight:600;height:40px;display:flex;align-items:center;padding:0 20px}
+.venue .v-info-list>.g-c{padding:6px 0}
+.venue .v-info-row{display:flex;align-items:center;gap:14px;padding:0 18px 0 20px;height:52px;width:100%;color:#2a2650;text-decoration:none;text-align:left;font-size:15px;font-weight:500}
+.venue .v-info-row>span{flex:1;min-width:0}
+.venue .v-divider{height:1px;background:rgba(42,38,80,.08);margin:0 18.5px}
+.venue .v-hours-note{font-size:13px;padding:0 20px 12px 56px;color:#5e5a7e}
+.venue .v-button{position:relative;flex:none;color:#2a2650}
+.venue .v-chip{height:44px;padding:0;font-size:15px;font-weight:500;color:rgba(42,38,80,.8);white-space:nowrap;min-width:max-content}
+.venue .v-chip>.glass>.g-c{padding:0 20px}
+.venue .v-chip.selected>.glass{border-color:#fff}
+.venue .v-chip.selected .g-bg{background:rgba(255,255,255,.92)}
+.venue .v-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -24px;padding:0 24px 20px;margin-bottom:-20px;flex:none}
+.venue .v-chips::-webkit-scrollbar{display:none}
+.venue .v-wrap-chips{flex-wrap:wrap;overflow:visible;margin:0;padding:0}
+.venue .v-summary-link{display:block;text-align:left;width:100%}
+.venue .v-review-summary>.g-c{flex-direction:row!important;align-items:center!important;gap:20px}
+.venue .v-distribution{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0}
+.venue .v-rating-line{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:500;color:#5e5a7e}
+.venue .v-rating-track{height:6px;border-radius:3px;background:rgba(42,38,80,.08);flex:1;overflow:hidden}
+.venue .v-rating-track>div{height:6px;border-radius:3px;background:#5b52c9}
+.venue .v-score{display:flex;flex-direction:column;align-items:center;gap:4px}
+.venue .v-score>strong{font-size:40px;font-weight:600}
+.venue .v-score>span:last-child{font-size:13px;color:#5e5a7e}
+.venue .v-stars{display:flex;gap:2px;align-items:center}
+.venue .v-ai-summary>.g-c{gap:12px;padding:18px 20px;font-size:15px}
+.venue .v-ai-title{display:flex;gap:8px;align-items:center}
+.venue .v-ai-title>strong{font-size:15px;font-weight:600}
+.venue .v-tags{display:flex;gap:8px;flex-wrap:wrap}
+.venue .v-tags>span{padding:6px 12px;border-radius:14px;background:rgba(255,255,255,.8);font-size:12px;font-weight:500;white-space:nowrap}
+.venue .v-ai-footnote{font-size:12px;color:#5e5a7e}
+.venue .v-review>.g-c{padding:18px 20px;gap:10px;font-size:15px}
+.venue .v-reviewer{display:flex;align-items:center;gap:12px}
+.venue .v-reviewer>div{display:flex;flex-direction:column;gap:2px}
+.venue .v-reviewer strong{font-size:15px;font-weight:600}
+.venue .v-reviewer p{font-size:13px;color:#5e5a7e}
+.venue .v-helpful{display:flex;align-items:center;gap:6px;align-self:flex-start;font-size:13px;font-weight:500;color:#5e5a7e;border-radius:8px}
+.venue .v-helpful[aria-pressed=true]{color:#5b52c9}
+.venue .v-write-review{height:52px;font-size:15px;font-weight:600;width:100%}
+.venue .v-dishes{display:flex;gap:12px;overflow-x:auto;margin-right:-24px;padding:0 24px 24px 0;margin-bottom:-24px}
+.venue .v-dish{width:168px;min-width:168px;border-radius:24px!important}
+.venue .v-dish>.g-c{padding:8px 8px 14px;gap:8px}
+.venue .v-dish-photo{height:132px;width:100%;border-radius:18px}
+.venue .v-dish-name{font-size:15px;font-weight:600;padding:0 4px}
+.venue .v-dish-meta{font-size:13px;color:#5e5a7e;padding:0 4px}
+.venue .v-menu-grid{display:grid;grid-template-columns:repeat(2,188px);gap:16px}
+.venue .v-menu-grid>button{width:188px;height:188px}
+.venue .v-full-menu{display:block;position:relative;height:56px;color:#2a2650;font-size:15px;font-weight:500;text-decoration:none}
+.venue .v-full-menu span{flex:1;min-width:0}
+.venue .v-photo-columns{display:flex;gap:16px;align-items:flex-start}
+.venue .v-photo-columns>div{display:flex;flex-direction:column;gap:16px;width:188px}
+.venue .v-photo-columns .v-placeholder{width:188px}
+.venue .v-toolbar{position:absolute;top:56px;left:0;width:440px;height:48px;z-index:44;pointer-events:none}
+.venue .v-icon-button{width:48px;height:48px;position:absolute;top:0;pointer-events:auto}
+.venue .v-back{left:24px}
+.venue .v-save{left:316px}
+.venue .v-share{left:368px}
+.venue .v-saved>.glass .g-bg{background:rgba(228,225,255,.95)}
+.venue .v-reserve-dock{position:absolute;left:0;right:0;bottom:0;height:112px;z-index:43;pointer-events:none;background:linear-gradient(180deg,rgba(247,245,241,0),rgba(247,245,241,.92) 85%)}
+.venue .v-reserve{position:absolute;left:24px;top:22px;width:392px;height:56px;pointer-events:auto}
+.venue .v-reserve .g-bg{background:rgba(255,255,255,.9)}
+.venue .v-reserve strong{font-size:17px;font-weight:600}
+.venue .v-toast{position:absolute;left:24px;right:24px;bottom:124px;padding:14px 20px;background:#2a2650;color:#fff;z-index:65;font-size:14px;border-radius:20px;text-align:center;box-shadow:0 8px 24px rgba(42,38,80,.2)}
+.venue .v-sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
