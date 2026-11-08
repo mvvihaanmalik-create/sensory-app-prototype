@@ -114,7 +114,7 @@ function VenueCard({ v }) {
   );
 }
 
-function ForYouStack() {
+function ForYouStack({ onOpenVenue }) {
   const [front, setFront] = useState('A');
   const scale = useScale();
   const drag = useRef(null);
@@ -122,7 +122,8 @@ function ForYouStack() {
   const fi = KEYS.indexOf(front);
   const roleOf = (k) => (k === front ? 'front' : k === KEYS[(fi + 1) % 3] ? 'right' : 'left');
 
-  const onDown = (e) => { drag.current = { x: e.clientX, moved: false, id: e.pointerId }; };
+  const dragged = useRef(false);
+  const onDown = (e) => { dragged.current = false; drag.current = { x: e.clientX, moved: false, id: e.pointerId }; };
   const onMove = (e) => {
     const d = drag.current; if (!d) return;
     const delta = (e.clientX - d.x) / scale;
@@ -131,6 +132,7 @@ function ForYouStack() {
   };
   const onUp = () => {
     const d = drag.current; drag.current = null; if (!d) return;
+    dragged.current = d.moved;
     if (d.moved && Math.abs(dx) > 50) setFront(dx < 0 ? KEYS[(fi + 1) % 3] : KEYS[(fi + 2) % 3]);
     setDx(0);
   };
@@ -146,7 +148,7 @@ function ForYouStack() {
             initial={false}
             animate={{ ...ROLE[role], x: ROLE[role].x + (isFront ? dx : 0), rotate: ROLE[role].rotate + (isFront ? dx / 40 : 0) }}
             transition={isFront && dx !== 0 ? { type: 'spring', stiffness: 600, damping: 40 } : GENTLE}
-            onClick={() => { if (!isFront) setFront(k); }}
+            onClick={() => { if (!isFront) setFront(k); else if (!dragged.current && k === 'A') onOpenVenue?.(); }}
             onPointerDown={isFront ? onDown : undefined} onPointerMove={isFront ? onMove : undefined}
             onPointerUp={isFront ? onUp : undefined} onPointerCancel={isFront ? onUp : undefined}
             whileTap={!isFront ? { scale: 0.78 } : undefined}>
@@ -168,9 +170,9 @@ function ForYouStack() {
   );
 }
 
-function RankingRow({ top, n, name, meta, level }) {
+function RankingRow({ top, n, name, meta, level, onClick }) {
   return (
-    <motion.button className="abs" whileTap={{ scale: 0.985 }} transition={GENTLE}
+    <motion.button className="abs" onClick={onClick} whileTap={{ scale: 0.985 }} transition={GENTLE}
       style={{ left: 24, top, width: 392, height: 92, borderRadius: 24, ...cardGlass, display: 'flex', alignItems: 'center', gap: 16, padding: '0 20px', textAlign: 'left' }}>
       <span style={{ ...h2, width: 22 }}>{n}</span>
       <img src={uri('photoSlot')} alt="" style={{ width: 56, height: 56, display: 'block' }} />
@@ -186,7 +188,7 @@ function RankingRow({ top, n, name, meta, level }) {
   );
 }
 
-export default function Home({ onOpenMap, onScroll, reduceMotion }) {
+export default function Home({ onOpenMap, onOpenVenue, onScroll, reduceMotion }) {
   return (
     <div className="scroll" style={{ background: '#f7f5f1' }} onScroll={(e) => onScroll?.(e.currentTarget.scrollTop)}>
       <div style={{ position: 'relative', width: 440, height: 1753.83 }}>
@@ -208,11 +210,11 @@ export default function Home({ onOpenMap, onScroll, reduceMotion }) {
 
         <Categories />
         <SectionHeader top={421.17} title="For you" />
-        <ForYouStack />
+        <ForYouStack onOpenVenue={onOpenVenue} />
 
         <SectionHeader top={946} title="Popular Around you" />
         <RankingRow top={998} n={1} name="Gallery Café" meta="Café · 1.1 mi" level={1} />
-        <RankingRow top={1106} n={2} name="Foxy Loxy Café" meta="Café · 0.5 mi" level={2} />
+        <RankingRow top={1106} n={2} name="Foxy Loxy Café" meta="Café · 0.5 mi" level={2} onClick={onOpenVenue} />
         <RankingRow top={1214} n={3} name="The Sentient" meta="Café · 0.8 mi" level={2} />
 
         <div className="abs" style={{ left: 24, top: 1346, width: 392, height: 164, borderRadius: 24, overflow: 'hidden', background: 'rgba(20,24,31,0.06)', boxShadow: '0 12px 32px rgba(27,42,68,0.06)' }}>

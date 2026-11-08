@@ -1,0 +1,330 @@
+// Venue page · Foxy Loxy Cafe (Figma 789:3120): Overview / Menu / Reviews / Photos
+import { useRef, useState } from 'react';
+import { AnimatePresence, motion, useMotionValue, useTransform } from 'motion/react';
+import { GENTLE, Icon, NAVY, MUTED } from './ui.jsx';
+import { paths } from './svgs.js';
+import { VIcon } from './venueIcons.jsx';
+import { G, CircleBtn, Chip, SenseTiles, InfoList, ReviewSummary, AISummary, ReviewCard, H, PrimaryCTA, Toast, PURPLE, DIV, TAP, t } from './flow.jsx';
+
+export const VENUE = {
+  name: 'Foxy Loxy Cafe',
+  address: '1919 Bull St, Savannah, GA 31401',
+  phone: '(912) 401-0543',
+};
+
+// Typical crowd by hour, 6a to 11p (18 bars). Sunday matches the Figma frame.
+const SUN = [8, 15, 23, 31, 37, 44, 42, 52, 50, 64, 73, 85, 94, 87, 75, 67, 52, 37];
+const shape = (k, add = 0) => SUN.map((h, i) => Math.max(6, Math.min(100, Math.round(h * k + add + (i % 3 === 0 ? 3 : -2)))));
+const WEEK = {
+  Mon: shape(0.62), Tue: shape(0.6), Wed: shape(0.66), Thu: shape(0.72),
+  Fri: shape(0.92, 4), Sat: shape(1.02, 2), Sun: SUN,
+};
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const NOW_IDX = 11;
+const hourLabel = (i) => { const h = 6 + i; const hh = h % 12 || 12; return `${hh} ${h < 12 ? 'AM' : 'PM'}`; };
+const busyWord = (v) => (v < 25 ? 'Usually quiet' : v < 50 ? 'Usually not too busy' : v < 75 ? 'Usually a little busy' : 'Usually busy');
+const AXIS = [['9a', 16.98], ['12p', 33.02], ['3p', 50.63], ['6p', 67.61], ['9p', 84.28]];
+
+function CrowdCard() {
+  const [day, setDay] = useState('Sun');
+  const [menu, setMenu] = useState(false);
+  const [info, setInfo] = useState(false);
+  const [sel, setSel] = useState(null);
+  const bars = WEEK[day];
+  const live = day === 'Sun';
+  const status = sel != null ? `${hourLabel(sel)} · ${busyWord(bars[sel])}` : live ? 'Live · Busier than usual' : `${day} · Tap a bar to see an hour`;
+  return (
+    <G r={28} style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16, zIndex: menu ? 5 : 1 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <Icon d={paths.users} size={24} fill={NAVY} />
+        <span style={{ ...t(17, 600), flex: '1 0 0' }}>Crowd</span>
+        <div style={{ position: 'relative' }}>
+          <motion.button whileTap={{ scale: 0.95 }} transition={TAP} onClick={() => setMenu((m) => !m)}
+            style={{ height: 44, padding: '0 12px 0 16px', borderRadius: 22, background: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={t(14, 500)}>{day}</span>
+            <motion.span animate={{ rotate: menu ? 180 : 0 }} transition={GENTLE}><VIcon name="caretDown" size={16} /></motion.span>
+          </motion.button>
+          <AnimatePresence>
+            {menu && (
+              <motion.div className="gl-solid" initial={{ opacity: 0, y: -6, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -6, scale: 0.96 }} transition={{ duration: 0.18 }}
+                style={{ position: 'absolute', right: 0, top: 50, width: 140, borderRadius: 20, padding: 6, zIndex: 10, transformOrigin: '100% 0' }}>
+                {DAYS.map((d) => (
+                  <button key={d} onClick={() => { setDay(d); setSel(null); setMenu(false); }}
+                    style={{ width: '100%', height: 36, borderRadius: 14, padding: '0 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: d === day ? 'rgba(91,82,201,0.1)' : 'transparent' }}>
+                    <span style={t(14, d === day ? 600 : 500)}>{d === 'Sun' ? 'Sun · Today' : d}</span>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+        <motion.button aria-label="About crowd" whileTap={{ scale: 0.9 }} onClick={() => setInfo((i) => !i)}
+          style={{ width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 22, background: info ? 'rgba(255,255,255,0.85)' : 'transparent' }}>
+          <VIcon name="info" />
+        </motion.button>
+      </div>
+      <AnimatePresence initial={false}>
+        {info && (
+          <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={GENTLE}
+            style={{ ...t(13, 400, MUTED, { lineHeight: 1.4 }), overflow: 'hidden', marginTop: -4 }}>
+            Based on visits over the past few weeks. Live shows how busy it is right now compared with a usual Sunday.
+          </motion.p>
+        )}
+      </AnimatePresence>
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span key={status} style={t(14, 400, MUTED)} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
+          {live && sel == null && <motion.span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: 4, background: PURPLE, marginRight: 6, verticalAlign: 1 }}
+            animate={{ opacity: [1, 0.35, 1] }} transition={{ repeat: Infinity, duration: 1.6 }} />}
+          {status}
+        </motion.span>
+      </AnimatePresence>
+      <div>
+        <div style={{ width: 318, height: 104, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+          {bars.map((h, i) => {
+            const hot = sel != null ? sel === i : live && i === NOW_IDX;
+            return (
+              <button key={i} aria-label={hourLabel(i)} onClick={() => setSel(sel === i ? null : i)}
+                style={{ width: 14, height: 104, display: 'flex', alignItems: 'flex-end', padding: 0 }}>
+                <motion.div initial={{ height: 0 }} animate={{ height: h, backgroundColor: hot ? PURPLE : 'rgba(42,38,80,0.16)' }}
+                  whileHover={{ backgroundColor: hot ? PURPLE : 'rgba(42,38,80,0.26)' }}
+                  transition={{ ...GENTLE, delay: i * 0.015 }} style={{ width: 14, borderRadius: 7 }} />
+              </button>
+            );
+          })}
+        </div>
+        <div style={{ position: 'relative', width: 318, height: 18, marginTop: 8 }}>
+          {AXIS.map(([l, x]) => <span key={l} className="abs" style={{ left: `${x}%`, top: 0, ...t(12, 400, MUTED) }}>{l}</span>)}
+        </div>
+      </div>
+      <span style={{ ...t(13, 400, MUTED), textAlign: 'center' }}>Tap a bar for details</span>
+    </G>
+  );
+}
+
+const HOURS = [['Sun', '8 AM – 9 PM'], ['Mon', '7 AM – 9 PM'], ['Tue', '7 AM – 9 PM'], ['Wed', '7 AM – 9 PM'], ['Thu', '7 AM – 9 PM'], ['Fri', '7 AM – 10 PM'], ['Sat', '8 AM – 10 PM']];
+
+function Overview({ onReviews, firstReview }) {
+  const [hours, setHours] = useState(false);
+  const rows = [
+    { icon: 'storefront', text: 'Dine-in · Takeout · Delivery' },
+    { icon: 'mapPin', text: VENUE.address },
+    {
+      render: (
+        <div style={{ width: '100%' }}>
+          <button onClick={() => setHours((h) => !h)} style={{ width: '100%', height: 52, padding: '0 18px 0 20px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}>
+            <VIcon name="clock" />
+            <span style={{ ...t(15, 500), flex: '1 0 0' }}>Open · Closes 9 PM</span>
+            <motion.span animate={{ rotate: hours ? 180 : 0 }} transition={GENTLE}><VIcon name="caretDown" /></motion.span>
+          </button>
+          <AnimatePresence initial={false}>
+            {hours && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={GENTLE} style={{ overflow: 'hidden' }}>
+                <div style={{ padding: '0 18px 12px 56px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {HOURS.map(([d, h]) => (
+                    <div key={d} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={t(14, d === 'Sun' ? 600 : 400, d === 'Sun' ? NAVY : MUTED)}>{d === 'Sun' ? 'Sunday · Today' : d}</span>
+                      <span style={t(14, d === 'Sun' ? 600 : 400, d === 'Sun' ? NAVY : MUTED)}>{h}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      ),
+    },
+    { icon: 'forkKnife', text: 'foxyloxycafe.com/menu' },
+    { icon: 'globe', text: 'foxyloxycafe.com' },
+    { icon: 'phone', text: VENUE.phone },
+  ];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <InfoList rows={rows} />
+      <H>What's here</H>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {['Back patio', 'Garden pond', 'Live music', 'Beer & wine', 'Art gallery'].map((c) => <Chip key={c} label={c} />)}
+      </div>
+      <H>Reviews</H>
+      <ReviewSummary onClick={onReviews} />
+      <AISummary />
+      <ReviewCard r={firstReview} />
+    </div>
+  );
+}
+
+const DISHES = [['Breakfast taco', 'Tex-Mex'], ['Kolache', 'Bakery'], ['Horchata latte', 'Coffee'], ['Chai', 'Tea']];
+function Menu() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <H>Popular dishes</H>
+      <div className="hscroll" style={{ margin: '0 -24px', padding: '4px 24px 20px', display: 'flex', gap: 12 }}>
+        {DISHES.map(([n, k]) => (
+          <G key={n} r={24} style={{ width: 168, flex: 'none', padding: '8px 8px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ height: 112, borderRadius: 18, background: '#e0e0e3' }} />
+            <div style={{ padding: '0 6px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <span className="nowrap" style={t(15, 600)}>{n}</span>
+              <span style={t(13, 400, MUTED)}>{k}</span>
+            </div>
+          </G>
+        ))}
+      </div>
+      <H>Menu photos</H>
+      <div style={{ display: 'grid', gridTemplateColumns: '188px 188px', gap: 16 }}>
+        {[0, 1, 2, 3].map((i) => <motion.div key={i} whileTap={{ scale: 0.97 }} style={{ height: 188, borderRadius: 24, background: '#dbdbde' }} />)}
+      </div>
+      <G as="button" r={28} whileTap={{ scale: 0.98 }} transition={TAP} style={{ height: 56, padding: '0 18px 0 20px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}>
+        <VIcon name="forkKnife" />
+        <span style={{ ...t(15, 500), flex: '1 0 0' }}>View full menu · foxyloxycafe.com</span>
+        <VIcon name="arrowUpRight" />
+      </G>
+    </div>
+  );
+}
+
+export const REVIEWS = [
+  { name: 'Local guide', meta: '42 reviews · 1 week ago', text: 'Cozy, artsy space with a lovely back patio. Great chai and kolaches. Gets busy on weekends, so come early for a seat.', tags: ['Sound · Lively', 'Crowd · Busy'], age: 7 },
+  { name: 'Weekend regular', meta: '8 reviews · 2 weeks ago', text: 'Lively but easy to talk at the patio tables. Natural light inside makes it a nice spot to read in the morning.', tags: ['Sound · Easy to talk', 'Light · Natural'], age: 14 },
+  { name: 'First visit', meta: '3 reviews · 1 month ago', text: 'Loved the horchata latte and the art on the walls. Parking is limited and the line moves slowly at brunch.', tags: ['Crowd · Packed', 'Seating · Patio'], age: 30 },
+];
+const FILTERS = ['All', 'Sound', 'Crowd', 'Seating', 'Service'];
+
+function Reviews({ onWrite, mine }) {
+  const [f, setF] = useState('All');
+  const [sort, setSort] = useState('Most relevant');
+  let list = [...(mine ? [mine] : []), ...REVIEWS];
+  if (f !== 'All') list = list.filter((r) => r.tags?.some((x) => x.startsWith(f)));
+  if (sort === 'Newest') list = [...list].sort((a, b) => a.age - b.age);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <ReviewSummary />
+      <AISummary />
+      <G as="button" r={26} onClick={onWrite} whileTap={{ scale: 0.98 }} transition={TAP}
+        style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <VIcon name="pencil" />
+        <span style={t(15, 600)}>{mine ? 'Edit your review' : 'Write a review'}</span>
+      </G>
+      <div className="hscroll" style={{ margin: '0 -24px', padding: '4px 24px 16px', display: 'flex', gap: 8 }}>
+        {FILTERS.map((c) => <Chip key={c} label={c} on={f === c} onClick={() => setF(c)} />)}
+        <div style={{ width: 1, background: DIV, margin: '8px 4px', flex: 'none' }} />
+        <G as="button" r={20} onClick={() => setSort((s) => (s === 'Newest' ? 'Most relevant' : 'Newest'))} whileTap={{ scale: 0.95 }} transition={TAP}
+          style={{ height: 40, padding: '0 12px 0 16px', display: 'flex', alignItems: 'center', gap: 6, flex: 'none' }}>
+          <span className="nowrap" style={t(14, 500)}>{sort}</span>
+          <VIcon name="caretDown" size={16} />
+        </G>
+      </div>
+      <motion.div layout style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: -16 }}>
+        <AnimatePresence mode="popLayout" initial={false}>
+          {list.map((r) => (
+            <motion.div key={r.name} layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }} transition={GENTLE}>
+              <ReviewCard r={r} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+        {list.length === 0 && (
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ ...t(14, 400, MUTED), textAlign: 'center', padding: '24px 0' }}>
+            No reviews mention {f.toLowerCase()} yet.
+          </motion.p>
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
+const PHOTO_CHIPS = ['All', 'Latest', 'Food & drink', 'Vibe', 'Menu', 'By owner'];
+const COLS = [[240, 180, 260, 200], [180, 260, 200, 240]];
+function Photos() {
+  const [c, setC] = useState('All');
+  const k = PHOTO_CHIPS.indexOf(c);
+  const cols = k % 2 ? [COLS[1], COLS[0]] : COLS;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+      <div className="hscroll" style={{ margin: '0 -24px', padding: '4px 24px 20px', display: 'flex', gap: 8 }}>
+        {PHOTO_CHIPS.map((p) => <Chip key={p} label={p} on={c === p} onClick={() => setC(p)} />)}
+      </div>
+      <div style={{ display: 'flex', gap: 16, marginTop: -4 }}>
+        {cols.map((col, ci) => (
+          <div key={ci} style={{ width: 188, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {col.map((h, i) => (
+              <motion.div key={`${ci}-${i}`} layout initial={false} animate={{ height: h }} transition={GENTLE} whileTap={{ scale: 0.97 }}
+                style={{ borderRadius: 24, background: (ci + i) % 2 ? '#dbdbde' : '#e0e0e3' }} />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const TABS = [['overview', 'Overview'], ['menu', 'Menu'], ['reviews', 'Reviews'], ['photos', 'Photos']];
+
+export default function Venue({ tab, setTab, onBack, onReserve, onWriteReview, booking, mine, onScroll, toast }) {
+  const [saved, setSaved] = useState(false);
+  const scroller = useRef(null);
+  const tabsRef = useRef(null);
+  const sy = useMotionValue(0);
+  const heroY = useTransform(sy, (v) => (v > 0 ? v * 0.45 : 0));
+  const heroScale = useTransform(sy, (v) => (v < 0 ? 1 - v / 320 : 1));
+
+  const goTab = (k, scroll) => {
+    setTab(k);
+    const s = scroller.current, el = tabsRef.current;
+    if (!s || !el) return;
+    const target = el.offsetTop - 112;
+    if (scroll || s.scrollTop > target) s.scrollTo({ top: target, behavior: 'smooth' });
+  };
+
+  return (
+    <div className="abs" style={{ inset: 0, background: '#f7f5f1' }}>
+      <div ref={scroller} className="scroll" onScroll={(e) => { sy.set(e.currentTarget.scrollTop); onScroll?.(e.currentTarget.scrollTop); }}>
+        <motion.div style={{ height: 320, background: '#dbdbde', y: heroY, scale: heroScale, transformOrigin: '50% 0' }} />
+        <div style={{ position: 'relative', background: '#f7f5f1', padding: '24px 24px 140px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <h1 style={t(28, 600, NAVY, { letterSpacing: -0.4 })}>{VENUE.name}</h1>
+            <p style={t(14, 400, MUTED)}>4.6 ★ · 2,600 reviews · $ · Café · Tex-Mex</p>
+          </div>
+          <SenseTiles sound="Lively" light="Natural" crowd="Busy" seating="Patio" />
+          <div className="hscroll" style={{ margin: '0 -24px', padding: '0 24px', display: 'flex', gap: 12 }}>
+            {[300, 220, 220, 220].map((w, i) => (
+              <motion.button key={i} aria-label="See photos" onClick={() => goTab('photos', true)} whileTap={{ scale: 0.97 }} transition={TAP}
+                style={{ width: w, height: 280, borderRadius: 24, background: i % 2 ? '#e0e0e3' : '#dbdbde', flex: 'none' }} />
+            ))}
+          </div>
+          <div style={{ height: 104 }} />
+          <CrowdCard />
+          <div ref={tabsRef}><G r={27} style={{ padding: 5, display: 'flex' }}>
+            {TABS.map(([k, l]) => {
+              const on = tab === k;
+              return (
+                <button key={k} onClick={() => goTab(k)} style={{ position: 'relative', flex: '1 0 0', height: 44, borderRadius: 22 }}>
+                  {on && <motion.div layoutId="venue-tab" transition={GENTLE}
+                    style={{ position: 'absolute', inset: 0, borderRadius: 22, background: 'rgba(255,255,255,0.9)', boxShadow: '0 2px 8px rgba(42,38,80,0.06)' }} />}
+                  <span style={{ position: 'relative', ...t(14, on ? 600 : 500, on ? NAVY : 'rgba(42,38,80,0.65)') }}>{l}</span>
+                </button>
+              );
+            })}
+          </G></div>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.2 }} style={{ paddingTop: 8 }}>
+              {tab === 'overview' && <Overview onReviews={() => goTab('reviews', true)} firstReview={mine || REVIEWS[0]} />}
+              {tab === 'menu' && <Menu />}
+              {tab === 'reviews' && <Reviews onWrite={onWriteReview} mine={mine} />}
+              {tab === 'photos' && <Photos />}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
+
+      <CircleBtn icon="caretLeft" label="Back" onClick={onBack} style={{ position: 'absolute', left: 24, top: 56, zIndex: 10 }} />
+      <CircleBtn label={saved ? 'Saved' : 'Save'} onClick={() => setSaved((s) => !s)} style={{ position: 'absolute', left: 316, top: 56, zIndex: 10 }}>
+        <motion.span key={saved ? 'on' : 'off'} initial={{ scale: 0.4 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 14 }}>
+          <VIcon name={saved ? 'heartFill' : 'heart'} fill={saved ? PURPLE : NAVY} />
+        </motion.span>
+      </CircleBtn>
+      <CircleBtn icon="export" label="Share" style={{ position: 'absolute', left: 368, top: 56, zIndex: 10 }} />
+
+      <PrimaryCTA icon="calendarCheck" onClick={onReserve}
+        label={booking ? `Booked · ${booking.dayShort}, ${booking.time}` : 'Reserve'} />
+      <Toast text={toast} />
+    </div>
+  );
+}
