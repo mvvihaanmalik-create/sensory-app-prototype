@@ -1,0 +1,47 @@
+*{box-sizing:border-box;margin:0;padding:0}
+html,body,#root{height:100%}
+body{font-family:'Figtree',system-ui,sans-serif;color:#14181f;background:#ebe8e2;-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.abs{position:absolute}
+.nowrap{white-space:nowrap}
+
+/* Stage */
+.stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;gap:56px;
+  background:radial-gradient(1200px 700px at 30% 20%,#f6f2ec 0%,#ebe8e2 55%,#e4e1db 100%)}
+.panel{width:280px;display:flex;flex-direction:column;gap:22px}
+.panel h1{font-size:28px;font-weight:600;letter-spacing:-.6px;line-height:1.1}
+.panel p.lead{font-size:14px;color:#4b5462;line-height:1.45}
+.panel .label{font-size:11px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:#8a8f99;margin-bottom:8px}
+.jump{display:flex;flex-wrap:wrap;gap:6px}
+.jump button{height:34px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:rgba(255,255,255,.6);
+  border:1px solid rgba(255,255,255,.85);box-shadow:0 2px 8px rgba(27,42,68,.06);transition:background .2s}
+.jump button:hover{background:rgba(255,255,255,.95)}
+.jump button.on{background:#14181f;color:#fff;border-color:#14181f}
+.hints{display:flex;flex-direction:column;gap:9px;font-size:13px;color:#4b5462;line-height:1.4}
+.hints b{color:#14181f;font-weight:600}
+@media (max-width:900px){.panel{display:none}}
+
+/* Device: iPhone 18 Pro Max (440 x 956 pt screen, slimmer Dynamic Island) */
+.device-wrap{position:relative;flex:none}
+.device{position:absolute;left:0;top:0;width:468px;height:984px;border-radius:76px;transform-origin:0 0;
+  background:linear-gradient(145deg,#d9d6d0 0%,#a9a6a1 22%,#e8e5df 48%,#9c9994 76%,#cfccc6 100%);
+  box-shadow:0 50px 90px -20px rgba(30,28,40,.35),0 18px 36px -12px rgba(30,28,40,.25),inset 0 0 0 1px rgba(255,255,255,.5)}
+.device::before{content:'';position:absolute;inset:3px;border-radius:73px;background:#0b0b0d}
+.device .btn{position:absolute;width:4px;border-radius:2px;background:linear-gradient(90deg,#8f8c87,#c9c6c0)}
+.screen{position:absolute;left:14px;top:14px;width:440px;height:956px;border-radius:62px;overflow:hidden;background:#f7f5f1;isolation:isolate}
+.island{position:absolute;left:50%;top:12px;width:86px;height:30px;margin-left:-43px;border-radius:15px;background:#000;z-index:60;pointer-events:none}
+
+/* Glass (Figma "Glass / ... / Light") */
+.glass{position:absolute;border:1.5px solid rgba(255,255,255,.95);box-shadow:0 14px 18px rgba(42,38,80,.1)}
+.glass>.g-bg{position:absolute;inset:0;border-radius:inherit;pointer-events:none;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  background-image:linear-gradient(var(--ga,135deg),rgba(255,255,255,.55) 14.286%,rgba(255,255,255,.08) 85.714%),linear-gradient(90deg,rgba(255,255,255,.55),rgba(255,255,255,.55))}
+.glass>.g-in{position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.9)}
+.glass>.g-c{position:relative;display:flex;align-items:center;height:100%}
+
+.scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;overscroll-behavior:contain}
+.scroll::-webkit-scrollbar{display:none}
+.hscroll{overflow-x:auto;scrollbar-width:none}
+.hscroll::-webkit-scrollbar{display:none}
+
+.press{transition:transform .18s cubic-bezier(.3,.7,.4,1)}
+.press:active{transform:scale(.97)}
