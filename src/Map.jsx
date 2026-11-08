@@ -14,10 +14,10 @@ const RECS = [
   { title: 'Gallery Café', meta: 'Level 3 · 0.5 mi · Updated 1h ago', reason: 'Mixed fit · More crowded' },
 ];
 
-function Recommendation({ r }) {
+function Recommendation({ r, onOpen }) {
   const [saved, setSaved] = useState(false);
   return (
-    <div style={{ width: 400, display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div onClick={onOpen} style={{ width: 400, display: 'flex', flexDirection: 'column', gap: 8, cursor: onOpen ? 'pointer' : 'default' }}>
       <div style={{ width: 400, height: 191, borderRadius: 8, background: '#d7d7d7' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, width: 400 }}>
         <div style={{ width: 344, display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -55,7 +55,7 @@ const SENSES = [
   { key: 'Crowd', d: paths.users },
 ];
 
-export default function MapScreen({ command }) {
+export default function MapScreen({ command, onOpenVenue }) {
   const scale = useScale();
   const top = useMotionValue(SNAP.half);
   const [state, setState] = useState('half');
@@ -197,7 +197,7 @@ export default function MapScreen({ command }) {
         <div ref={listRef} className="abs scroll" {...handlers('list')}
           style={{ inset: 'auto', left: 0, top: 80, width: 440, height: 574, overflowY: state === 'full' ? 'auto' : 'hidden', touchAction: state === 'full' ? 'pan-y' : 'none' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24, padding: '0 20px 24px' }}>
-            {RECS.map((r) => <Recommendation key={r.title} r={r} />)}
+            {RECS.map((r, i) => <Recommendation key={r.title} r={r} onOpen={i === 0 ? onOpenVenue : undefined} />)}
           </div>
         </div>
       </motion.div>
