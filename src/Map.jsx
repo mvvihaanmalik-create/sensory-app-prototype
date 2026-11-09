@@ -71,6 +71,7 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch }) {
   const ctrlEvents = useTransform(p, (v) => (v > 0.6 ? 'auto' : 'none'));
 
   const go = (name, velocity = 0) => {
+    if (name !== 'full' && listRef.current) listRef.current.scrollTop = 0;
     setState(name);
     animate(top, SNAP[name], { ...GENTLE, velocity });
   };
@@ -78,6 +79,7 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch }) {
 
   // ---- drag handling (pointer deltas are divided by the device scale) ----
   const begin = (e, source) => {
+    top.stop();
     g.current = { y: e.clientY, startTop: top.get(), moved: false, source, last: [{ t: performance.now(), y: top.get() }], el: e.currentTarget, id: e.pointerId };
   };
   const move = (e) => {
@@ -197,7 +199,7 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch }) {
         </div>
         <div ref={listRef} className="abs scroll" {...handlers('list')}
           style={{ inset: 'auto', left: 0, top: 80, bottom: 0, width: 440, overflowY: state === 'full' ? 'auto' : 'hidden', touchAction: state === 'full' ? 'pan-y' : 'none' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, padding: '0 20px 24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, padding: '0 20px 112px' }}>
             {RECS.map((r, i) => <Recommendation key={r.title} r={r} onOpen={i === 0 ? onOpenVenue : undefined} />)}
           </div>
         </div>

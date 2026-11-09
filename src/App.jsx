@@ -274,7 +274,7 @@ export default function App() {
                 <div className="abs" style={{ inset: 0, zIndex: 60, pointerEvents: 'none' }}><Toast text={note} icon={note && /Only|later/.test(note) ? 'info' : 'check'} /></div>
                 <StatusBar shade={screen === 'search' && !venueOpen ? 0 : flow || sense ? 0 : venueOpen ? (venueScroll > 270 ? 1 : 0) : screen !== 'map' && homeScroll > 24 ? 1 : 0} />
                 <TabBar active={screen} onNav={to => { nav(to); if (to === 'search') navigateSearch(searchRoute); }} top={venueOpen || (screen === 'search' && ['search-filters','search-place'].includes(searchRoute)) ? 1000 : page ? 876 : TAB_TOP[screen]} yMV={screen === 'home' ? pull : undefined} />
-                <div className="abs" style={{ left: 150, top: 943, width: 140, height: 5, borderRadius: 3, background: screen === 'map' ? 'rgba(20,24,31,0.85)' : '#14181f', zIndex: 55 }} />
+                <div className="abs" style={{ left: 150, top: screen === 'home' && discoverOpen ? 935 : 943, width: 140, height: 5, borderRadius: 3, background: screen === 'home' && discoverOpen ? '#2a2650' : screen === 'map' ? 'rgba(20,24,31,0.85)' : '#14181f', zIndex: 55 }} />
                 <div className="island" />
               </div>
             </div>

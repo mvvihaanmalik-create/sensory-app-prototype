@@ -32,7 +32,7 @@ The build produces a single self-contained `dist/index.html`. Dependencies and g
 - Home-linked pages: Cafés, Dining, Nightlife, Events, More (category icons), For You and Popular Around You (See all)
 - Sort sheets behind the Sound, Lighting, Crowd, Temperature and Seating chips (they really reorder the list)
 - Modes: Your modes sheet from the Study mode chip, Edit mode (Study, Party, custom), Add custom mode
-- Hidden Discovery Mode: pull Home down from the top to reveal a swipeable card stack (not in Figma, built from a written brief)
+- Hidden Discovery Mode: pull Home down from the top to reveal the Figma Easter egg screen (`1002:8169`)
 
 Search browse, query results, sensory filters, and venue entry points are implemented.
 
@@ -51,7 +51,7 @@ Search browse, query results, sensory filters, and venue entry points are implem
 - The deck is ranked by the active mode (Study, Party or a custom mode) and re-ranks when the mode changes. Each card says why it fits and flags what does not, or what is unknown. Unknown sense data is shown as Unknown, never guessed.
 - Saved and passed cards persist while the app is open. Saved places add to the Saved count on Profile. "Show passed places" brings passes back.
 - The close button or Escape slides Home back down over Discover. Home is never unmounted, so its mode chip and For you card stay as they were.
-- Card images are illustrations (the app has no venue photography yet); the café and the park reuse the Savannah header scene.
+- Discovery uses the exact Figma morning background at 20% opacity, its 393 × 628 card at (23, 135), five sensory tiles, and 48px pass/save actions. The photo area stays the Figma placeholder. Ranking, save/pass state, Home pull gesture, and existing springs are preserved. Extra venue data remains dynamic; unknown temperature or seating stays Unknown.
 
 ### Booking flow rules
 
@@ -94,11 +94,19 @@ This feature branches from `feature/hidden-discovery` at `dafce5a`, the current 
 
 Use the **Final flow**, **DS · Foundations**, and **DS · Components** pages as the design reference. See [HANDOFF.md](HANDOFF.md) for the original implementation notes and screen node IDs.
 
+The Easter egg view is grounded in the Home page frame “Easter egg function.” The browser requires login to read the comment itself, so the connected frame is the implementation source. Only the Discovery view, its local assets, and its conditional home indicator changed for this update.
+
 ## Copy fidelity
 
 Static subtitles and decorative helper copy should come from the corresponding Figma frame. Edit/Add mode has one title at y=62, without a “Your modes” breadcrumb (`984:7582`, `984:7663`, `984:7738`). The Your modes sheet title, mode descriptions, list location subtitles, venue subtitles, and preference hints are retained because they appear in Figma.
 
 Removed prototype-only captions from Edit/Add mode, custom-mode cards, Discovery, Search, the review composer, and the desktop preview panel. Booking confirmation uses the source “Held Until” label with the selected time instead of an added reminder paragraph. Keep implementation and sample-data explanations in this README. Required interaction feedback, result counts, empty-state recovery, conflicts, and choice-dependent summaries remain functional.
+
+## Map and Discover finish
+
+The expanded Map sheet snaps to y=172, directly below the category buttons. Collapsing it resets the list scroll position; the list has enough bottom clearance to read the last result above the tab bar. Starting another drag stops the previous snap animation.
+
+Discover follows Figma frame `1002:8169`: a 393 × 628 glass card, five sensory tiles, the exported morning artwork, and 48px Pass/Save actions. The Save fill uses a more specific selector so shared glass CSS cannot override it. Save/pass decisions survive closing and reopening Discover.
 
 ## Validation
 
