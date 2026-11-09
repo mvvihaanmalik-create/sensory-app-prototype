@@ -1,0 +1,11 @@
+import user from './assets/profile/user.svg';
+import share from './assets/profile/export.svg';
+import caret from './assets/profile/caret.svg';
+import sliders from './assets/profile/sliders.svg';
+import bell from './assets/profile/bell.svg';
+import toggle from './assets/profile/switch.svg';
+import edit from './assets/profile/edit.svg';
+import plus from './assets/profile/plus.svg';
+import close from './assets/profile/close.svg';
+import back from './assets/profile/back.svg';
+export const profileAssets = { user, share, caret, sliders, bell, toggle, edit, plus, close, back };

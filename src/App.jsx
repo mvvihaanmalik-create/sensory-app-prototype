@@ -11,7 +11,7 @@ import WriteReview from './WriteReview.jsx';
 import SenseReviews from './SenseReviews.jsx';
 import ListPage, { SortSheet } from './Lists.jsx';
 import { ModesSheet, EditMode, INITIAL_MODES, modeLabel } from './Modes.jsx';
-import { PAGE_IDS } from './listData.js';
+import { PAGE_IDS, PAGES } from './listData.js';
 import { Toast } from './flow.jsx';
 import { GENTLE, ScaleCtx, StatusBar, TabBar } from './ui.jsx';
 
@@ -81,6 +81,7 @@ export default function App() {
   const [activeMode, setActiveMode] = useState('study');
   const [modesOpen, setModesOpen] = useState(MODE_VIEWS.includes(initial));
   const [editing, setEditing] = useState(initial === 'edit-study' ? 'study' : initial === 'edit-party' ? 'party' : initial === 'add-mode' ? 'new' : null);
+  const [modeOrigin, setModeOrigin] = useState('home');
   const [sortSheet, setSortSheet] = useState(initial === 'sort-sound' ? { sense: 'sound', value: null, onApply: () => {} } : null);
   const [sortsBy, setSortsBy] = useState({});
   const [note, setNote] = useState(null);
@@ -108,8 +109,11 @@ export default function App() {
   // Hidden Discovery Mode: Home slides down by `pull`, Discover sits underneath it
   const [discoverOpen, setDiscoverOpen] = useState(initial === 'discover');
   const pull = useMotionValue(initial === 'discover' ? SCREEN_H : 0);
-  const [decided, setDecided] = useState({}); // id -> 'save' | 'pass'; survives closing Discover
-  const savedCount = Object.values(decided).filter((v) => v === 'save').length;
+  // Figma's initial Saved places include Foxy Loxy and The Grey within the total of 12.
+  const [decided, setDecided] = useState({ foxy: 'save', grey: 'save' });
+  const savedCount = 10 + Object.values(decided).filter(v => v === 'save').length;
+  const savedPlaces = Object.keys(decided).filter(id => decided[id] === 'save').map(id => Object.values(PAGES).flatMap(page => page.rows).find(row => row.id === id)).filter(Boolean);
+  const toggleSaved = id => setDecided(m => { const next = { ...m }; if (next[id] === 'save') delete next[id]; else next[id] = 'save'; return next; });
   const closeDiscover = () => { setDiscoverOpen(false); animate(pull, 0, CLOSE_SPRING); };
   const showPassed = () => setDecided((m) => Object.fromEntries(Object.entries(m).filter(([, v]) => v === 'save')));
 
@@ -135,17 +139,11 @@ export default function App() {
   const setSortsFor = (k) => (fn) => setSortsBy((b) => ({ ...b, [k]: fn(b[k] || []) }));
   const saveMode = (m) => {
     setModes((ms) => (ms.some((x) => x.id === m.id) ? ms.map((x) => (x.id === m.id ? m : x)) : [...ms, m]));
-    setEditing(null); setModesOpen(true);
-    sayNote(editing === 'new' ? `${m.name} added` : 'Mode saved');
+    if (editing === 'new') setActiveMode(m.id);
+    setEditing(null); setModesOpen(modeOrigin === 'home');
   };
-  const deleteMode = (id) => {
-    setModes((ms) => ms.filter((x) => x.id !== id));
-    if (activeMode === id) setActiveMode('study');
-    setEditing(null); setModesOpen(true);
-    sayNote('Mode deleted');
-  };
-  const bannerText = activeM.id === 'study' ? 'Because you like quiet cafés and outdoor seating'
-    : `Matched to ${activeM.custom ? activeM.name : activeM.name + ' mode'}: ${[activeM.prefs.sound, activeM.prefs.crowd].filter(Boolean).join(', ').toLowerCase() || 'your picks'}`;
+  const editMode = (id, origin) => { setModeOrigin(origin); setEditing(id); };
+  const bannerText = activeM.id === 'study' && activeM.prefs.sound === 'Quiet' ? 'Because you like quiet cafés and outdoor seating' : null;
   const jump = (id) => {
     if (SEARCH_ROUTES.includes(id)) { closeVenue(); nav('search'); navigateSearch(id); return; }
     if (VENUE_VIEWS.includes(id)) {
@@ -197,8 +195,8 @@ export default function App() {
                     {<Home pull={pull} pullOn={screen === 'home' && !discoverOpen} onDiscover={() => setDiscoverOpen(true)} onOpenMap={() => nav('map')} onOpenSearch={() => { nav('search'); navigateSearch(searchRoute); }} onOpenVenue={openVenue} onOpenPage={setPage} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} reduceMotion={reduceMotion} />}
                 </div>
                 <AnimatePresence>{!['home', 'search'].includes(screen) && <ScreenLayer key={screen} screen={screen}>
-                  {screen === 'map' && <MapScreen command={sheetCmd} onOpenVenue={openVenue} onOpenSearch={() => { nav('search'); navigateSearch(searchRoute); }} />}
-                  {screen === 'profile' && <Profile onScroll={setHomeScroll} savedCount={savedCount} />}
+                  {screen === 'map' && <MapScreen command={sheetCmd} onOpenVenue={openVenue} onOpenSearch={() => { nav('search'); navigateSearch(searchRoute); }} savedIds={Object.keys(decided).filter(id => decided[id] === 'save')} onToggleSaved={toggleSaved} />}
+                  {screen === 'profile' && <Profile onScroll={setHomeScroll} savedCount={savedCount} savedPlaces={savedPlaces} modes={modes} activeId={activeMode} onPickMode={setActiveMode} onEditMode={id => editMode(id, 'profile')} onAddMode={() => editMode('new', 'profile')} onOpenVenue={openVenue} />}
                 </ScreenLayer>}</AnimatePresence>
                 <motion.div className="abs" style={{ inset: 0, display: screen === 'search' ? 'block' : 'none' }} aria-hidden={screen !== 'search'} initial={false} animate={{ opacity: screen === 'search' ? 1 : 0 }} transition={GENTLE}>
                   <Search route={searchRoute} active={screen === 'search' && !venueOpen} onNavigate={navigateSearch} onBack={backSearch} onOpenVenue={openSearchVenue} hasSaved={decided.foxy === 'save'} activeMode={activeM} booking={booking} />
@@ -207,7 +205,7 @@ export default function App() {
                   {venueOpen && (
                     <motion.div key="venue" className="abs" style={{ inset: 0, zIndex: 42, boxShadow: '-12px 0 40px rgba(42,38,80,0.12)' }}
                       initial={{ x: 440 }} animate={{ x: 0 }} exit={{ x: 440 }} transition={{ type: 'spring', stiffness: 260, damping: 32 }}>
-                      <Venue saved={decided.foxy === 'save'} onToggleSaved={() => setDecided(m => { const next = { ...m }; if (next.foxy === 'save') delete next.foxy; else next.foxy = 'save'; return next; })} tab={venueTab} setTab={setVenueTab} onBack={closeVenue} backLabel={screen === 'search' ? 'Back to Search' : 'Back'} booking={booking} mine={mine} toast={toast}
+                      <Venue saved={decided.foxy === 'save'} onToggleSaved={() => toggleSaved('foxy')} tab={venueTab} setTab={setVenueTab} onBack={closeVenue} backLabel={screen === 'search' ? 'Back to Search' : 'Back'} booking={booking} mine={mine} toast={toast}
                         onScroll={setVenueScroll}
                         onReserve={reserve} onSense={setSense} reviewsCmd={reviewsCmd}
                         onWriteReview={() => setFlow('review')} />
@@ -260,21 +258,21 @@ export default function App() {
                   {sortSheet && <SortSheet key={sortSheet.sense} sense={sortSheet.sense} value={sortSheet.value} onApply={sortSheet.onApply} onClose={() => setSortSheet(null)} />}
                 </AnimatePresence>
                 <AnimatePresence>
-                  {modesOpen && <ModesSheet key="modes" modes={modes} activeId={activeMode} onPick={(id) => { setActiveMode(id); }} onEdit={(id) => setEditing(id)}
-                    onAdd={() => setEditing('new')} onClose={() => setModesOpen(false)} />}
+                  {modesOpen && <ModesSheet key="modes" modes={modes} activeId={activeMode} onPick={setActiveMode} onEdit={id => editMode(id, 'home')}
+                    onAdd={() => editMode('new', 'home')} onClose={() => setModesOpen(false)} />}
                 </AnimatePresence>
                 <AnimatePresence>
                   {editing && (
                     <motion.div key="edit" className="abs" style={{ inset: 0, zIndex: 46 }}
                       initial={{ x: 440 }} animate={{ x: 0 }} exit={{ x: 440 }} transition={{ type: 'spring', stiffness: 260, damping: 32 }}>
-                      <EditMode key={editing} mode={modes.find((m) => m.id === editing)} isNew={editing === 'new'} onBack={() => setEditing(null)} onSave={saveMode} onDelete={() => deleteMode(editing)} />
+                      <EditMode key={editing} mode={modes.find((m) => m.id === editing)} isNew={editing === 'new'} onBack={() => setEditing(null)} onSave={saveMode} />
                     </motion.div>
                   )}
                 </AnimatePresence>
                 <div className="abs" style={{ inset: 0, zIndex: 60, pointerEvents: 'none' }}><Toast text={note} icon={note && /Only|later/.test(note) ? 'info' : 'check'} /></div>
                 <StatusBar shade={screen === 'search' && !venueOpen ? 0 : flow || sense ? 0 : venueOpen ? (venueScroll > 270 ? 1 : 0) : screen !== 'map' && homeScroll > 24 ? 1 : 0} />
-                <TabBar active={screen} onNav={to => { nav(to); if (to === 'search') navigateSearch(searchRoute); }} top={venueOpen || (screen === 'search' && ['search-filters','search-place'].includes(searchRoute)) ? 1000 : page ? 876 : TAB_TOP[screen]} yMV={screen === 'home' ? pull : undefined} />
-                <div className="abs" style={{ left: 150, top: screen === 'home' && discoverOpen ? 935 : 943, width: 140, height: 5, borderRadius: 3, background: screen === 'home' && discoverOpen ? '#2a2650' : screen === 'map' ? 'rgba(20,24,31,0.85)' : '#14181f', zIndex: 55 }} />
+                <TabBar active={screen} onNav={to => { nav(to); if (to === 'search') navigateSearch(searchRoute); }} top={venueOpen || modesOpen || editing || (screen === 'search' && ['search-filters','search-place'].includes(searchRoute)) ? 1000 : page ? 876 : TAB_TOP[screen]} yMV={screen === 'home' ? pull : undefined} />
+                <div className="abs" style={{ left: 150, top: editing || (screen === 'home' && discoverOpen) ? 935 : 943, width: 140, height: 5, borderRadius: 3, background: screen === 'home' && discoverOpen ? '#2a2650' : screen === 'map' ? 'rgba(20,24,31,0.85)' : '#14181f', zIndex: 55 }} />
                 <div className="island" />
               </div>
             </div>

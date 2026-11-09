@@ -45,6 +45,13 @@ function VenueRow({ v, onOpen }) {
     </Row>
   );
 }
+
+export function SavedPlaceList({ rows, onOpen }) {
+  return <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>{rows.map(v => {
+    const Item = v.when ? EventRow : v.checks ? MoreRow : v.tags ? VenueRow : PickRow;
+    return <Item key={v.id} v={v} onOpen={onOpen} />;
+  })}</div>;
+}
 function EventRow({ v, onOpen }) {
   return (
     <Row h={120} onClick={() => onOpen(v)}>
@@ -140,7 +147,7 @@ export default function ListPage({ kind, onBack, onOpenVenue, onNote, openSort, 
   const Item = ROWS[cfg.kind];
   const rows = sortRows(cfg.rows, sorts);
   const listTop = cfg.listTop || (cfg.chips ? 190 : 192);
-  const open = (v) => (v.venue ? onOpenVenue() : onNote(cfg.kind === 'event' ? 'Event pages come later in the prototype' : `Only Foxy Loxy Cafe has a full page so far`));
+  const open = v => { if (v.venue) onOpenVenue(); };
   return (
     <div className="abs" style={{ inset: 0, background: '#f7f5f1' }}>
       <div className="scroll hide-sb" style={{ inset: `${listTop - 12}px 0 0 0` }}>
@@ -154,7 +161,7 @@ export default function ListPage({ kind, onBack, onOpenVenue, onNote, openSort, 
         {cfg.sub && <p className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: INK2, lineHeight: '16px', marginTop: 2 }}>{cfg.sub}</p>}
       </div>
       {cfg.chips && <FilterChips sorts={sorts} openSense={sortOpen} onOpen={(sense, cur) => openSort(sense, cur, (key) => setSorts((s) => [...s.filter((x) => x[0] !== sense), ...(key ? [[sense, key]] : [])]))} />}
-      {cfg.banner && (
+      {cfg.banner && bannerText && (
         <div className="abs" style={{ left: 24, top: 118, width: 392, height: 44, borderRadius: 20, background: 'rgba(47,98,201,0.08)', border: '1px solid rgba(47,98,201,0.3)',
           display: 'flex', alignItems: 'center', gap: 10, padding: '0 16px', zIndex: 6 }}>
           <VIcon name="sparkle" size={20} fill={INK} />
@@ -200,3 +207,4 @@ export function SortSheet({ sense, value, onApply, onClose }) {
     </SheetFrame>
   );
 }
+

@@ -1,3 +1,4 @@
+import { PAGES } from './listData.js';
 // Data and matching rules for Hidden Discovery Mode (the pull-down layer under Home).
 // Sense values reuse the hidden profiles in listData.js: s sound, l light, c crowd (1 low - 5 high), null = unknown.
 // level is the overall sensory level (1 calmest - 5 most intense). Home shows Foxy Loxy 2, The Sentient 2, Gallery Café 1.
@@ -24,8 +25,8 @@ export const metaOf = (p) => [p.cat, p.dist, p.illustrative ? 'illustrative' : n
 // 1 when v sits inside [lo, hi], otherwise falls off over two steps. null (unknown) is neutral.
 const fit = (v, lo, hi) => (v == null ? null : v >= lo && v <= hi ? 1 : Math.max(0, 1 - (v < lo ? lo - v : v - hi) / 2));
 const RANGE = {
-  sound: { Quiet: [1, 2], Moderate: [3, 3], Lively: [4, 4], Loud: [5, 5] },
-  bright: { Dim: [1, 2], Bright: [4, 5] },
+  sound: { Quiet: [1, 2], 'Easy to talk': [2, 3], Moderate: [3, 3], Lively: [4, 4], Loud: [5, 5] },
+  bright: { Dim: [1, 2], Soft: [3, 3], Bright: [4, 5] },
   src: { 'Natural daylight': [4, 5], 'Indirect light': [2, 3] },
   crowd: { Relaxed: [1, 2], Moderate: [3, 3], Busy: [4, 5] },
 };
@@ -38,6 +39,7 @@ function checks(p, prefs) {
   if (prefs.light?.b) add('light', fit(p.l, ...RANGE.bright[prefs.light.b]));
   else if (prefs.light?.src) add('light', fit(p.l, ...RANGE.src[prefs.light.src]));
   if (prefs.crowd) add('crowd', fit(p.c, ...RANGE.crowd[prefs.crowd]));
+  if (prefs.temp) { const t = Object.values(PAGES).flatMap(page => page.rows).find(row => row.id === p.id)?.t; const range = { Cool: [1, 2], Mild: [3, 3], Warm: [4, 5] }[prefs.temp]; add('temp', fit(t, ...range)); }
   const pos = prefs.seat?.pos;
   if (pos === 'Corner seat' || pos === 'Booth') add('seat', p.seat ? (p.seat.includes('booth') ? 1 : 0.3) : null);
   if (pos === 'Patio') add('seat', p.seat ? (p.seat.includes('outdoor') ? 1 : 0.2) : null);
