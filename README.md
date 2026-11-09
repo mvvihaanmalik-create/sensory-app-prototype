@@ -33,7 +33,7 @@ The build produces a single self-contained `dist/index.html`. Dependencies and g
 - Modes: Your modes sheet from the Study mode chip, Edit mode (Study, Party, custom), Add custom mode
 - Hidden Discovery Mode: pull Home down from the top to reveal a swipeable card stack (not in Figma, built from a written brief)
 
-Search is not implemented yet.
+Search browse, query results, sensory filters, and venue entry points are implemented.
 
 ### Home pages and modes rules
 
@@ -60,11 +60,46 @@ Search is not implemented yet.
 - Step 3: summary rows jump back to the step that owns them; name, phone and email edit inline.
 - The confirmation is built from the choices. "Change or cancel booking" reopens step 3 with everything kept.
 
+## Search flow and source
+
+Read November 9, 2026: Search section `985:6709` contains one finished frame, `985:6872`, named `Map · Sheet half` in Figma. It is the Search browse screen, not a map. It has no prototype reactions. The frame is 440 × 956; its search field is 328 × 52 at (24, 62), category row begins at (24, 128), scroll viewport starts at y=193, and bottom tab bar is 273 × 64 at (84, 862). Cards are 192 × 108 with 192 × 77 backgrounds and 103 × 103 illustrations. All values and artwork come from that frame. PNG artwork is stored at 2× display size. Glass, type, status bar, tab bar, and `GENTLE` springs reuse the repo's shared components.
+
+| Screen or state | Entry | Back, close, or return |
+| --- | --- | --- |
+| Browse, `#search` | Search tab; Home or Map search field | Other tabs remain reachable; returning preserves browse scroll and selected chip |
+| Results, `#search-results` | Type a query, tap any category card, or tap Events chip | Back to browse clears query/category and preserves applied filters and browse position |
+| Filter sheet, `#search-filters` | Filter button | Close, scrim, Escape, browser Back, or swipe down discards the draft; Apply commits it |
+| Sample place preview, `#search-place` | A non-Foxy search result | Done, Close, scrim, Escape, browser Back, or swipe down returns to unchanged results |
+| Foxy Loxy venue | Foxy result | Back to Search restores query, filters, and results scroll |
+
+Flow rules:
+
+- All is selected by default as shown in Figma. Sensory filters start empty.
+- Category cards narrow the dataset; query words and applied filters combine with AND. Search ignores case and accents. Blank submission focuses the input; clearing an unfiltered query returns to browse.
+- Filter choices are drafts until Apply. The CTA count reflects the draft and current query/category, including zero matches. Active filter chips remove one preference at a time.
+- An active Quiet mode or Quiet filter plus Buzzing or Live music shows an explanation and a one-tap switch to Quiet now without losing the quiet filter.
+- Like your saved places requires the shared Foxy Loxy saved state. Save or unsave Foxy on its venue page or in Discovery and this collection and Profile count update together.
+- Home and Search stay mounted. Their independent scroll containers preserve positions; opening another category or changing a query starts results at the top.
+- Extra bottom padding keeps the last category row reachable above the floating tab bar.
+- Hash routes and the desktop jump list are testing shortcuts. All Search screens also have real tap paths. A fresh direct place-preview route uses Gallery Café as a demo.
+
+Prototype additions where Figma has no screen: result cards, filter sheet, empty states, conflict explanation, and compact previews for other places. Search reuses all Home/list/Discovery names, distances, event schedules, and sensory profiles. Unknown sensory data stays Unknown and cannot pass the corresponding strict filter. Category membership is a prototype mapping. One bakery fixture fills the only type absent from the repo. This inventory is prototype data, not live venue facts or recommendations. New in Savannah is a demo collection, not a verified opening list. Similar-place matching is the existing café collection unlocked by saving Foxy. Fits you tonight reuses Discovery’s active-mode ranking, without claiming live opening hours. Full venue screens currently exist only for Foxy Loxy. Search state lasts until the page is reloaded; Foxy's saved state is shared with Discovery and Profile while the app is open.
+
+This feature branches from `feature/hidden-discovery` at `dafce5a`, the current live source, and preserves its booking, reviews, lists, modes, and Discovery flows.
+
 ## Design source
 
 [Figma design](https://www.figma.com/design/piKIGYS9mjqhShrqGn6kGk/Design?node-id=469-2151) · Venue section: node 789-3120
 
 Use the **Final flow**, **DS · Foundations**, and **DS · Components** pages as the design reference. See [HANDOFF.md](HANDOFF.md) for the original implementation notes and screen node IDs.
+
+## Validation
+
+- `npm run build` passes.
+- Data checks cover all 19 category collections, 16 filter combinations, accent/case search, saved-place dependency, and mode-dependent ranking.
+- Browser checks cover all 19 category tap/back paths, category chips, empty search, combined filters, cancellation, removal, Escape, swipe-down, browser Back, and sample preview Done.
+- Integrated checks cover Home/Map/tab entry points, Search state restoration, venue Save reflected in Search and Profile, Party-mode ranking, and Reserve opening the existing unselected booking flow.
+- Browse geometry and all 19 source illustrations were compared with Figma. No application console errors or warnings were observed.
 
 ## Collaboration
 
@@ -75,3 +110,4 @@ git switch main
 git pull --ff-only
 git switch -c feature/short-description
 ```
+

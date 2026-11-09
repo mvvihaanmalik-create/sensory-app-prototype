@@ -51,8 +51,8 @@ const score = (p, prefs) => {
 };
 
 // Best matches first; equal scores keep the authored order.
-export function rankPlaces(prefs) {
-  return PLACES.map((p, i) => ({ p, i, sc: score(p, prefs) })).sort((a, b) => b.sc - a.sc || a.i - b.i).map((x) => x.p);
+export function rankPlaces(prefs, places = PLACES) {
+  return places.map((p, i) => ({ p, i, sc: score(p, prefs) })).sort((a, b) => b.sc - a.sc || a.i - b.i).map((x) => x.p);
 }
 
 const PHRASE = {
@@ -81,3 +81,4 @@ export function reasonFor(p, prefs, modeName) {
   const note = miss ? `Heads up: ${CAVEAT[miss.k](p)}.` : unknown.length ? `We don't know the ${list(unknown)} here yet.` : null;
   return { line, note };
 }
+
