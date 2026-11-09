@@ -6,9 +6,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webki
 .nowrap{white-space:nowrap}
 
 /* Stage */
-.stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;gap:56px;
+.stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;gap:48px;
   background:radial-gradient(1200px 700px at 30% 20%,#f6f2ec 0%,#ebe8e2 55%,#e4e1db 100%)}
-.panel{width:280px;display:flex;flex-direction:column;gap:22px}
+.panel{width:220px;display:flex;flex-direction:column;gap:18px}
 .panel h1{font-size:28px;font-weight:600;letter-spacing:-.6px;line-height:1.1}
 .panel p.lead{font-size:14px;color:#4b5462;line-height:1.45}
 .panel .label{font-size:11px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:#8a8f99;margin-bottom:8px}
@@ -17,6 +17,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webki
   border:1px solid rgba(255,255,255,.85);box-shadow:0 2px 8px rgba(27,42,68,.06);transition:background .2s}
 .jump button:hover{background:rgba(255,255,255,.95)}
 .jump button.on{background:#14181f;color:#fff;border-color:#14181f}
+.tools{display:flex;gap:14px;font-size:12px;font-weight:600}
+.tools button{color:#8a8f99;padding:2px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s}
+.tools button:hover{color:#14181f;border-bottom-color:#14181f}
 .hints{display:flex;flex-direction:column;gap:9px;font-size:13px;color:#4b5462;line-height:1.4}
 .hints b{color:#14181f;font-weight:600}
 @media (max-width:900px){.panel{display:none}}

@@ -21,7 +21,7 @@ const EASE = { duration: 0.42, ease: [0.22, 1, 0.36, 1] };
 function useFitScale() {
   const calc = () => {
     const w = window.innerWidth, h = window.innerHeight;
-    const side = w > 900 ? 336 : 0;
+    const side = w > 900 ? 276 : 0;
     return Math.min(1, (h - 40) / DEVICE_H, (w - 32 - side) / DEVICE_W);
   };
   const [s, setS] = useState(calc);
@@ -109,36 +109,10 @@ export default function App() {
               <div className="label">UXDG 370 · Final flow</div>
               <h1>Calm places,<br />Savannah</h1>
             </div>
-            <p className="lead">Coded prototype of the finalised Home, Map, Profile and Venue screens, plus the review and booking flows, built from the Figma file at 440 × 956 in an iPhone 18 Pro Max frame.</p>
-            <div>
-              <div className="label">Jump to</div>
-              <div className="jump">
-                {VIEWS.map((v) => {
-                  const cur = venueOpen ? (flow === 'book' ? (bookStep === 1 ? 'book' : `book-${bookStep}`) : flow || (sense ? 'sense' : venueTab === 'reviews' ? 'venue-reviews' : 'venue')) : screen;
-                  const on = v.id === cur;
-                  return <button key={v.id} className={on ? 'on' : ''} onClick={() => jump(v.id)}>{v.label}</button>;
-                })}
-              </div>
-            </div>
-            <div>
-              <div className="label">Motion</div>
-              <div className="jump">
-                <button className={!reduceMotion ? 'on' : ''} onClick={() => setReduceMotion(false)}>Full motion</button>
-                <button className={reduceMotion ? 'on' : ''} onClick={() => setReduceMotion(true)}>Reduce motion</button>
-              </div>
-            </div>
-            <div>
-              <div className="label">Try</div>
-              <div className="hints">
-                <span><b>Tap or swipe</b> the For you cards to bring one forward</span>
-                <span><b>Open map</b> at the bottom of Home, or the map tab</span>
-                <span><b>Drag the sheet</b> up, down, or away; tap its header to expand</span>
-                <span><b>Sheet away:</b> filters slide in; drag up from the bottom edge to bring it back</span>
-                <span><b>Open Foxy Loxy</b> from the front For you card, Popular #2, or the map list</span>
-                <span><b>Sense tiles</b> under the venue name open reviews for that sense; the star goes back to all reviews</span>
-                <span><b>Book a table</b> in three steps: times unlock after a date, tables free up by time, and comfort picks flag a poor fit</span>
-                <span><b>Write a review</b> from the Reviews tab; it shows up in the list once posted</span>
-              </div>
+            <p className="lead">Tap through it like the real app. Start from a For you card on Home.</p>
+            <div className="tools">
+              <button onClick={() => setReduceMotion((r) => !r)}>{reduceMotion ? 'Motion: reduced' : 'Motion: full'}</button>
+              <button onClick={() => { try { history.replaceState(null, '', location.pathname); } catch (_) {} location.reload(); }}>Restart</button>
             </div>
           </aside>
 
