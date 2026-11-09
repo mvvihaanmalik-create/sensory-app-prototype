@@ -7,6 +7,10 @@ import Venue from './Venue.jsx';
 import BookTable, { BookingConfirmed, emptyDraft, slotsFor, DATES } from './BookTable.jsx';
 import WriteReview from './WriteReview.jsx';
 import SenseReviews from './SenseReviews.jsx';
+import ListPage, { SortSheet } from './Lists.jsx';
+import { ModesSheet, EditMode, INITIAL_MODES, modeLabel } from './Modes.jsx';
+import { PAGE_IDS } from './listData.js';
+import { Toast } from './flow.jsx';
 import { ScaleCtx, StatusBar, TabBar } from './ui.jsx';
 
 const DEVICE_W = 468, DEVICE_H = 984;
@@ -43,7 +47,15 @@ const VIEWS = [
   { id: 'book-2', label: 'Book · 2 Where to sit' },
   { id: 'book-3', label: 'Book · 3 Booking for' },
   { id: 'confirmed', label: 'Booking confirmed' },
+  ...PAGE_IDS.map((id) => ({ id, label: id })),
+  { id: 'modes', label: 'Modes' },
+  { id: 'edit-study', label: 'Edit Study' },
+  { id: 'edit-party', label: 'Edit Party' },
+  { id: 'add-mode', label: 'Add custom mode' },
+  { id: 'sort-sound', label: 'Sound sort sheet' },
 ];
+const MODE_VIEWS = ['modes', 'edit-study', 'edit-party', 'add-mode'];
+const HOME_VIEWS = [...PAGE_IDS, ...MODE_VIEWS, 'sort-sound'];
 const VENUE_VIEWS = ['venue', 'venue-reviews', 'sense', 'review', 'book', 'book-2', 'book-3', 'confirmed'];
 const SAMPLE_DRAFT = { ...emptyDraft(), guests: 2, date: 0, time: '5:30 PM', zone: 'Patio', table: 4, comfort: ['Away from speakers'] };
 const toBooking = (d) => ({ ...d, crowd: slotsFor(d.date, d.guests).find((s) => s.time === d.time).crowd, dayShort: DATES[d.date].short, dayLong: DATES[d.date].long });
@@ -53,7 +65,17 @@ const SHEET_UP = { initial: { y: 956 }, animate: { y: 0 }, exit: { y: 956 } };
 export default function App() {
   const scale = useFitScale();
   const initial = (() => { const h = (location.hash || '').slice(1); return VIEWS.some((v) => v.id === h) ? h : 'home'; })();
-  const [screen, setScreen] = useState(initial.startsWith('map') ? 'map' : VENUE_VIEWS.includes(initial) ? 'home' : initial);
+  const [screen, setScreen] = useState(initial.startsWith('map') ? 'map' : VENUE_VIEWS.includes(initial) || HOME_VIEWS.includes(initial) ? 'home' : initial);
+  const [page, setPage] = useState(PAGE_IDS.includes(initial) || initial === 'sort-sound' ? (initial === 'sort-sound' ? 'cafes' : initial) : null);
+  const [modes, setModes] = useState(INITIAL_MODES);
+  const [activeMode, setActiveMode] = useState('study');
+  const [modesOpen, setModesOpen] = useState(MODE_VIEWS.includes(initial));
+  const [editing, setEditing] = useState(initial === 'edit-study' ? 'study' : initial === 'edit-party' ? 'party' : initial === 'add-mode' ? 'new' : null);
+  const [sortSheet, setSortSheet] = useState(initial === 'sort-sound' ? { sense: 'sound', value: null, onApply: () => {} } : null);
+  const [sortsBy, setSortsBy] = useState({});
+  const [note, setNote] = useState(null);
+  const noteTimer = useRef(0);
+  const sayNote = (m) => { setNote(m); clearTimeout(noteTimer.current); noteTimer.current = setTimeout(() => setNote(null), 2400); };
   const [venueOpen, setVenueOpen] = useState(VENUE_VIEWS.includes(initial));
   const [flow, setFlow] = useState(flowOf(initial));
   const [bookStep, setBookStep] = useState(initial === 'book-2' ? 2 : initial === 'book-3' ? 3 : 1);
@@ -76,8 +98,25 @@ export default function App() {
 
   const nav = (to) => {
     if (to === 'search') return; // no Search screen designed yet
+    if (page) setPage(null);
     if (to !== screen) { setScreen(to); setHomeScroll(0); setSheetCmd(null); }
   };
+  const activeM = modes.find((m) => m.id === activeMode) || modes[0];
+  const sortsFor = (k) => sortsBy[k] || [];
+  const setSortsFor = (k) => (fn) => setSortsBy((b) => ({ ...b, [k]: fn(b[k] || []) }));
+  const saveMode = (m) => {
+    setModes((ms) => (ms.some((x) => x.id === m.id) ? ms.map((x) => (x.id === m.id ? m : x)) : [...ms, m]));
+    setEditing(null); setModesOpen(true);
+    sayNote(editing === 'new' ? `${m.name} added` : 'Mode saved');
+  };
+  const deleteMode = (id) => {
+    setModes((ms) => ms.filter((x) => x.id !== id));
+    if (activeMode === id) setActiveMode('study');
+    setEditing(null); setModesOpen(true);
+    sayNote('Mode deleted');
+  };
+  const bannerText = activeM.id === 'study' ? 'Because you like quiet cafés and outdoor seating'
+    : `Matched to ${activeM.custom ? activeM.name : activeM.name + ' mode'}: ${[activeM.prefs.sound, activeM.prefs.crowd].filter(Boolean).join(', ').toLowerCase() || 'your picks'}`;
   const jump = (id) => {
     if (VENUE_VIEWS.includes(id)) {
       setVenueOpen(true); setVenueScroll(0);
@@ -125,7 +164,7 @@ export default function App() {
                 <AnimatePresence>
                   <motion.div key={screen} className="abs" style={{ inset: 0 }}
                     initial={SCREEN_IN[screen].initial} animate={SCREEN_IN[screen].animate} exit={{ opacity: 0, transition: { duration: 0.28 } }} transition={EASE}>
-                    {screen === 'home' && <Home onOpenMap={() => nav('map')} onOpenVenue={openVenue} onScroll={setHomeScroll} reduceMotion={reduceMotion} />}
+                    {screen === 'home' && <Home onOpenMap={() => nav('map')} onOpenVenue={openVenue} onOpenPage={setPage} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} reduceMotion={reduceMotion} />}
                     {screen === 'map' && <MapScreen command={sheetCmd} onOpenVenue={openVenue} />}
                     {screen === 'profile' && <Profile onScroll={setHomeScroll} />}
                   </motion.div>
@@ -173,8 +212,34 @@ export default function App() {
                     </motion.div>
                   )}
                 </AnimatePresence>
+                <AnimatePresence>
+                  {page && (
+                    <motion.div key={page} className="abs" style={{ inset: 0, zIndex: 30 }}
+                      initial={{ x: 440 }} animate={{ x: 0 }} exit={{ x: 440 }} transition={{ type: 'spring', stiffness: 260, damping: 32 }}>
+                      <ListPage kind={page} onBack={() => setPage(null)} onOpenVenue={openVenue} onNote={(m) => sayNote(m)} bannerText={bannerText}
+                        sorts={sortsFor(page)} setSorts={setSortsFor(page)} sortOpen={sortSheet ? sortSheet.sense : null}
+                        openSort={(sense, value, onApply) => setSortSheet({ sense, value, onApply })} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <AnimatePresence>
+                  {sortSheet && <SortSheet key={sortSheet.sense} sense={sortSheet.sense} value={sortSheet.value} onApply={sortSheet.onApply} onClose={() => setSortSheet(null)} />}
+                </AnimatePresence>
+                <AnimatePresence>
+                  {modesOpen && <ModesSheet key="modes" modes={modes} activeId={activeMode} onPick={(id) => { setActiveMode(id); }} onEdit={(id) => setEditing(id)}
+                    onAdd={() => setEditing('new')} onClose={() => setModesOpen(false)} />}
+                </AnimatePresence>
+                <AnimatePresence>
+                  {editing && (
+                    <motion.div key="edit" className="abs" style={{ inset: 0, zIndex: 46 }}
+                      initial={{ x: 440 }} animate={{ x: 0 }} exit={{ x: 440 }} transition={{ type: 'spring', stiffness: 260, damping: 32 }}>
+                      <EditMode key={editing} mode={modes.find((m) => m.id === editing)} isNew={editing === 'new'} onBack={() => setEditing(null)} onSave={saveMode} onDelete={() => deleteMode(editing)} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <div className="abs" style={{ inset: 0, zIndex: 60, pointerEvents: 'none' }}><Toast text={note} icon={note && /Only|later/.test(note) ? 'info' : 'check'} /></div>
                 <StatusBar shade={flow || sense ? 0 : venueOpen ? (venueScroll > 270 ? 1 : 0) : screen !== 'map' && homeScroll > 24 ? 1 : 0} />
-                <TabBar active={screen} onNav={nav} top={venueOpen ? 1000 : TAB_TOP[screen]} />
+                <TabBar active={screen} onNav={nav} top={venueOpen ? 1000 : page ? 876 : TAB_TOP[screen]} />
                 <div className="abs" style={{ left: 150, top: 943, width: 140, height: 5, borderRadius: 3, background: screen === 'map' ? 'rgba(20,24,31,0.85)' : '#14181f', zIndex: 55 }} />
                 <div className="island" />
               </div>

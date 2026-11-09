@@ -48,17 +48,17 @@ function Hero({ reduce }) {
 }
 
 const CATS = [
-  { k: 'illCafe', label: 'Café', inset: '15.13% 18.49%' },
-  { k: 'illDining', label: 'Dining', inset: '19.93% 13.46%' },
-  { k: 'illNightlife', label: 'Nightlife', inset: '12.5% 21.58%' },
-  { k: 'illEvents', label: 'Events', inset: '20.73% 13.28%' },
-  { k: 'illMore', label: 'More', inset: '15.89% 17.79%' },
+  { k: 'illCafe', label: 'Café', page: 'cafes', inset: '15.13% 18.49%' },
+  { k: 'illDining', label: 'Dining', page: 'dining', inset: '19.93% 13.46%' },
+  { k: 'illNightlife', label: 'Nightlife', page: 'nightlife', inset: '12.5% 21.58%' },
+  { k: 'illEvents', label: 'Events', page: 'events', inset: '20.73% 13.28%' },
+  { k: 'illMore', label: 'More', page: 'more', inset: '15.89% 17.79%' },
 ];
-function Categories() {
+function Categories({ onOpen }) {
   return (
     <div className="abs" style={{ left: 24, top: 322, width: 392, display: 'flex', justifyContent: 'space-between' }}>
       {CATS.map((c) => (
-        <motion.button key={c.k} whileTap={{ scale: 0.92 }} transition={GENTLE}
+        <motion.button key={c.k} onClick={() => onOpen?.(c.page)} whileTap={{ scale: 0.92 }} transition={GENTLE}
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7.685 }}>
           <img src={uri(c.k)} alt="" style={{ width: 61.481, height: 61.481, display: 'block' }} />
           <span style={{ fontSize: 12, color: INK2, lineHeight: 'normal' }}>{c.label}</span>
@@ -68,11 +68,11 @@ function Categories() {
   );
 }
 
-function SectionHeader({ top, title }) {
+function SectionHeader({ top, title, onSeeAll }) {
   return (
     <div className="abs" style={{ left: 24, top, width: 392, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <p className="nowrap" style={h2}>{title}</p>
-      <button className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: INK }}>See all</button>
+      <button className="nowrap" onClick={onSeeAll} style={{ fontSize: 13, fontWeight: 700, color: INK }}>See all</button>
     </div>
   );
 }
@@ -188,15 +188,15 @@ function RankingRow({ top, n, name, meta, level, onClick }) {
   );
 }
 
-export default function Home({ onOpenMap, onOpenVenue, onScroll, reduceMotion }) {
+export default function Home({ onOpenMap, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, reduceMotion }) {
   return (
     <div className="scroll" style={{ background: '#f7f5f1' }} onScroll={(e) => onScroll?.(e.currentTarget.scrollTop)}>
       <div style={{ position: 'relative', width: 440, height: 1753.83 }}>
         <Hero reduce={reduceMotion} />
         <p className="abs nowrap" style={{ left: 24, top: 59, fontSize: 15, fontWeight: 500, color: INK2 }}>Savannah, GA</p>
-        <motion.button className="abs nowrap" whileTap={{ scale: 0.95 }} transition={GENTLE}
-          style={{ left: 301, top: 46, height: 44, padding: '0 16px', borderRadius: 999, ...lightGlass, fontSize: 15, fontWeight: 500, color: INK }}>
-          Study mode
+        <motion.button className="abs nowrap" onClick={onOpenModes} whileTap={{ scale: 0.95 }} transition={GENTLE}
+          style={{ right: 22, top: 46, height: 44, padding: '0 16px', borderRadius: 999, ...lightGlass, fontSize: 15, fontWeight: 500, color: INK }}>
+          {modeLabel}
         </motion.button>
         <p className="abs nowrap" style={{ left: 24, top: 90, fontSize: 40, fontWeight: 600, lineHeight: '44px', letterSpacing: -1, color: INK }}>Good morning</p>
         <div className="abs" style={{ left: 23, top: 145, width: 334, height: 52, borderRadius: 999, ...lightGlass, display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px' }}>
@@ -208,11 +208,11 @@ export default function Home({ onOpenMap, onOpenVenue, onScroll, reduceMotion })
           <img src={uri('filterHome')} alt="" className="abs" style={{ left: 11, top: 11, width: 24, height: 24 }} />
         </motion.button>
 
-        <Categories />
-        <SectionHeader top={421.17} title="For you" />
+        <Categories onOpen={onOpenPage} />
+        <SectionHeader top={421.17} title="For you" onSeeAll={() => onOpenPage?.('foryou')} />
         <ForYouStack onOpenVenue={onOpenVenue} />
 
-        <SectionHeader top={946} title="Popular Around you" />
+        <SectionHeader top={946} title="Popular Around you" onSeeAll={() => onOpenPage?.('popular')} />
         <RankingRow top={998} n={1} name="Gallery Café" meta="Café · 1.1 mi" level={1} />
         <RankingRow top={1106} n={2} name="Foxy Loxy Café" meta="Café · 0.5 mi" level={2} onClick={onOpenVenue} />
         <RankingRow top={1214} n={3} name="The Sentient" meta="Café · 0.8 mi" level={2} />
