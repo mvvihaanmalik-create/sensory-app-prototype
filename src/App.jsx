@@ -6,6 +6,7 @@ import Profile from './Profile.jsx';
 import Venue from './Venue.jsx';
 import BookTable, { BookingConfirmed, emptyDraft, slotsFor, DATES } from './BookTable.jsx';
 import WriteReview from './WriteReview.jsx';
+import SenseReviews from './SenseReviews.jsx';
 import { ScaleCtx, StatusBar, TabBar } from './ui.jsx';
 
 const DEVICE_W = 468, DEVICE_H = 984;
@@ -36,13 +37,17 @@ const VIEWS = [
   { id: 'profile', label: 'Profile' },
   { id: 'venue', label: 'Venue' },
   { id: 'venue-reviews', label: 'Venue · reviews' },
+  { id: 'sense', label: 'Sense reviews' },
   { id: 'review', label: 'Write a review' },
-  { id: 'book', label: 'Book a table' },
+  { id: 'book', label: 'Book · 1 When' },
+  { id: 'book-2', label: 'Book · 2 Where to sit' },
+  { id: 'book-3', label: 'Book · 3 Booking for' },
   { id: 'confirmed', label: 'Booking confirmed' },
 ];
-const VENUE_VIEWS = ['venue', 'venue-reviews', 'review', 'book', 'confirmed'];
-const SAMPLE_DRAFT = { guests: 2, date: 0, time: '5:30 PM', seat: 'Patio', comfort: ['Away from speakers'], note: '' };
+const VENUE_VIEWS = ['venue', 'venue-reviews', 'sense', 'review', 'book', 'book-2', 'book-3', 'confirmed'];
+const SAMPLE_DRAFT = { ...emptyDraft(), guests: 2, date: 0, time: '5:30 PM', zone: 'Patio', table: 4, comfort: ['Away from speakers'] };
 const toBooking = (d) => ({ ...d, crowd: slotsFor(d.date, d.guests).find((s) => s.time === d.time).crowd, dayShort: DATES[d.date].short, dayLong: DATES[d.date].long });
+const flowOf = (id) => (id.startsWith('book') ? 'book' : ['review', 'confirmed'].includes(id) ? id : null);
 const SHEET_UP = { initial: { y: 956 }, animate: { y: 0 }, exit: { y: 956 } };
 
 export default function App() {
@@ -50,17 +55,21 @@ export default function App() {
   const initial = (() => { const h = (location.hash || '').slice(1); return VIEWS.some((v) => v.id === h) ? h : 'home'; })();
   const [screen, setScreen] = useState(initial.startsWith('map') ? 'map' : VENUE_VIEWS.includes(initial) ? 'home' : initial);
   const [venueOpen, setVenueOpen] = useState(VENUE_VIEWS.includes(initial));
-  const [flow, setFlow] = useState(['review', 'book', 'confirmed'].includes(initial) ? initial : null);
+  const [flow, setFlow] = useState(flowOf(initial));
+  const [bookStep, setBookStep] = useState(initial === 'book-2' ? 2 : initial === 'book-3' ? 3 : 1);
+  const [sense, setSense] = useState(initial === 'sense' ? 'sound' : null);
+  const [reviewsCmd, setReviewsCmd] = useState(0);
   const [venueTab, setVenueTab] = useState(initial === 'venue-reviews' || initial === 'review' ? 'reviews' : 'overview');
-  const [draft, setDraft] = useState(initial === 'confirmed' ? SAMPLE_DRAFT : emptyDraft());
+  const [draft, setDraft] = useState(['confirmed', 'book-3'].includes(initial) ? SAMPLE_DRAFT : initial === 'book-2' ? { ...SAMPLE_DRAFT, table: null, comfort: [] } : emptyDraft());
   const [booking, setBooking] = useState(initial === 'confirmed' ? toBooking(SAMPLE_DRAFT) : null);
   const [mine, setMine] = useState(null);
   const [toast, setToast] = useState(null);
   const [venueScroll, setVenueScroll] = useState(0);
   const toastTimer = useRef(0);
   const say = (m) => { setToast(m); clearTimeout(toastTimer.current); toastTimer.current = setTimeout(() => setToast(null), 2400); };
-  const openVenue = () => { setVenueOpen(true); setVenueTab('overview'); setVenueScroll(0); setFlow(null); };
-  const closeVenue = () => { setVenueOpen(false); setFlow(null); setVenueScroll(0); };
+  const openVenue = () => { setVenueOpen(true); setVenueTab('overview'); setVenueScroll(0); setFlow(null); setSense(null); };
+  const closeVenue = () => { setVenueOpen(false); setFlow(null); setSense(null); setVenueScroll(0); };
+  const reserve = () => { if (booking) setFlow('confirmed'); else { setBookStep(1); setFlow('book'); } };
   const [sheetCmd, setSheetCmd] = useState(initial.startsWith('map-') && initial !== 'map-half' ? { state: initial.slice(4), n: 0 } : null);
   const [homeScroll, setHomeScroll] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -73,8 +82,12 @@ export default function App() {
     if (VENUE_VIEWS.includes(id)) {
       setVenueOpen(true); setVenueScroll(0);
       setVenueTab(id === 'venue-reviews' || id === 'review' ? 'reviews' : 'overview');
+      setSense(id === 'sense' ? 'sound' : null);
       if (id === 'confirmed' && !booking) { setDraft(SAMPLE_DRAFT); setBooking(toBooking(SAMPLE_DRAFT)); }
-      setFlow(['review', 'book', 'confirmed'].includes(id) ? id : null);
+      if (id === 'book-2') setDraft((d) => (d.guests && d.date != null && d.time ? d : { ...SAMPLE_DRAFT, table: null, comfort: [] }));
+      if (id === 'book-3') setDraft((d) => (d.table ? d : SAMPLE_DRAFT));
+      if (id.startsWith('book')) setBookStep(id === 'book-2' ? 2 : id === 'book-3' ? 3 : 1);
+      setFlow(flowOf(id));
       try { history.replaceState(null, '', '#' + id); } catch (_) {}
       return;
     }
@@ -101,7 +114,7 @@ export default function App() {
               <div className="label">Jump to</div>
               <div className="jump">
                 {VIEWS.map((v) => {
-                  const cur = venueOpen ? (flow || (venueTab === 'reviews' ? 'venue-reviews' : 'venue')) : screen;
+                  const cur = venueOpen ? (flow === 'book' ? (bookStep === 1 ? 'book' : `book-${bookStep}`) : flow || (sense ? 'sense' : venueTab === 'reviews' ? 'venue-reviews' : 'venue')) : screen;
                   const on = v.id === cur;
                   return <button key={v.id} className={on ? 'on' : ''} onClick={() => jump(v.id)}>{v.label}</button>;
                 })}
@@ -122,7 +135,8 @@ export default function App() {
                 <span><b>Drag the sheet</b> up, down, or away; tap its header to expand</span>
                 <span><b>Sheet away:</b> filters slide in; drag up from the bottom edge to bring it back</span>
                 <span><b>Open Foxy Loxy</b> from the front For you card, Popular #2, or the map list</span>
-                <span><b>Book a table:</b> times unlock once you pick a date; the button fills in as you choose</span>
+                <span><b>Sense tiles</b> under the venue name open reviews for that sense; the star goes back to all reviews</span>
+                <span><b>Book a table</b> in three steps: times unlock after a date, tables free up by time, and comfort picks flag a poor fit</span>
                 <span><b>Write a review</b> from the Reviews tab; it shows up in the list once posted</span>
               </div>
             </div>
@@ -149,8 +163,18 @@ export default function App() {
                       initial={{ x: 440 }} animate={{ x: 0 }} exit={{ x: 440 }} transition={{ type: 'spring', stiffness: 260, damping: 32 }}>
                       <Venue tab={venueTab} setTab={setVenueTab} onBack={closeVenue} booking={booking} mine={mine} toast={toast}
                         onScroll={setVenueScroll}
-                        onReserve={() => setFlow(booking ? 'confirmed' : 'book')}
+                        onReserve={reserve} onSense={setSense} reviewsCmd={reviewsCmd}
                         onWriteReview={() => setFlow('review')} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <AnimatePresence>
+                  {venueOpen && sense && (
+                    <motion.div key="sense" className="abs" style={{ inset: 0, zIndex: 43, boxShadow: '-12px 0 40px rgba(42,38,80,0.12)' }}
+                      initial={{ x: 440 }} animate={{ x: 0 }} exit={{ x: 440 }} transition={{ type: 'spring', stiffness: 260, damping: 32 }}>
+                      <SenseReviews sense={sense} setSense={setSense} booking={booking} onReserve={reserve}
+                        onBack={() => setSense(null)}
+                        onAll={() => { setSense(null); setReviewsCmd((n) => n + 1); }} />
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -162,11 +186,13 @@ export default function App() {
                         <motion.div key={flow} className="abs" style={{ inset: 0 }}
                           initial={{ opacity: 0, x: flow === 'confirmed' ? 40 : -40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: flow === 'confirmed' ? -40 : 40 }}
                           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}>
-                          {flow === 'book' && <BookTable draft={draft} setDraft={setDraft} existing={!!booking}
+                          {flow === 'book' && <BookTable draft={draft} setDraft={setDraft} existing={!!booking} step={bookStep} setStep={setBookStep}
                             onClose={() => setFlow(booking ? 'confirmed' : null)}
                             onCancelBooking={() => { setBooking(null); setDraft(emptyDraft()); setFlow(null); say('Booking cancelled'); }}
                             onBooked={(b) => { setBooking(b); setFlow('confirmed'); }} />}
-                          {flow === 'confirmed' && booking && <BookingConfirmed booking={booking} onClose={() => setFlow(null)} onChange={() => setFlow('book')} />}
+                          {flow === 'confirmed' && booking && <BookingConfirmed booking={booking}
+                            onClose={() => { setFlow(null); setSense(null); setVenueTab('overview'); }}
+                            onChange={() => { setDraft({ ...booking }); setBookStep(3); setFlow('book'); }} />}
                           {flow === 'review' && <WriteReview mine={mine} onClose={() => setFlow(null)}
                             onPosted={(r) => { setMine(r); setVenueTab('reviews'); setFlow(null); setTimeout(() => say(mine ? 'Review updated' : 'Thanks, your review is up'), 350); }} />}
                         </motion.div>
@@ -174,7 +200,7 @@ export default function App() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-                <StatusBar shade={flow ? 0 : venueOpen ? (venueScroll > 270 ? 1 : 0) : screen !== 'map' && homeScroll > 24 ? 1 : 0} />
+                <StatusBar shade={flow || sense ? 0 : venueOpen ? (venueScroll > 270 ? 1 : 0) : screen !== 'map' && homeScroll > 24 ? 1 : 0} />
                 <TabBar active={screen} onNav={nav} top={venueOpen ? 1000 : TAB_TOP[screen]} />
                 <div className="abs" style={{ left: 150, top: 943, width: 140, height: 5, borderRadius: 3, background: screen === 'map' ? 'rgba(20,24,31,0.85)' : '#14181f', zIndex: 55 }} />
                 <div className="island" />

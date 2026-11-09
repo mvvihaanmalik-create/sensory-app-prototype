@@ -25,19 +25,20 @@ The build produces a single self-contained `dist/index.html`. Dependencies and g
 - Home card gestures and hero motion
 - Map sheet dragging and snap states
 - Venue page for Foxy Loxy Cafe (Overview, Menu, Reviews, Photos), opened from the front For you card, Popular #2, or the first map result
+- Sense reviews (Sound, Light, Crowd, Temperature, Seating) opened from the sense tiles, with a category bar to switch between them
 - Write a review flow (posts into the Reviews tab)
-- Book a table and Booking confirmed flow
+- Book a table in three steps (When, Where to sit with a floor plan, Booking for) and Booking confirmed
 - Full motion and Reduce motion controls
 
 Search is not implemented yet.
 
 ### Booking flow rules
 
-- Nothing is preselected. The CTA reads "Book" until party size, date and time are chosen, then becomes "Book for N · Day, Time".
-- Time slots stay greyed until a date is picked. Availability and crowd labels change by day, and parties of 6 or more lose peak slots.
-- Changing the date or party size clears the time if that slot is no longer available.
-- Tapping the CTA early scrolls to the first missing step and nudges it.
-- The confirmation screen is built from the choices (seat, comfort needs, time, crowd, hold time, busy-time tip). "Change or cancel booking" reopens the form with choices kept.
+- Nothing is preselected. Each step's button stays faded until the step is complete; tapping it early scrolls to what's missing and nudges it.
+- Step 1: times stay greyed until a date is picked. Availability changes by day, and parties of 6 or more lose peak slots. Changing date or party size clears a time that is no longer free.
+- Step 2: four areas (Patio, Garden pond, Indoor, Bar). Which tables are taken depends on the date and time; tables too small for the party fade. Comfort picks that a table can't meet are called out, with a suggested table that fits.
+- Step 3: summary rows jump back to the step that owns them; name, phone and email edit inline.
+- The confirmation is built from the choices. "Change or cancel booking" reopens step 3 with everything kept.
 
 ## Design source
 
