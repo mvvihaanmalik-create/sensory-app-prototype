@@ -2,12 +2,12 @@
 // Nothing is pre-filled: stars, scales and toggles start unset. Post review unlocks once there is a star rating.
 import { useRef, useState } from 'react';
 import { AnimatePresence, motion, useAnimationControls } from 'motion/react';
-import { GENTLE, Icon, NAVY, MUTED } from './ui.jsx';
+import { GENTLE, Icon } from './ui.jsx';
 import { paths } from './svgs.js';
 import { VIcon } from './venueIcons.jsx';
-import { G, TopBar, Section, ChipGroup, PrimaryCTA, PURPLE, TAP, t } from './flow.jsx';
+import { G, TopBar, Section, ChipGroup, PrimaryCTA, NAVY, MUTED, PURPLE, TAP, t } from './flow.jsx';
 
-const RATING = ['Tap to rate', 'Poor', 'Okay', 'Good', 'Great', 'Excellent'];
+const RATING = ['  Tap to rate', 'Poor', 'Okay', 'Good', 'Great', 'Excellent'];
 
 function Stars({ value, onChange }) {
   return (
@@ -18,7 +18,7 @@ function Stars({ value, onChange }) {
           <motion.button key={n} aria-label={`${n} star${n > 1 ? 's' : ''}`} onClick={() => onChange(n)} whileTap={{ scale: 0.85 }} transition={TAP}
             style={{ width: 52, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <motion.span initial={false} animate={on ? { scale: [1, 1.22, 1] } : { scale: 1 }} transition={{ duration: 0.32, delay: on ? (n - 1) * 0.04 : 0 }}>
-              <VIcon name={on ? 'star36Fill' : 'star36'} fill={on ? NAVY : MUTED} />
+              <VIcon name={on ? 'star36Fill' : 'star36'} fill={NAVY} />
             </motion.span>
           </motion.button>
         );
@@ -36,6 +36,8 @@ function Stars({ value, onChange }) {
 function Scale({ icon, title, steps, value, onChange, endsOnly }) {
   const ref = useRef(null);
   const n = steps.length;
+  const skip = value === 'skip';
+  if (skip) value = null;
   const f = value == null ? 0 : value / (n - 1);
   const W = 345; // card inner width (392 - 2 x 1.5 border - 2 x 22 padding)
   const pos = (x) => 14 + (W - 28) * x;
@@ -51,16 +53,16 @@ function Scale({ icon, title, steps, value, onChange, endsOnly }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, height: 36 }}>
         {icon}
         <span style={{ ...t(17, 600), flex: '1 0 0' }}>{title}</span>
-        <AnimatePresence mode="popLayout" initial={false}>
-          <motion.span key={value ?? 'unset'} className="nowrap"
-            initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.85 }} transition={TAP}
-            style={{ height: 36, padding: '0 16px', borderRadius: 18, display: 'flex', alignItems: 'center',
-              background: value == null ? 'transparent' : 'rgba(255,255,255,0.9)', ...t(14, value == null ? 500 : 600, value == null ? MUTED : NAVY) }}>
-            {value == null ? 'Not set' : steps[value]}
-          </motion.span>
-        </AnimatePresence>
+        <motion.button whileTap={{ scale: 0.94 }} transition={TAP} onClick={() => onChange(skip ? null : 'skip')} aria-pressed={skip}
+          initial={false} animate={{ backgroundColor: skip ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.5)' }}
+          style={{ height: 36, padding: '0 16px', borderRadius: 18, border: '1px solid rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', gap: 6, flex: 'none' }}>
+          <AnimatePresence initial={false}>
+            {skip && <motion.span initial={{ width: 0, opacity: 0 }} animate={{ width: 14, opacity: 1 }} exit={{ width: 0, opacity: 0 }} style={{ display: 'flex', overflow: 'hidden' }}><VIcon name="check" size={14} /></motion.span>}
+          </AnimatePresence>
+          <span className="nowrap" style={t(13, skip ? 600 : 500)}>Didn't notice</span>
+        </motion.button>
       </div>
-      <div ref={ref} style={{ position: 'relative', height: 44, touchAction: 'none', cursor: 'pointer' }}
+      <motion.div ref={ref} initial={false} animate={{ opacity: skip ? 0.35 : 1 }} style={{ position: 'relative', height: 44, touchAction: 'none', cursor: 'pointer' }}
         onPointerDown={(e) => { drag.current = true; e.currentTarget.setPointerCapture(e.pointerId); pick(e); }}
         onPointerMove={(e) => drag.current && pick(e)}
         onPointerUp={() => { drag.current = false; }} onPointerCancel={() => { drag.current = false; }}>
@@ -73,26 +75,26 @@ function Scale({ icon, title, steps, value, onChange, endsOnly }) {
         ))}
         <AnimatePresence>
           {value != null && (
-            <motion.div className="abs" style={{ top: 8, width: 28, height: 28, marginLeft: -14, borderRadius: 14, background: '#fff', boxShadow: '0 2px 8px rgba(42,38,80,0.18), 0 0 0 0.5px rgba(42,38,80,0.06)' }}
+            <motion.div className="abs" style={{ top: 8, width: 28, height: 28, marginLeft: -14, borderRadius: 14, background: '#fff', border: '1.5px solid #fff', boxShadow: '0 2px 8px rgba(42,38,80,0.18), 0 0 0 0.5px rgba(42,38,80,0.06)' }}
               initial={{ scale: 0, left: pos(f) }} animate={{ scale: 1, left: pos(f) }} exit={{ scale: 0 }} transition={GENTLE} />
           )}
         </AnimatePresence>
-      </div>
-      <div style={{ position: 'relative', height: 16, marginTop: -6 }}>
+      </motion.div>
+      <motion.div initial={false} animate={{ opacity: skip ? 0.35 : 1 }} style={{ position: 'relative', height: 16, marginTop: -6 }}>
         {steps.map((s, i) => {
           if (endsOnly && i > 0 && i < n - 1) return null;
           const first = i === 0, last = i === n - 1;
           const on = value === i;
           return (
             <motion.span key={s} className="abs nowrap" initial={false}
-              animate={{ color: on ? NAVY : MUTED }}
-              style={{ top: 0, fontSize: 12, fontWeight: on ? 600 : 400, lineHeight: '16px',
+              
+              style={{ top: 0, fontSize: 12, fontWeight: on ? 600 : 400, lineHeight: '16px', color: NAVY,
                 ...(first ? { left: 0 } : last ? { right: 0 } : { left: pos(i / (n - 1)), transform: 'translateX(-50%)' }) }}>
               {s}
             </motion.span>
           );
         })}
-      </div>
+      </motion.div>
     </G>
   );
 }
@@ -103,8 +105,8 @@ function TwoWay({ value, onChange, options }) {
       {options.map((o) => (
         <button key={o} onClick={() => onChange(o)} style={{ position: 'relative', flex: '1 0 0', height: 44, borderRadius: 22 }}>
           {value === o && <motion.div layoutId="weekpart" transition={GENTLE}
-            style={{ position: 'absolute', inset: 0, borderRadius: 22, background: 'rgba(255,255,255,0.92)', boxShadow: '0 2px 8px rgba(42,38,80,0.06)' }} />}
-          <span style={{ position: 'relative', ...t(15, value === o ? 600 : 500, value === o ? NAVY : MUTED) }}>{o}</span>
+            style={{ position: 'absolute', inset: 0, borderRadius: 22, background: 'rgba(255,255,255,0.9)', boxShadow: '0 2px 8px rgba(42,38,80,0.06)' }} />}
+          <span style={{ position: 'relative', ...t(15, value === o ? 600 : 500) }}>{o}</span>
         </button>
       ))}
     </G>
@@ -140,9 +142,9 @@ export default function WriteReview({ onClose, onPosted, mine }) {
   const post = () => {
     setBusy(true);
     const tags = [];
-    if (v.sound != null) tags.push(`Sound · ${SCALES.sound[v.sound]}`);
-    if (v.crowd != null) tags.push(`Crowd · ${SCALES.crowd[v.crowd]}`);
-    if (v.light != null) tags.push(`Light · ${SCALES.light[v.light]}`);
+    if (typeof v.sound === 'number') tags.push(`Sound · ${SCALES.sound[v.sound]}`);
+    if (typeof v.crowd === 'number') tags.push(`Crowd · ${SCALES.crowd[v.crowd]}`);
+    if (typeof v.light === 'number') tags.push(`Light · ${SCALES.light[v.light]}`);
     if (seats[0]) tags.push(`Seating · ${seats[0]}`);
     setTimeout(() => onPosted({ name: 'You', meta: 'Just now', stars: rating, text: text.trim(), tags, mine: true, age: 0 }), 800);
   };
