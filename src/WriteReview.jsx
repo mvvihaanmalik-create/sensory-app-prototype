@@ -191,7 +191,7 @@ export default function WriteReview({ onClose, onPosted, mine }) {
           </Section>
 
           <Section icon="img" title="Add photos" note={photos.length ? `${photos.length} of 10` : 'Up to 10'}>
-            <div className="hscroll" style={{ margin: '-6px -24px -18px', padding: '6px 24px 18px', display: 'flex', gap: 12 }}>
+            <div className="hscroll" style={{ margin: '-6px -24px -40px', padding: '6px 24px 40px', display: 'flex', gap: 12 }}>
               <AnimatePresence initial={false}>
                 {photos.length < 10 && (
                   <G key="add" as="button" r={24} onClick={() => setPhotos((p) => [...p, nextId.current++])} whileTap={{ scale: 0.95 }} transition={TAP}

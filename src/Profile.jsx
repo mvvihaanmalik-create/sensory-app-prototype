@@ -27,7 +27,7 @@ function SettingsRow({ icon, label, i }) {
   );
 }
 
-export default function Profile({ onScroll }) {
+export default function Profile({ onScroll, savedCount = 0 }) {
   const knob = useAnimationControls();
   // "Coming soon": the switch only nudges, it does not turn on.
   const nudge = () => knob.start({ x: [0, 6, 0], transition: { duration: 0.45, ease: 'easeInOut' } });
@@ -51,7 +51,7 @@ export default function Profile({ onScroll }) {
 
           {/* Stat tiles */}
           <div style={{ display: 'flex', gap: 12 }}>
-            {[['12', 'Saved'], ['4', 'Lists'], ['3', 'Posts']].map(([v, l], i) => (
+            {[[String(12 + savedCount), 'Saved'], ['4', 'Lists'], ['3', 'Posts']].map(([v, l], i) => (
               <motion.button key={l} {...rise(1 + i * 0.5)} whileTap={{ scale: 0.96 }}
                 style={{ ...glass(24), flex: '1 0 0', height: 82, padding: '14.5px 16.5px', display: 'flex', flexDirection: 'column', gap: 2, textAlign: 'left' }}>
                 <span style={{ fontSize: 24, fontWeight: 600, color: NAVY, lineHeight: '29px' }}>{v}</span>

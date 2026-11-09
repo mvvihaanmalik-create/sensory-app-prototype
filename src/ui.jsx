@@ -39,9 +39,9 @@ const TABS = [
   { key: 'map', d: paths.map, label: 'Map' },
   { key: 'profile', d: paths.user, label: 'Profile' },
 ];
-export function TabBar({ active, onNav, top }) {
+export function TabBar({ active, onNav, top, yMV }) {
   return (
-    <motion.div className="abs" style={{ left: 84, width: 273, height: 64, zIndex: 40 }} initial={false} animate={{ top }} transition={GENTLE}>
+    <motion.div className="abs" style={{ left: 84, width: 273, height: 64, zIndex: 40, y: yMV }} initial={false} animate={{ top }} transition={GENTLE}>
       <Glass radius={32} angle="166.8deg" style={{ inset: 0 }} contentStyle={{ padding: 7 - 1.5 }}>
         {TABS.map((t, i) => {
           const on = active === t.key;

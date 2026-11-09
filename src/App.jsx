@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion, MotionConfig } from 'motion/react';
+import { AnimatePresence, animate, motion, MotionConfig, useMotionValue } from 'motion/react';
 import Home from './Home.jsx';
 import MapScreen from './Map.jsx';
 import Profile from './Profile.jsx';
+import DiscoverLayer, { SCREEN_H, OPEN_SPRING, CLOSE_SPRING } from './Discover.jsx';
 import Venue from './Venue.jsx';
 import BookTable, { BookingConfirmed, emptyDraft, slotsFor, DATES } from './BookTable.jsx';
 import WriteReview from './WriteReview.jsx';
@@ -53,9 +54,10 @@ const VIEWS = [
   { id: 'edit-party', label: 'Edit Party' },
   { id: 'add-mode', label: 'Add custom mode' },
   { id: 'sort-sound', label: 'Sound sort sheet' },
+  { id: 'discover', label: 'Hidden discovery' },
 ];
 const MODE_VIEWS = ['modes', 'edit-study', 'edit-party', 'add-mode'];
-const HOME_VIEWS = [...PAGE_IDS, ...MODE_VIEWS, 'sort-sound'];
+const HOME_VIEWS = [...PAGE_IDS, ...MODE_VIEWS, 'sort-sound', 'discover'];
 const VENUE_VIEWS = ['venue', 'venue-reviews', 'sense', 'review', 'book', 'book-2', 'book-3', 'confirmed'];
 const SAMPLE_DRAFT = { ...emptyDraft(), guests: 2, date: 0, time: '5:30 PM', zone: 'Patio', table: 4, comfort: ['Away from speakers'] };
 const toBooking = (d) => ({ ...d, crowd: slotsFor(d.date, d.guests).find((s) => s.time === d.time).crowd, dayShort: DATES[d.date].short, dayLong: DATES[d.date].long });
@@ -95,9 +97,17 @@ export default function App() {
   const [sheetCmd, setSheetCmd] = useState(initial.startsWith('map-') && initial !== 'map-half' ? { state: initial.slice(4), n: 0 } : null);
   const [homeScroll, setHomeScroll] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);
+  // Hidden Discovery Mode: Home slides down by `pull`, Discover sits underneath it
+  const [discoverOpen, setDiscoverOpen] = useState(initial === 'discover');
+  const pull = useMotionValue(initial === 'discover' ? SCREEN_H : 0);
+  const [decided, setDecided] = useState({}); // id -> 'save' | 'pass'; survives closing Discover
+  const savedCount = Object.values(decided).filter((v) => v === 'save').length;
+  const closeDiscover = () => { setDiscoverOpen(false); animate(pull, 0, CLOSE_SPRING); };
+  const showPassed = () => setDecided((m) => Object.fromEntries(Object.entries(m).filter(([, v]) => v === 'save')));
 
   const nav = (to) => {
     if (to === 'search') return; // no Search screen designed yet
+    if (discoverOpen) closeDiscover();
     if (page) setPage(null);
     if (to !== screen) { setScreen(to); setHomeScroll(0); setSheetCmd(null); }
   };
@@ -131,6 +141,7 @@ export default function App() {
       return;
     }
     closeVenue();
+    if (id === 'discover') { nav('home'); setDiscoverOpen(true); animate(pull, SCREEN_H, OPEN_SPRING); try { history.replaceState(null, '', '#discover'); } catch (_) {} return; }
     if (id.startsWith('map')) {
       const st = id.slice(4) || 'half';
       if (screen !== 'map') { setScreen('map'); setSheetCmd(st === 'half' ? null : { state: st, n: Date.now() }); }
@@ -148,7 +159,7 @@ export default function App() {
               <div className="label">UXDG 370 · Final flow</div>
               <h1>Calm places,<br />Savannah</h1>
             </div>
-            <p className="lead">Tap through it like the real app. Start from a For you card on Home.</p>
+            <p className="lead">Tap through it like the real app. Start from a For you card on Home. Pull Home down from the top to find a hidden layer.</p>
             <div className="tools">
               <button onClick={() => { try { history.replaceState(null, '', location.pathname); } catch (_) {} location.reload(); }}>Restart</button>
             </div>
@@ -164,9 +175,11 @@ export default function App() {
                 <AnimatePresence>
                   <motion.div key={screen} className="abs" style={{ inset: 0 }}
                     initial={SCREEN_IN[screen].initial} animate={SCREEN_IN[screen].animate} exit={{ opacity: 0, transition: { duration: 0.28 } }} transition={EASE}>
-                    {screen === 'home' && <Home onOpenMap={() => nav('map')} onOpenVenue={openVenue} onOpenPage={setPage} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} reduceMotion={reduceMotion} />}
+                    {screen === 'home' && <DiscoverLayer pull={pull} open={discoverOpen} onClose={closeDiscover} mode={activeM} decided={decided}
+                      onDecide={(id, d) => setDecided((m) => ({ ...m, [id]: d }))} onShowPassed={showPassed} onOpenVenue={openVenue} blocked={venueOpen || !!sense || !!flow} />}
+                    {screen === 'home' && <Home pull={pull} pullOn={!discoverOpen} onDiscover={() => setDiscoverOpen(true)} onOpenMap={() => nav('map')} onOpenVenue={openVenue} onOpenPage={setPage} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} reduceMotion={reduceMotion} />}
                     {screen === 'map' && <MapScreen command={sheetCmd} onOpenVenue={openVenue} />}
-                    {screen === 'profile' && <Profile onScroll={setHomeScroll} />}
+                    {screen === 'profile' && <Profile onScroll={setHomeScroll} savedCount={savedCount} />}
                   </motion.div>
                 </AnimatePresence>
                 <AnimatePresence>
@@ -239,7 +252,7 @@ export default function App() {
                 </AnimatePresence>
                 <div className="abs" style={{ inset: 0, zIndex: 60, pointerEvents: 'none' }}><Toast text={note} icon={note && /Only|later/.test(note) ? 'info' : 'check'} /></div>
                 <StatusBar shade={flow || sense ? 0 : venueOpen ? (venueScroll > 270 ? 1 : 0) : screen !== 'map' && homeScroll > 24 ? 1 : 0} />
-                <TabBar active={screen} onNav={nav} top={venueOpen ? 1000 : page ? 876 : TAB_TOP[screen]} />
+                <TabBar active={screen} onNav={nav} top={venueOpen ? 1000 : page ? 876 : TAB_TOP[screen]} yMV={screen === 'home' ? pull : undefined} />
                 <div className="abs" style={{ left: 150, top: 943, width: 140, height: 5, borderRadius: 3, background: screen === 'map' ? 'rgba(20,24,31,0.85)' : '#14181f', zIndex: 55 }} />
                 <div className="island" />
               </div>

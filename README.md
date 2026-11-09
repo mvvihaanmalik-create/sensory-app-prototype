@@ -31,6 +31,7 @@ The build produces a single self-contained `dist/index.html`. Dependencies and g
 - Home-linked pages: Cafés, Dining, Nightlife, Events, More (category icons), For You and Popular Around You (See all)
 - Sort sheets behind the Sound, Lighting, Crowd, Temperature and Seating chips (they really reorder the list)
 - Modes: Your modes sheet from the Study mode chip, Edit mode (Study, Party, custom), Add custom mode
+- Hidden Discovery Mode: pull Home down from the top to reveal a swipeable card stack (not in Figma, built from a written brief)
 
 Search is not implemented yet.
 
@@ -40,6 +41,16 @@ Search is not implemented yet.
 - Only Foxy Loxy Cafe opens a venue page; other rows show a short note. Back from the venue returns to the same list.
 - Picking a mode updates the Home chip and the For You banner. Save changes stays faded until something changes; Add mode needs a name and at least one preference.
 - Not in Figma, built to match: the preference picker sheet, Delete mode for custom modes, sorts for Lighting, Crowd, Temperature and Seating.
+
+### Hidden Discovery rules
+
+- Pull Home down while it is scrolled to the very top. Home follows the finger, the header illustration fades, and "Keep pulling to discover" turns into "Release to discover" past the threshold. Let go before it and Home springs back. Touch, mouse drag and a trackpad scroll-up that starts at the top all work.
+- A mostly vertical drag pulls the page; a mostly horizontal one belongs to the For you cards (and to the Discover cards once open), so the two never fight.
+- Swipe right or tap the heart to save, swipe left or tap the cross to pass, tap the card to open the place. Arrow keys also save and pass. Only Foxy Loxy Cafe has a venue page, so other cards show a short note.
+- The deck is ranked by the active mode (Study, Party or a custom mode) and re-ranks when the mode changes. Each card says why it fits and flags what does not, or what is unknown. Unknown sense data is shown as Unknown, never guessed.
+- Saved and passed cards persist while the app is open. Saved places add to the Saved count on Profile. "Show passed places" brings passes back.
+- The close button or Escape slides Home back down over Discover. Home is never unmounted, so its mode chip and For you card stay as they were.
+- Card images are illustrations (the app has no venue photography yet); the café and the park reuse the Savannah header scene.
 
 ### Booking flow rules
 

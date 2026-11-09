@@ -81,7 +81,7 @@ function Menu() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <H>Popular dishes</H>
-      <div className="hscroll" style={{ margin: '0 -24px', padding: '4px 24px 20px', display: 'flex', gap: 12 }}>
+      <div className="hscroll" style={{ margin: '0 -24px -20px', padding: '4px 24px 40px', display: 'flex', gap: 12 }}>
         {DISHES.map(([n, k]) => (
           <G key={n} r={24} style={{ width: 168, flex: 'none', padding: '8px 8px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div style={{ height: 112, borderRadius: 18, background: '#e0e0e3' }} />
@@ -127,7 +127,7 @@ function Reviews({ onWrite, mine }) {
         <VIcon name="pencil" />
         <span style={t(15, 600)}>{mine ? 'Edit your review' : 'Write a review'}</span>
       </G>
-      <div className="hscroll" style={{ margin: '0 -24px', padding: '4px 24px 16px', display: 'flex', gap: 8 }}>
+      <div className="hscroll" style={{ margin: '0 -24px -24px', padding: '4px 24px 40px', display: 'flex', gap: 8 }}>
         {FILTERS.map((c) => <Chip key={c} label={c} on={f === c} onClick={() => setF(c)} />)}
         <div style={{ width: 1, background: DIV, margin: '8px 4px', flex: 'none' }} />
         <G as="button" r={20} onClick={() => setSort((s) => (s === 'Newest' ? 'Most relevant' : 'Newest'))} whileTap={{ scale: 0.95 }} transition={TAP}
@@ -162,7 +162,7 @@ function Photos() {
   const cols = k % 2 ? [COLS[1], COLS[0]] : COLS;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-      <div className="hscroll" style={{ margin: '0 -24px', padding: '4px 24px 20px', display: 'flex', gap: 8 }}>
+      <div className="hscroll" style={{ margin: '0 -24px -20px', padding: '4px 24px 40px', display: 'flex', gap: 8 }}>
         {PHOTO_CHIPS.map((p) => <Chip key={p} label={p} on={c === p} onClick={() => setC(p)} />)}
       </div>
       <div style={{ display: 'flex', gap: 16, marginTop: -4 }}>

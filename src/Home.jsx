@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, useTransform } from 'motion/react';
 import { uri } from './svgs.js';
 import { drops, ripples, toTransition, LOOP } from './fountain.js';
 import { GENTLE, INK, INK2, useScale } from './ui.jsx';
 import sceneMorning from './assets/scene-morning.jpg';
+import { usePullDown } from './Discover.jsx';
 
 const lightGlass = {
   background: 'rgba(255,255,255,0.62)', border: '1px solid rgba(255,255,255,0.7)', boxShadow: '0 4px 14px rgba(27,42,68,0.1)',
@@ -13,13 +14,14 @@ const cardGlass = {
 };
 const h2 = { fontSize: 24, fontWeight: 600, lineHeight: '28px', letterSpacing: -0.36, color: INK };
 
-function Hero({ reduce }) {
+function Hero({ reduce, pull }) {
+  const fade = useTransform(pull, [0, 120], [1, 0]);
   const pulse = reduce ? {} : {
     animate: { scale: [1, 1.025, 1] },
     transition: { duration: LOOP, times: [0, 0.5, 1], ease: 'easeInOut', repeat: Infinity },
   };
   return (
-    <div className="abs" style={{ left: 0, top: 0, width: 440, height: 314, overflow: 'hidden', borderRadius: '0 0 32px 32px', boxShadow: '0 8px 12px rgba(13,15,26,0.12)' }}>
+    <motion.div className="abs" style={{ left: 0, top: 0, width: 440, height: 314, overflow: 'hidden', borderRadius: '0 0 32px 32px', boxShadow: '0 8px 12px rgba(13,15,26,0.12)', opacity: fade }}>
       {/* Scene art + Motion · fountain share one 440x550 frame at y -130, pulsing about its centre */}
       <motion.div className="abs" style={{ left: 0, top: -130, width: 440, height: 550, transformOrigin: '50% 50%' }} {...pulse}>
         <img src={sceneMorning} alt="" className="abs" style={{ left: 0, top: 130, width: 440, height: 314, display: 'block' }} />
@@ -43,7 +45,7 @@ function Hero({ reduce }) {
         )}
       </motion.div>
       <div className="abs" style={{ left: 0, top: 0, width: 440, height: 240, background: 'linear-gradient(180deg, rgba(255,252,247,0.85) 0%, rgba(255,252,247,0.62) 60%, rgba(255,252,247,0) 100%)' }} />
-    </div>
+    </motion.div>
   );
 }
 
@@ -123,11 +125,14 @@ function ForYouStack({ onOpenVenue }) {
   const roleOf = (k) => (k === front ? 'front' : k === KEYS[(fi + 1) % 3] ? 'right' : 'left');
 
   const dragged = useRef(false);
-  const onDown = (e) => { dragged.current = false; drag.current = { x: e.clientX, moved: false, id: e.pointerId }; };
+  const onDown = (e) => { dragged.current = false; drag.current = { x: e.clientX, y: e.clientY, moved: false, id: e.pointerId }; };
   const onMove = (e) => {
     const d = drag.current; if (!d) return;
-    const delta = (e.clientX - d.x) / scale;
-    if (!d.moved && Math.abs(delta) > 6) { d.moved = true; e.currentTarget.setPointerCapture(e.pointerId); }
+    const delta = (e.clientX - d.x) / scale, vert = (e.clientY - d.y) / scale;
+    // axis lock: a mostly vertical gesture belongs to the page (pull down to Discover), so the card lets go of it
+    if (!d.moved && Math.max(Math.abs(delta), Math.abs(vert)) > 6) {
+      if (Math.abs(delta) > Math.abs(vert)) { d.moved = true; e.currentTarget.setPointerCapture(e.pointerId); } else { drag.current = null; return; }
+    }
     if (d.moved) setDx(delta);
   };
   const onUp = () => {
@@ -148,7 +153,7 @@ function ForYouStack({ onOpenVenue }) {
             initial={false}
             animate={{ ...ROLE[role], x: ROLE[role].x + (isFront ? dx : 0), rotate: ROLE[role].rotate + (isFront ? dx / 40 : 0) }}
             transition={isFront && dx !== 0 ? { type: 'spring', stiffness: 600, damping: 40 } : GENTLE}
-            onClick={() => { if (!isFront) setFront(k); else if (!dragged.current && k === 'A') onOpenVenue?.(); }}
+            onClick={() => { if (dragged.current) return; if (!isFront) setFront(k); else if (k === 'A') onOpenVenue?.(); }}
             onPointerDown={isFront ? onDown : undefined} onPointerMove={isFront ? onMove : undefined}
             onPointerUp={isFront ? onUp : undefined} onPointerCancel={isFront ? onUp : undefined}
             whileTap={!isFront ? { scale: 0.78 } : undefined}>
@@ -188,11 +193,16 @@ function RankingRow({ top, n, name, meta, level, onClick }) {
   );
 }
 
-export default function Home({ onOpenMap, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, reduceMotion }) {
+export default function Home({ onOpenMap, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, reduceMotion, pull, onDiscover, pullOn = true }) {
+  const scrollRef = useRef(null);
+  usePullDown({ el: scrollRef, pull, enabled: pullOn, onCommit: onDiscover });
+  const r = useTransform(pull, [0, 24], [0, 32]);
+  const sh = useTransform(pull, [0, 24], ['0 -10px 28px rgba(42,38,80,0)', '0 -10px 28px rgba(42,38,80,0.12)']);
   return (
-    <div className="scroll" style={{ background: '#f7f5f1' }} onScroll={(e) => onScroll?.(e.currentTarget.scrollTop)}>
+    <motion.div className="abs" style={{ inset: 0, y: pull, overflow: 'hidden', background: '#f7f5f1', borderTopLeftRadius: r, borderTopRightRadius: r, boxShadow: sh, zIndex: 1, userSelect: 'none', WebkitUserSelect: 'none' }} onDragStart={(e) => e.preventDefault()}>
+    <div ref={scrollRef} className="scroll" style={{ background: '#f7f5f1' }} onScroll={(e) => onScroll?.(e.currentTarget.scrollTop)}>
       <div style={{ position: 'relative', width: 440, height: 1753.83 }}>
-        <Hero reduce={reduceMotion} />
+        <Hero reduce={reduceMotion} pull={pull} />
         <p className="abs nowrap" style={{ left: 24, top: 59, fontSize: 15, fontWeight: 500, color: INK2 }}>Savannah, GA</p>
         <motion.button className="abs nowrap" onClick={onOpenModes} whileTap={{ scale: 0.95 }} transition={GENTLE}
           style={{ right: 22, top: 46, height: 44, padding: '0 16px', borderRadius: 999, ...lightGlass, fontSize: 15, fontWeight: 500, color: INK }}>
@@ -234,5 +244,6 @@ export default function Home({ onOpenMap, onOpenVenue, onOpenPage, onOpenModes, 
         </motion.button>
       </div>
     </div>
+    </motion.div>
   );
 }
