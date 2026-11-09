@@ -2,15 +2,15 @@
 // then swipe cards (right saves, left passes, tap opens the place).
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, animate, motion, useMotionValue, useMotionValueEvent, useTransform } from 'motion/react';
-import { GENTLE, INK, INK2, NAVY, MUTED, useScale } from './ui.jsx';
-import { G, TAP } from './flow.jsx';
+import { Glass, GENTLE, INK, INK2, NAVY, MUTED, useScale } from './ui.jsx';
+import { TAP } from './flow.jsx';
 import { VIcon } from './venueIcons.jsx';
-import { uri } from './svgs.js';
 import { DarkCTA, TextBtn } from './sheets.jsx';
-import { modeLabel } from './Modes.jsx';
-import Scene from './art.jsx';
-import { SOUND_W, LIGHT_W, CROWD_W, metaOf, rankPlaces, reasonFor } from './discoverData.js';
-import sceneMorning from './assets/scene-morning.jpg';
+import { PAGES } from './listData.js';
+import { SENSE_VALUES } from './Venue.jsx';
+import { discoverAssets as A } from './discoverAssets.js';
+import './discover.css';
+import { SOUND_W, LIGHT_W, CROWD_W, metaOf, rankPlaces } from './discoverData.js';
 
 export const SCREEN_H = 956;
 export const THRESH = 120; // how far the sheet must be pulled (design px) before letting go opens Discover
@@ -125,73 +125,62 @@ function PullHint({ pull }) {
   );
 }
 
-/* ---------- Backdrop: soft Savannah dusk, same scene as the Home header ---------- */
+/* ---------- Figma 1002:8169: background, card, and five sense tiles ---------- */
 function Backdrop() {
-  const fade = 'linear-gradient(to top, #000 0%, rgba(0,0,0,0.55) 45%, transparent 90%)';
-  return (
-    <div className="abs" style={{ inset: 0, background: 'linear-gradient(180deg, #cfe3f3 0%, #e8dfd9 30%, #f5dfc9 52%, #f7ece0 78%, #f7f5f1 100%)' }}>
-      <div className="abs" style={{ left: -60, top: 90, width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,0.55), rgba(255,255,255,0) 70%)' }} />
-      <div className="abs" style={{ left: 200, top: 360, width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(246,196,168,0.35), rgba(246,196,168,0) 70%)' }} />
-      <img src={sceneMorning} alt="" draggable={false} className="abs"
-        style={{ left: -40, bottom: 0, width: 520, height: 371, maxWidth: 'none', transform: 'scaleX(-1)', opacity: 0.3, pointerEvents: 'none', WebkitMaskImage: fade, maskImage: fade }} />
+  return <div className="abs" style={{ inset: 0, background: '#f7f5f1', overflow: 'hidden', pointerEvents: 'none' }}>
+    <div className="abs" style={{ inset: 0, opacity: .2, overflow: 'hidden' }}>
+      <img src={A.imgSourceArtMorning} alt="" draggable={false} className="abs" style={{ height: '100.06%', left: '-41.78%', top: '-.03%', width: '174.22%', maxWidth: 'none' }} />
     </div>
-  );
+  </div>;
 }
 
-/* ---------- Card ---------- */
-const Pips = ({ n }) => (
-  <span style={{ display: 'flex', gap: 3 }}>
-    {[1, 2, 3, 4, 5].map((i) => <span key={i} style={{ width: 6, height: 6, borderRadius: 3, background: n != null && i <= n ? NAVY : 'rgba(20,24,31,0.12)' }} />)}
-  </span>
-);
-function SenseChip({ label, n, words }) {
-  const known = n != null;
-  return (
-    <div style={{ flex: '1 0 0', minWidth: 0, background: '#f4f2ee', borderRadius: 16, padding: '9px 12px 10px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <span className="nowrap" style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase', color: MUTED, lineHeight: '13px' }}>{label}</span>
-      <span className="nowrap" style={{ fontSize: 15, fontWeight: known ? 700 : 500, color: known ? INK : INK2, lineHeight: '18px' }}>{known ? words[n] : 'Unknown'}</span>
-      <Pips n={n} />
-    </div>
-  );
+function senseValues(p) {
+  if (p.id === 'foxy') return SENSE_VALUES;
+  const canonical = Object.values(PAGES).flatMap(page => page.rows).find(row => row.id === p.id);
+  const seat = p.seat || canonical?.seat;
+  return {
+    sound: SOUND_W[p.s] || 'Unknown', light: LIGHT_W[p.l] || 'Unknown', crowd: CROWD_W[p.c] || 'Unknown',
+    temp: canonical?.t == null ? 'Unknown' : canonical.t <= 2 ? 'Cool' : canonical.t >= 4 ? 'Warm' : 'Mild',
+    seating: seat?.includes('outdoor') ? 'Patio' : seat?.includes('booth') ? 'Booths' : seat?.includes('indoor') ? 'Indoor' : 'Unknown',
+  };
 }
-
-function CardFace({ p, prefs, modeName, stamps }) {
-  const { line, note } = reasonFor(p, prefs, modeName);
-  return (
-    <div className="abs" style={{ inset: 0, borderRadius: 32, overflow: 'hidden', background: '#fff', border: '1px solid rgba(20,24,31,0.08)', boxShadow: '0 12px 32px rgba(27,42,68,0.10)', userSelect: 'none' }}>
-      <div className="abs" style={{ left: 0, top: 0, width: 360, height: 330, overflow: 'hidden' }}><Scene kind={p.scene} tone={p.tone} /></div>
-      <div className="abs" style={{ left: 14, top: 14, display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px 4px 8px', borderRadius: 999, background: '#f7f5f1', boxShadow: '0 4px 14px rgba(27,42,68,0.08)' }}>
-        <img src={uri('rippleCard')} alt="" draggable={false} style={{ width: 28, height: 28, display: 'block' }} />
-        <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: INK }}>Level {p.level}</span>
-      </div>
-      {stamps && (
-        <>
-          <motion.div className="abs" style={{ left: 18, top: 70, opacity: stamps.save, rotate: -12, padding: '4px 14px', border: '3px solid #2f62c9', borderRadius: 12, background: 'rgba(255,255,255,0.88)', color: '#2f62c9', fontSize: 24, fontWeight: 800, letterSpacing: 2, pointerEvents: 'none' }}>SAVE</motion.div>
-          <motion.div className="abs" style={{ right: 18, top: 70, opacity: stamps.pass, rotate: 12, padding: '4px 14px', border: `3px solid ${INK2}`, borderRadius: 12, background: 'rgba(255,255,255,0.88)', color: INK2, fontSize: 24, fontWeight: 800, letterSpacing: 2, pointerEvents: 'none' }}>PASS</motion.div>
-        </>
-      )}
-      <div className="abs" style={{ left: 0, top: 314, width: 360, height: 276, background: '#fff', borderRadius: '26px 26px 0 0', padding: '18px 20px 0', display: 'flex', flexDirection: 'column' }}>
-        <p className="nowrap" style={{ fontSize: 22, fontWeight: 700, color: INK, lineHeight: '26px', letterSpacing: -0.3 }}>{p.name}</p>
-        <p className="nowrap" style={{ fontSize: 14, fontWeight: 500, color: INK2, lineHeight: '18px', marginTop: 2 }}>{metaOf(p)}</p>
-        {p.event && <p className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: INK, lineHeight: '17px', marginTop: 3 }}>{p.event}</p>}
-        <div style={{ display: 'flex', gap: 8, marginTop: p.event ? 10 : 14 }}>
-          <SenseChip label="Sound" n={p.s} words={SOUND_W} />
-          <SenseChip label="Light" n={p.l} words={LIGHT_W} />
-          <SenseChip label="Crowd" n={p.c} words={CROWD_W} />
-        </div>
-        <div style={{ marginTop: 12, borderRadius: 18, background: 'rgba(47,98,201,0.08)', border: '1px solid rgba(47,98,201,0.3)', padding: '10px 14px 11px' }}>
-          <p style={{ fontSize: 14, fontWeight: 600, color: INK, lineHeight: '19px', marginTop: 3 }}>{line}</p>
-          {note && <p style={{ fontSize: 13, fontWeight: 500, color: INK2, lineHeight: '17px', marginTop: 3 }}>{note}</p>}
-        </div>
+const SENSE_TILES = [['sound', 'Sound', 'imgPhosphorSpeakerHigh'], ['light', 'Light', 'imgPhosphorSun'], ['crowd', 'Crowd', 'imgPhosphorUsers'], ['temp', 'Temperature', 'imgPhosphorThermometer'], ['seating', 'Seating', 'imgPhosphorChair']];
+function CardFace({ p, stamps }) {
+  const senses = senseValues(p);
+  return <div className="abs" data-discover-face={p.id} style={{ inset: 0, borderRadius: 48.32, overflow: 'hidden', background: 'rgba(255,255,255,.85)', border: '1.51px solid rgba(20,24,31,.08)', boxShadow: '0 18.12px 48.32px rgba(27,42,68,.06)', userSelect: 'none' }}>
+    <div className="abs" style={{ left: -1.51, top: 434.49, width: 393, height: 192, borderRadius: 25, background: 'rgba(20,24,31,.06)' }} />
+    <div className="abs" style={{ left: -1.51, top: -1.51, width: 393, height: 628, overflow: 'hidden', background: 'rgba(20,24,31,.06)' }}>
+      <div className="abs" style={{ left: 18, top: 451, width: 355, display: 'flex', flexDirection: 'column', gap: 8, color: MUTED, textAlign: 'left' }}>
+        <p className="nowrap" style={{ fontSize: 28, fontWeight: 600, lineHeight: 'normal', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</p>
+        <p className="nowrap" style={{ fontSize: 14, fontWeight: 400, lineHeight: 'normal', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.id === 'foxy' ? '4.6 ★ · 2,600 reviews · $ · Café · Tex-Mex' : p.event ? `${metaOf(p)} · ${p.event}` : metaOf(p)}</p>
       </div>
     </div>
-  );
+    <div className="abs" style={{ left: 16.61, top: 16.61, display: 'flex', alignItems: 'center', gap: 6.04, padding: '6.04px 12.08px', borderRadius: 1508.49, background: '#f7f5f1', WebkitBackdropFilter: 'blur(12.08px)', backdropFilter: 'blur(12.08px)', boxShadow: '0 6.04px 21.14px rgba(27,42,68,.05)' }}>
+      <img src={A.imgLevelRipple} alt="" width="42.28" height="42.28" draggable={false} />
+      <p className="nowrap" style={{ fontSize: 19.63, fontWeight: 700, lineHeight: 'normal', color: INK }}>Level {p.level}</p>
+    </div>
+    <div className="abs" style={{ left: 16.49, top: 523.49, width: 355, height: 85, display: 'flex', gap: 10 }}>
+      {SENSE_TILES.map(([key, label, icon]) => <Glass key={key} radius={24} angle="126.545deg" style={{ position: 'relative', flex: '1 0 0', minWidth: 0, height: 85 }} contentStyle={{ flexDirection: 'column', gap: 8, padding: '14.5px 2.5px' }}>
+        <img src={A[icon]} alt="" width="24" height="24" draggable={false} />
+        <span className="nowrap" aria-label={`${label}: ${senses[key]}`} style={{ fontSize: 15, fontWeight: 500, lineHeight: 'normal', color: MUTED }}>{senses[key]}</span>
+      </Glass>)}
+    </div>
+    {stamps && <>
+      <motion.div className="abs" style={{ left: 18, top: 70, opacity: stamps.save, rotate: -12, padding: '4px 14px', border: '3px solid #2f62c9', borderRadius: 12, background: 'rgba(255,255,255,.88)', color: '#2f62c9', fontSize: 24, fontWeight: 800, letterSpacing: 2, pointerEvents: 'none' }}>SAVE</motion.div>
+      <motion.div className="abs" style={{ right: 18, top: 70, opacity: stamps.pass, rotate: 12, padding: '4px 14px', border: `3px solid ${INK2}`, borderRadius: 12, background: 'rgba(255,255,255,.88)', color: INK2, fontSize: 24, fontWeight: 800, letterSpacing: 2, pointerEvents: 'none' }}>PASS</motion.div>
+    </>}
+  </div>;
+}
+function DiscoverAction({ label, icon, left, top, dark = false, onClick }) {
+  return <motion.button type="button" aria-label={label} onClick={onClick} whileTap={{ scale: .9 }} transition={TAP} className="abs" style={{ left, top, width: 48, height: 48, borderRadius: 24 }}>
+    <Glass className={dark ? 'discover-dark-action' : ''} radius={24} style={{ inset: 0, ...(dark ? { border: 'none' } : {}) }} contentStyle={{ justifyContent: 'center' }}><img src={A[icon]} alt="" draggable={false} /></Glass>
+  </motion.button>;
 }
 
-const SLOT = [{ s: 1, y: 0, o: 1 }, { s: 0.94, y: 30, o: 1 }, { s: 0.88, y: 60, o: 1 }];
+const SLOT = [{ s: 1, y: 0, o: 1 }, { s: .97, y: 0, o: 0 }, { s: .94, y: 0, o: 0 }];
 const STACK_SPRING = { type: 'spring', stiffness: 260, damping: 28 };
 
-function StackCard({ p, depth, prefs, modeName, cmd, onDecide, onTap }) {
+function StackCard({ p, depth, cmd, onDecide, onTap }) {
   const front = depth === 0;
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-240, 0, 240], [-13, 0, 13]);
@@ -224,23 +213,18 @@ function StackCard({ p, depth, prefs, modeName, cmd, onDecide, onTap }) {
     <motion.div className="abs" data-card={p.id}
       role={front ? 'button' : undefined} tabIndex={front ? 0 : -1} aria-hidden={front ? undefined : true}
       aria-label={front ? `${p.name}. Tap for details. Swipe right to save, left to pass.` : undefined}
-      style={{ left: 0, top: 0, width: 360, height: 590, x, rotate, zIndex: 10 - depth, cursor: front ? 'grab' : 'default', pointerEvents: front ? 'auto' : 'none', transformOrigin: '50% 60%' }}
+      style={{ left: 0, top: 0, width: 393, height: 628, x, rotate, zIndex: 10 - depth, cursor: front ? 'grab' : 'default', pointerEvents: front ? 'auto' : 'none', transformOrigin: '50% 60%' }}
       initial={false} animate={{ scale: SLOT[depth].s, y: SLOT[depth].y, opacity: SLOT[depth].o }} transition={STACK_SPRING}
       drag={front ? 'x' : false} dragMomentum={false} dragElastic={1}
       onPointerDown={() => { dragged.current = false; }} onDragStart={() => { dragged.current = true; }} onDragEnd={end}
       onTap={() => { if (front && !dragged.current) onTap(p); }}>
-      <CardFace p={p} prefs={prefs} modeName={modeName} stamps={front ? { save, pass } : null} />
+      <CardFace p={p} stamps={front ? { save, pass } : null} />
     </motion.div>
   );
 }
 
 /* ---------- The layer ---------- */
-const Xmark = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke={INK} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
-);
-
 export default function DiscoverLayer({ pull, open, onClose, mode, decided, onDecide, onShowPassed, onOpenVenue, blocked }) {
-  const modeName = modeLabel(mode);
   const deck = useMemo(() => rankPlaces(mode.prefs).filter((p) => !decided[p.id]), [mode, decided]);
   const savedN = Object.values(decided).filter((v) => v === 'save').length;
   const passedN = Object.values(decided).filter((v) => v === 'pass').length;
@@ -278,17 +262,12 @@ export default function DiscoverLayer({ pull, open, onClose, mode, decided, onDe
       <Backdrop />
       <PullHint pull={pull} />
       <motion.div className="abs" style={{ inset: 0, y: lift, opacity: fade }}>
-        <div className="abs" style={{ left: 24, top: 62, width: 300, pointerEvents: 'none' }}>
-          <p className="nowrap" style={{ fontSize: 24, fontWeight: 700, color: INK, lineHeight: '29px' }}>Discover</p>
-        </div>
-        <G as="button" r={24} aria-label="Close Discover" onClick={onClose} whileTap={{ scale: 0.9 }} transition={TAP}
-          style={{ position: 'absolute', left: 368, top: 52, width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 8 }}>
-          <Xmark />
-        </G>
+        <DiscoverAction label="Back to Home" icon="imgPhosphorCaretLeft" left={24} top={52} onClick={onClose} />
+        <p className="abs nowrap" style={{ left: 84, top: 62, fontSize: 24, fontWeight: 700, color: INK, lineHeight: '29px', pointerEvents: 'none' }}>Discover</p>
 
-        <div className="abs" style={{ left: 40, top: 140, width: 360, height: 590 }}>
+        <div className="abs" style={{ left: 23, top: 135, width: 393, height: 628 }}>
           {deck.slice(0, 3).map((p, i) => ({ p, i })).reverse().map(({ p, i }) => (
-            <StackCard key={p.id} p={p} depth={i} prefs={mode.prefs} modeName={modeName} cmd={cmd} onDecide={decide} onTap={tapCard} />
+            <StackCard key={p.id} p={p} depth={i} cmd={cmd} onDecide={decide} onTap={tapCard} />
           ))}
           {!deck.length && (
             <motion.div className="abs" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={GENTLE}
@@ -309,17 +288,9 @@ export default function DiscoverLayer({ pull, open, onClose, mode, decided, onDe
 
         {deck.length > 0 && (
           <>
-            <div className="abs" style={{ left: 132, top: 778, width: 176, display: 'flex', justifyContent: 'space-between' }}>
-              <G as="button" r={32} aria-label="Pass" onClick={() => fling(-1)} whileTap={{ scale: 0.9 }} transition={TAP}
-                style={{ width: 64, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke={NAVY} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </G>
-              <motion.button aria-label="Save" onClick={() => fling(1)} whileTap={{ scale: 0.9 }} transition={TAP}
-                style={{ width: 64, height: 64, borderRadius: 32, background: INK, border: '1.5px solid rgba(255,255,255,0.95)', boxShadow: '0 14px 18px rgba(42,38,80,0.12), inset 0 1px 0 rgba(255,255,255,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <VIcon name="heartFill" size={26} fill="#fff" />
-              </motion.button>
-            </div>
-            <div className="abs" style={{ left: 0, top: 856, width: 440, height: 24, display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
+            <DiscoverAction label="Pass" icon="imgX" left={152} top={817} onClick={() => fling(-1)} />
+            <DiscoverAction label="Save" icon="imgHeart" left={240} top={817} dark onClick={() => fling(1)} />
+            <div className="abs" style={{ left: 0, top: 884, width: 440, height: 24, display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
               <AnimatePresence mode="wait" initial={false}>
                 {fb ? (
                   <motion.span key={fb.n} className="nowrap" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.18 }}
