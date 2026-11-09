@@ -143,13 +143,13 @@ export default function MapScreen({ command, onOpenVenue }) {
       </Glass>
 
       {/* Category chips (scrolls past the screen edge like the Figma row) */}
-      <div className="abs hscroll" style={{ left: 0, top: 120, width: 440, height: 70 }}>
-        <div style={{ display: 'flex', gap: 8, padding: '8px 24px 0', width: 'max-content' }}>
+      <div className="abs hscroll" style={{ left: 0, top: 120, width: 440, height: 100, pointerEvents: 'none' }}>
+        <div style={{ display: 'flex', gap: 8, padding: '8px 24px 40px', width: 'max-content' }}>
           {CHIPS.map((c) => {
             const on = chip === c;
             return (
               <motion.button key={c} onClick={() => setChip(c)} whileTap={{ scale: 0.95 }} transition={GENTLE}
-                className="glass" style={{ position: 'relative', height: 44, borderRadius: 22, borderColor: on ? '#fff' : 'rgba(255,255,255,.95)', '--ga': '157.6deg' }}>
+                className="glass" style={{ position: 'relative', height: 44, borderRadius: 22, pointerEvents: 'auto', borderColor: on ? '#fff' : 'rgba(255,255,255,.95)', '--ga': '157.6deg' }}>
                 <div className="g-bg" style={on ? { background: 'rgba(255,255,255,0.92)' } : undefined} />
                 <span className="g-c nowrap" style={{ padding: '0 18.5px', fontSize: 15, fontWeight: on ? 600 : 500, color: on ? NAVY : 'rgba(42,38,80,0.8)' }}>{c}</span>
                 <div className="g-in" />

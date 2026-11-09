@@ -243,7 +243,7 @@ function StepWhen({ draft, set, refs, ctl }) {
             </AnimatePresence>
           </div>
         }>
-          <div ref={strip} className="hscroll" onScroll={onStrip} style={{ margin: '-6px -24px -22px', padding: '6px 24px 22px', display: 'flex', gap: 12 }}>
+          <div ref={strip} className="hscroll" onScroll={onStrip} style={{ margin: '-6px -24px -40px', padding: '6px 24px 40px', display: 'flex', gap: 12 }}>
             {DATES.map((x) => {
               const on = date === x.i;
               return (
@@ -377,7 +377,7 @@ function StepWhere({ draft, set, refs, ctl, goStep }) {
         <span className="nowrap" style={t(14, 500)}>{guests} {guests === 1 ? 'guest' : 'guests'} · {d.short} · {time}</span>
       </G>
 
-      <div className="hscroll" style={{ margin: '-6px -24px -14px', padding: '6px 24px 14px', display: 'flex', gap: 8 }}>
+      <div className="hscroll" style={{ margin: '-6px -24px -40px', padding: '6px 24px 40px', display: 'flex', gap: 8 }}>
         {ZONE_NAMES.map((z) => <Chip key={z} label={z} on={zone === z} onClick={() => { set({ zone: z }); setHint(null); }} />)}
       </div>
 

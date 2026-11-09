@@ -13,8 +13,8 @@ import { SOUND_W, LIGHT_W, CROWD_W, metaOf, rankPlaces, reasonFor } from './disc
 import sceneMorning from './assets/scene-morning.jpg';
 
 export const SCREEN_H = 956;
-export const THRESH = 140; // how far the sheet must be pulled (design px) before letting go opens Discover
-const CAP = 420, K = 1;
+export const THRESH = 120; // how far the sheet must be pulled (design px) before letting go opens Discover
+const CAP = 600, K = 1;
 const rubber = (dy) => CAP * (1 - Math.exp(-(K * dy) / CAP));
 const unrubber = (y) => (-CAP / K) * Math.log(1 - Math.min(y, CAP - 1) / CAP);
 export const OPEN_SPRING = { type: 'spring', stiffness: 170, damping: 26 };
@@ -39,7 +39,7 @@ export function usePullDown({ el, pull, enabled, onCommit }) {
     };
     const decide = (gg, dx, dy) => {
       if (Math.hypot(dx, dy) < 6) return;
-      gg.lock = dy > 0 && dy > Math.abs(dx) * 1.15 && node.scrollTop <= 0 ? 'pull' : 'other';
+      gg.lock = dy > 0 && dy > Math.abs(dx) * 1.15 && node.scrollTop <= 1 ? 'pull' : 'other';
     };
     const apply = (gg, dy) => { gg.raw = Math.max(0, gg.raw0 + dy); pull.set(rubber(gg.raw)); };
 
@@ -72,7 +72,7 @@ export function usePullDown({ el, pull, enabled, onCommit }) {
     const wheel = (e) => {
       const now = performance.now(), fresh = now - w.last > 220; w.last = now;
       const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
-      if (fresh) { w.active = node.scrollTop <= 0 && dy < 0 && Math.abs(dy) > Math.abs(e.deltaX); w.raw = unrubber(pull.get()); stop(); }
+      if (fresh) { w.active = node.scrollTop <= 1 && dy < 0 && Math.abs(dy) > Math.abs(e.deltaX); w.raw = unrubber(pull.get()); stop(); }
       if (!w.active) return;
       e.preventDefault();
       w.raw = Math.max(0, w.raw - dy); pull.set(rubber(w.raw));
@@ -104,8 +104,8 @@ function PullHint({ pull }) {
   const [ready, setReady] = useState(false);
   useMotionValueEvent(pull, 'change', (v) => { const r = v >= THRESH; setReady((p) => (p === r ? p : r)); });
   // rides just above the sheet edge, below the status bar and the island, so it only shows once the strip is tall enough
-  const opacity = useTransform(pull, [76, 104, 330, 500], [0, 1, 1, 0]);
-  const top = useTransform(pull, (v) => Math.min(Math.max(58, v - 40), 190));
+  const opacity = useTransform(pull, [118, 146, 330, 480], [0, 1, 1, 0]);
+  const top = 108;
   return (
     <motion.div className="abs" style={{ left: 0, width: 440, top, opacity, display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
       <span style={{ display: 'flex', alignItems: 'center', gap: 8, height: 24 }}>
@@ -251,8 +251,9 @@ export default function DiscoverLayer({ pull, open, onClose, mode, decided, onDe
   const say = (text, icon) => { setFb({ text, icon, n: Date.now() }); clearTimeout(fbTimer.current); fbTimer.current = setTimeout(() => setFb(null), 2000); };
 
   const visibility = useTransform(pull, (v) => (v > 0.5 ? 'visible' : 'hidden'));
-  const lift = useTransform(pull, [0, SCREEN_H], [-110, 0]);
-  const fade = useTransform(pull, [260, 720], [0, 1]);
+  // Content rides just above the sheet edge while pulling, then settles at its resting place
+  const lift = useTransform(pull, (v) => Math.min(0, v - 132));
+  const fade = useTransform(pull, [40, 130], [0, 1]);
 
   const decide = (id, d) => {
     onDecide(id, d);

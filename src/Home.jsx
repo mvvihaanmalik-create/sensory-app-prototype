@@ -199,7 +199,7 @@ export default function Home({ onOpenMap, onOpenVenue, onOpenPage, onOpenModes, 
   const r = useTransform(pull, [0, 24], [0, 32]);
   const sh = useTransform(pull, [0, 24], ['0 -10px 28px rgba(42,38,80,0)', '0 -10px 28px rgba(42,38,80,0.12)']);
   return (
-    <motion.div className="abs" style={{ inset: 0, y: pull, overflow: 'hidden', background: '#f7f5f1', borderTopLeftRadius: r, borderTopRightRadius: r, boxShadow: sh, zIndex: 1, userSelect: 'none', WebkitUserSelect: 'none' }}>
+    <motion.div className="abs" style={{ inset: 0, y: pull, overflow: 'hidden', background: '#f7f5f1', borderTopLeftRadius: r, borderTopRightRadius: r, boxShadow: sh, zIndex: 1, userSelect: 'none', WebkitUserSelect: 'none' }} onDragStart={(e) => e.preventDefault()}>
     <div ref={scrollRef} className="scroll" style={{ background: '#f7f5f1' }} onScroll={(e) => onScroll?.(e.currentTarget.scrollTop)}>
       <div style={{ position: 'relative', width: 440, height: 1753.83 }}>
         <Hero reduce={reduceMotion} pull={pull} />

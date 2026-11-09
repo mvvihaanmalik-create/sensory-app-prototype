@@ -109,12 +109,12 @@ const ROWS = { venue: VenueRow, event: EventRow, more: MoreRow, pick: PickRow, r
 
 function FilterChips({ sorts, openSense, onOpen }) {
   return (
-    <div className="abs hide-sb" style={{ left: 0, top: 125, width: 440, height: 44, overflowX: 'auto', overflowY: 'hidden', padding: '0 24px', display: 'flex', gap: 8, zIndex: 6 }}>
+    <div className="abs hide-sb" style={{ left: 0, top: 119, width: 440, height: 80, overflowX: 'auto', overflowY: 'hidden', padding: '6px 24px 30px', display: 'flex', gap: 8, zIndex: 6, pointerEvents: 'none', alignItems: 'flex-start' }}>
       {SORT_ORDER.map((sense) => {
         const cur = (sorts.find((s) => s[0] === sense) || [])[1];
         return (
           <G key={sense} as="button" r={22} on={!!cur} onClick={() => onOpen(sense, cur)} whileTap={{ scale: 0.95 }} transition={TAP}
-            style={{ height: 44, minWidth: SORTS[sense].minW, padding: '0 22px', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
+            style={{ height: 44, minWidth: SORTS[sense].minW, padding: '0 22px', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none', pointerEvents: 'auto', boxShadow: '0 6px 14px rgba(42,38,80,0.08), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
             <span className="nowrap" style={{ fontSize: 15, fontWeight: 600, color: NAVY }}>{chipText(sense, cur)}</span>
             <motion.span animate={{ rotate: openSense === sense ? 180 : 0 }} transition={GENTLE} style={{ display: 'flex', marginLeft: 0 }}>
               <VIcon name="caretDown" size={15} fill={NAVY} />
