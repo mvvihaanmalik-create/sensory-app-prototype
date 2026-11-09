@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, animate, motion, MotionConfig, useMotionValue } from 'motion/react';
+import { AnimatePresence, animate, motion, MotionConfig, useMotionValue, useIsPresent } from 'motion/react';
 import Home from './Home.jsx';
 import MapScreen from './Map.jsx';
 import Profile from './Profile.jsx';
+import Search from './Search.jsx';
 import DiscoverLayer, { SCREEN_H, OPEN_SPRING, CLOSE_SPRING } from './Discover.jsx';
 import Venue from './Venue.jsx';
 import BookTable, { BookingConfirmed, emptyDraft, slotsFor, DATES } from './BookTable.jsx';
@@ -12,10 +13,10 @@ import ListPage, { SortSheet } from './Lists.jsx';
 import { ModesSheet, EditMode, INITIAL_MODES, modeLabel } from './Modes.jsx';
 import { PAGE_IDS } from './listData.js';
 import { Toast } from './flow.jsx';
-import { ScaleCtx, StatusBar, TabBar } from './ui.jsx';
+import { GENTLE, ScaleCtx, StatusBar, TabBar } from './ui.jsx';
 
 const DEVICE_W = 468, DEVICE_H = 984;
-const TAB_TOP = { home: 852, map: 862, profile: 852 };
+const TAB_TOP = { home: 852, search: 862, map: 862, profile: 852 };
 const SCREEN_IN = {
   home: { initial: { opacity: 0, scale: 0.985 }, animate: { opacity: 1, scale: 1 } },
   map: { initial: { opacity: 0, scale: 1.04 }, animate: { opacity: 1, scale: 1 } },
@@ -36,6 +37,7 @@ function useFitScale() {
 
 const VIEWS = [
   { id: 'home', label: 'Home' },
+  ...['search', 'search-results', 'search-filters', 'search-place'].map(id => ({ id, label: id })),
   { id: 'map-half', label: 'Map' },
   { id: 'map-full', label: 'Map · sheet up' },
   { id: 'map-hidden', label: 'Map · sheet away' },
@@ -56,6 +58,11 @@ const VIEWS = [
   { id: 'sort-sound', label: 'Sound sort sheet' },
   { id: 'discover', label: 'Hidden discovery' },
 ];
+const SEARCH_ROUTES = ['search', 'search-results', 'search-filters', 'search-place'];
+function ScreenLayer({ screen, children }) {
+  const present = useIsPresent();
+  return <motion.div className="abs" aria-hidden={!present || undefined} style={{ inset: 0, pointerEvents: present ? 'auto' : 'none' }} initial={SCREEN_IN[screen].initial} animate={SCREEN_IN[screen].animate} exit={{ opacity: 0, transition: { duration: .28 } }} transition={EASE}>{children}</motion.div>;
+}
 const MODE_VIEWS = ['modes', 'edit-study', 'edit-party', 'add-mode'];
 const HOME_VIEWS = [...PAGE_IDS, ...MODE_VIEWS, 'sort-sound', 'discover'];
 const VENUE_VIEWS = ['venue', 'venue-reviews', 'sense', 'review', 'book', 'book-2', 'book-3', 'confirmed'];
@@ -67,7 +74,8 @@ const SHEET_UP = { initial: { y: 956 }, animate: { y: 0 }, exit: { y: 956 } };
 export default function App() {
   const scale = useFitScale();
   const initial = (() => { const h = (location.hash || '').slice(1); return VIEWS.some((v) => v.id === h) ? h : 'home'; })();
-  const [screen, setScreen] = useState(initial.startsWith('map') ? 'map' : VENUE_VIEWS.includes(initial) || HOME_VIEWS.includes(initial) ? 'home' : initial);
+  const [screen, setScreen] = useState(SEARCH_ROUTES.includes(initial) ? 'search' : initial.startsWith('map') ? 'map' : VENUE_VIEWS.includes(initial) || HOME_VIEWS.includes(initial) ? 'home' : initial);
+  const [searchRoute, setSearchRoute] = useState(SEARCH_ROUTES.includes(initial) ? initial : 'search');
   const [page, setPage] = useState(PAGE_IDS.includes(initial) || initial === 'sort-sound' ? (initial === 'sort-sound' ? 'cafes' : initial) : null);
   const [modes, setModes] = useState(INITIAL_MODES);
   const [activeMode, setActiveMode] = useState('study');
@@ -92,7 +100,7 @@ export default function App() {
   const toastTimer = useRef(0);
   const say = (m) => { setToast(m); clearTimeout(toastTimer.current); toastTimer.current = setTimeout(() => setToast(null), 2400); };
   const openVenue = () => { setVenueOpen(true); setVenueTab('overview'); setVenueScroll(0); setFlow(null); setSense(null); };
-  const closeVenue = () => { setVenueOpen(false); setFlow(null); setSense(null); setVenueScroll(0); };
+  const closeVenue = () => { if (screen === 'search') { try { history.replaceState(null, '', '#' + searchRoute); } catch (_) {} } setVenueOpen(false); setFlow(null); setSense(null); setVenueScroll(0); };
   const reserve = () => { if (booking) setFlow('confirmed'); else { setBookStep(1); setFlow('book'); } };
   const [sheetCmd, setSheetCmd] = useState(initial.startsWith('map-') && initial !== 'map-half' ? { state: initial.slice(4), n: 0 } : null);
   const [homeScroll, setHomeScroll] = useState(0);
@@ -106,11 +114,22 @@ export default function App() {
   const showPassed = () => setDecided((m) => Object.fromEntries(Object.entries(m).filter(([, v]) => v === 'save')));
 
   const nav = (to) => {
-    if (to === 'search') return; // no Search screen designed yet
+    if (screen === 'search' && to !== 'search') { try { history.pushState(null, '', '#' + (to === 'map' ? 'map-half' : to)); } catch (_) {} }
     if (discoverOpen) closeDiscover();
     if (page) setPage(null);
-    if (to !== screen) { setScreen(to); setHomeScroll(0); setSheetCmd(null); }
+    if (to !== screen) { setScreen(to); setSheetCmd(null); }
   };
+  const navigateSearch = (route, replace = false) => {
+    setSearchRoute(route); setScreen('search');
+    try { if (location.hash !== '#' + route) history[replace ? 'replaceState' : 'pushState']({ search: true }, '', '#' + route); } catch (_) {}
+  };
+  const backSearch = fallback => { if (history.state?.search) history.back(); else navigateSearch(fallback, true); };
+  const openSearchVenue = () => { openVenue(); try { history.pushState({ search: true }, '', '#venue'); } catch (_) {} };
+  useEffect(() => {
+    const restore = () => { const id = location.hash.slice(1); if (SEARCH_ROUTES.includes(id)) { setSearchRoute(id); setScreen('search'); setVenueOpen(false); setFlow(null); setSense(null); } else if (['home','map-half','profile'].includes(id)) { setScreen(id === 'map-half' ? 'map' : id); } };
+    window.addEventListener('popstate', restore); window.addEventListener('hashchange', restore);
+    return () => { window.removeEventListener('popstate', restore); window.removeEventListener('hashchange', restore); };
+  }, []);
   const activeM = modes.find((m) => m.id === activeMode) || modes[0];
   const sortsFor = (k) => sortsBy[k] || [];
   const setSortsFor = (k) => (fn) => setSortsBy((b) => ({ ...b, [k]: fn(b[k] || []) }));
@@ -128,6 +147,7 @@ export default function App() {
   const bannerText = activeM.id === 'study' ? 'Because you like quiet cafés and outdoor seating'
     : `Matched to ${activeM.custom ? activeM.name : activeM.name + ' mode'}: ${[activeM.prefs.sound, activeM.prefs.crowd].filter(Boolean).join(', ').toLowerCase() || 'your picks'}`;
   const jump = (id) => {
+    if (SEARCH_ROUTES.includes(id)) { closeVenue(); nav('search'); navigateSearch(id); return; }
     if (VENUE_VIEWS.includes(id)) {
       setVenueOpen(true); setVenueScroll(0);
       setVenueTab(id === 'venue-reviews' || id === 'review' ? 'reviews' : 'overview');
@@ -159,8 +179,8 @@ export default function App() {
               <div className="label">UXDG 370 · Final flow</div>
               <h1>Calm places,<br />Savannah</h1>
             </div>
-            <p className="lead">Tap through it like the real app. Start from a For you card on Home. Pull Home down from the top to find a hidden layer.</p>
-            <div className="tools">
+            <p className="lead">Search by place, mood or activity. Start from Search or a For you card on Home. Pull Home down from the top to find a hidden layer.</p>
+            <div className="tools"><button onClick={() => { nav('search'); navigateSearch('search'); }}>Search</button>
               <button onClick={() => { try { history.replaceState(null, '', location.pathname); } catch (_) {} location.reload(); }}>Restart</button>
             </div>
           </aside>
@@ -172,21 +192,23 @@ export default function App() {
               <div className="btn" style={{ left: -3, top: 334, height: 64 }} />
               <div className="btn" style={{ right: -3, top: 290, height: 104 }} />
               <div className="screen">
-                <AnimatePresence>
-                  <motion.div key={screen} className="abs" style={{ inset: 0 }}
-                    initial={SCREEN_IN[screen].initial} animate={SCREEN_IN[screen].animate} exit={{ opacity: 0, transition: { duration: 0.28 } }} transition={EASE}>
-                    {screen === 'home' && <DiscoverLayer pull={pull} open={discoverOpen} onClose={closeDiscover} mode={activeM} decided={decided}
+                <div className="abs" style={{ inset: 0, display: screen === 'home' ? 'block' : 'none' }} aria-hidden={screen !== 'home'}>
+                    {<DiscoverLayer pull={pull} open={discoverOpen} onClose={closeDiscover} mode={activeM} decided={decided}
                       onDecide={(id, d) => setDecided((m) => ({ ...m, [id]: d }))} onShowPassed={showPassed} onOpenVenue={openVenue} blocked={venueOpen || !!sense || !!flow} />}
-                    {screen === 'home' && <Home pull={pull} pullOn={!discoverOpen} onDiscover={() => setDiscoverOpen(true)} onOpenMap={() => nav('map')} onOpenVenue={openVenue} onOpenPage={setPage} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} reduceMotion={reduceMotion} />}
-                    {screen === 'map' && <MapScreen command={sheetCmd} onOpenVenue={openVenue} />}
-                    {screen === 'profile' && <Profile onScroll={setHomeScroll} savedCount={savedCount} />}
-                  </motion.div>
-                </AnimatePresence>
+                    {<Home pull={pull} pullOn={screen === 'home' && !discoverOpen} onDiscover={() => setDiscoverOpen(true)} onOpenMap={() => nav('map')} onOpenSearch={() => { nav('search'); navigateSearch(searchRoute); }} onOpenVenue={openVenue} onOpenPage={setPage} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} reduceMotion={reduceMotion} />}
+                </div>
+                <AnimatePresence>{!['home', 'search'].includes(screen) && <ScreenLayer key={screen} screen={screen}>
+                  {screen === 'map' && <MapScreen command={sheetCmd} onOpenVenue={openVenue} onOpenSearch={() => { nav('search'); navigateSearch(searchRoute); }} />}
+                  {screen === 'profile' && <Profile onScroll={setHomeScroll} savedCount={savedCount} />}
+                </ScreenLayer>}</AnimatePresence>
+                <motion.div className="abs" style={{ inset: 0, display: screen === 'search' ? 'block' : 'none' }} aria-hidden={screen !== 'search'} initial={false} animate={{ opacity: screen === 'search' ? 1 : 0 }} transition={GENTLE}>
+                  <Search route={searchRoute} active={screen === 'search' && !venueOpen} onNavigate={navigateSearch} onBack={backSearch} onOpenVenue={openSearchVenue} hasSaved={decided.foxy === 'save'} activeMode={activeM} booking={booking} />
+                </motion.div>
                 <AnimatePresence>
                   {venueOpen && (
                     <motion.div key="venue" className="abs" style={{ inset: 0, zIndex: 42, boxShadow: '-12px 0 40px rgba(42,38,80,0.12)' }}
                       initial={{ x: 440 }} animate={{ x: 0 }} exit={{ x: 440 }} transition={{ type: 'spring', stiffness: 260, damping: 32 }}>
-                      <Venue tab={venueTab} setTab={setVenueTab} onBack={closeVenue} booking={booking} mine={mine} toast={toast}
+                      <Venue saved={decided.foxy === 'save'} onToggleSaved={() => setDecided(m => { const next = { ...m }; if (next.foxy === 'save') delete next.foxy; else next.foxy = 'save'; return next; })} tab={venueTab} setTab={setVenueTab} onBack={closeVenue} backLabel={screen === 'search' ? 'Back to Search' : 'Back'} booking={booking} mine={mine} toast={toast}
                         onScroll={setVenueScroll}
                         onReserve={reserve} onSense={setSense} reviewsCmd={reviewsCmd}
                         onWriteReview={() => setFlow('review')} />
@@ -251,8 +273,8 @@ export default function App() {
                   )}
                 </AnimatePresence>
                 <div className="abs" style={{ inset: 0, zIndex: 60, pointerEvents: 'none' }}><Toast text={note} icon={note && /Only|later/.test(note) ? 'info' : 'check'} /></div>
-                <StatusBar shade={flow || sense ? 0 : venueOpen ? (venueScroll > 270 ? 1 : 0) : screen !== 'map' && homeScroll > 24 ? 1 : 0} />
-                <TabBar active={screen} onNav={nav} top={venueOpen ? 1000 : page ? 876 : TAB_TOP[screen]} yMV={screen === 'home' ? pull : undefined} />
+                <StatusBar shade={screen === 'search' && !venueOpen ? 0 : flow || sense ? 0 : venueOpen ? (venueScroll > 270 ? 1 : 0) : screen !== 'map' && homeScroll > 24 ? 1 : 0} />
+                <TabBar active={screen} onNav={to => { nav(to); if (to === 'search') navigateSearch(searchRoute); }} top={venueOpen || (screen === 'search' && ['search-filters','search-place'].includes(searchRoute)) ? 1000 : page ? 876 : TAB_TOP[screen]} yMV={screen === 'home' ? pull : undefined} />
                 <div className="abs" style={{ left: 150, top: 943, width: 140, height: 5, borderRadius: 3, background: screen === 'map' ? 'rgba(20,24,31,0.85)' : '#14181f', zIndex: 55 }} />
                 <div className="island" />
               </div>
@@ -263,3 +285,4 @@ export default function App() {
     </MotionConfig>
   );
 }
+

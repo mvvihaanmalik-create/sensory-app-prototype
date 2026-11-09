@@ -181,8 +181,7 @@ function Photos() {
 
 const TABS = [['overview', 'Overview'], ['menu', 'Menu'], ['reviews', 'Reviews'], ['photos', 'Photos']];
 
-export default function Venue({ tab, setTab, onBack, onReserve, onWriteReview, onSense, booking, mine, onScroll, toast, reviewsCmd }) {
-  const [saved, setSaved] = useState(false);
+export default function Venue({ tab, setTab, onBack, backLabel = 'Back', saved = false, onToggleSaved, onReserve, onWriteReview, onSense, booking, mine, onScroll, toast, reviewsCmd }) {
   const scroller = useRef(null);
   const tabsRef = useRef(null);
   const sy = useMotionValue(0);
@@ -240,8 +239,8 @@ export default function Venue({ tab, setTab, onBack, onReserve, onWriteReview, o
         </div>
       </div>
 
-      <CircleBtn icon="caretLeft" label="Back" onClick={onBack} style={{ position: 'absolute', left: 24, top: 56, zIndex: 10 }} />
-      <CircleBtn label={saved ? 'Saved' : 'Save'} onClick={() => setSaved((s) => !s)} style={{ position: 'absolute', left: 316, top: 56, zIndex: 10 }}>
+      <CircleBtn icon="caretLeft" label={backLabel} onClick={onBack} style={{ position: 'absolute', left: 24, top: 56, zIndex: 10 }} />
+      <CircleBtn label={saved ? 'Saved' : 'Save'} onClick={onToggleSaved} style={{ position: 'absolute', left: 316, top: 56, zIndex: 10 }}>
         <motion.span key={saved ? 'on' : 'off'} initial={{ scale: 0.4 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 14 }}>
           <VIcon name={saved ? 'heartFill' : 'heart'} fill={saved ? PURPLE : NAVY} />
         </motion.span>
@@ -254,3 +253,4 @@ export default function Venue({ tab, setTab, onBack, onReserve, onWriteReview, o
     </div>
   );
 }
+

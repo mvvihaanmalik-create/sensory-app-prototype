@@ -193,7 +193,7 @@ function RankingRow({ top, n, name, meta, level, onClick }) {
   );
 }
 
-export default function Home({ onOpenMap, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, reduceMotion, pull, onDiscover, pullOn = true }) {
+export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, reduceMotion, pull, onDiscover, pullOn = true }) {
   const scrollRef = useRef(null);
   usePullDown({ el: scrollRef, pull, enabled: pullOn, onCommit: onDiscover });
   const r = useTransform(pull, [0, 24], [0, 32]);
@@ -209,10 +209,10 @@ export default function Home({ onOpenMap, onOpenVenue, onOpenPage, onOpenModes, 
           {modeLabel}
         </motion.button>
         <p className="abs nowrap" style={{ left: 24, top: 90, fontSize: 40, fontWeight: 600, lineHeight: '44px', letterSpacing: -1, color: INK }}>Good morning</p>
-        <div className="abs" style={{ left: 23, top: 145, width: 334, height: 52, borderRadius: 999, ...lightGlass, display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px' }}>
+        <button type="button" onClick={onOpenSearch} className="abs" style={{ left: 23, top: 145, width: 334, height: 52, borderRadius: 999, ...lightGlass, display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px' }}>
           <img src={uri('searchHome')} alt="" style={{ width: 20, height: 20, display: 'block' }} />
           <span style={{ fontSize: 16, color: '#000' }}>Search places</span>
-        </div>
+        </button>
         <motion.button className="abs" whileTap={{ scale: 0.92 }} transition={GENTLE}
           style={{ left: 367, top: 147, width: 48, height: 48, borderRadius: 24, ...lightGlass }}>
           <img src={uri('filterHome')} alt="" className="abs" style={{ left: 11, top: 11, width: 24, height: 24 }} />
@@ -247,3 +247,4 @@ export default function Home({ onOpenMap, onOpenVenue, onOpenPage, onOpenModes, 
     </motion.div>
   );
 }
+

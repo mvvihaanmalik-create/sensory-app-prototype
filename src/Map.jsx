@@ -55,7 +55,7 @@ const SENSES = [
   { key: 'Crowd', d: paths.users },
 ];
 
-export default function MapScreen({ command, onOpenVenue }) {
+export default function MapScreen({ command, onOpenVenue, onOpenSearch }) {
   const scale = useScale();
   const top = useMotionValue(SNAP.half);
   const [state, setState] = useState('half');
@@ -136,7 +136,7 @@ export default function MapScreen({ command, onOpenVenue }) {
       {/* Search + filter */}
       <Glass radius={26} angle="170deg" style={{ left: 24, top: 62, width: 328, height: 52 }} contentStyle={{ gap: 12, padding: '0 16.5px' }}>
         <img src={uri('mapSearch')} alt="" style={{ width: 22, height: 22, display: 'block' }} />
-        <span className="nowrap" style={{ fontSize: 16, fontWeight: 500, color: NAVY }}>Search places</span>
+        <button type="button" onClick={onOpenSearch} className="nowrap" style={{ fontSize: 16, fontWeight: 500, color: NAVY, position: 'absolute', inset: 0, paddingLeft: 51, textAlign: 'left' }}>Search places</button>
       </Glass>
       <Glass radius={26} style={{ left: 364, top: 62, width: 52, height: 52 }} contentStyle={{ justifyContent: 'center' }} className="press">
         <img src={uri('sliders')} alt="" style={{ width: 22, height: 22, display: 'block' }} />
@@ -204,3 +204,4 @@ export default function MapScreen({ command, onOpenVenue }) {
     </div>
   );
 }
+
