@@ -1,4 +1,4 @@
-.mode-choice{position:relative;width:392px;min-height:96px;flex:none;border:1px solid rgba(20,24,31,.08);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:6px;text-align:left}
+.mode-choice{position:relative;width:392px;height:96px;flex:none;border:1px solid rgba(20,24,31,.08);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:6px;text-align:left}
 .mode-choice-pick{position:absolute;inset:0;border-radius:inherit}
 .mode-choice-title{display:flex;align-items:center;justify-content:space-between;height:20px;font-size:17px;line-height:20px;font-weight:700;pointer-events:none;gap:8px}
 .mode-choice-title>span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
