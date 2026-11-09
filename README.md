@@ -49,7 +49,7 @@ Search is not implemented yet.
 - Swipe right or tap the heart to save, swipe left or tap the cross to pass, tap the card to open the place. Arrow keys also save and pass. Only Foxy Loxy Cafe has a venue page, so other cards show a short note.
 - The deck is ranked by the active mode (Study, Party or a custom mode) and re-ranks when the mode changes. Each card says why it fits and flags what does not, or what is unknown. Unknown sense data is shown as Unknown, never guessed.
 - Saved and passed cards persist while the app is open. Saved places add to the Saved count on Profile. "Show passed places" brings passes back.
-- The close button, Escape, or the tab-less Home slide back up. Home is never unmounted, so its mode chip and For you card stay as they were.
+- The close button or Escape slides Home back down over Discover. Home is never unmounted, so its mode chip and For you card stay as they were.
 - Card images are illustrations (the app has no venue photography yet); the café and the park reuse the Savannah header scene.
 
 ### Booking flow rules
