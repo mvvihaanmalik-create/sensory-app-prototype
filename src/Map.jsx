@@ -4,8 +4,9 @@ import { uri, paths } from './svgs.js';
 import { Glass, Icon, GENTLE, NAVY, MUTED, useScale } from './ui.jsx';
 import mapTiles from './assets/map-tiles.jpg';
 
-// Sheet positions from the three Figma frames: Sheet full / Sheet half / Sheet hidden
-export const SNAP = { full: 302, half: 616, hidden: 956 };
+// The expanded sheet meets the category row's lower edge (128 + 44).
+// Half and hidden retain their existing Figma positions.
+export const SNAP = { full: 172, half: 616, hidden: 956 };
 const SNAPS = [SNAP.full, SNAP.half, SNAP.hidden];
 
 const RECS = [
@@ -189,13 +190,13 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch }) {
       {state === 'hidden' && <div className="abs" style={{ left: 0, top: 822, width: 440, height: 120, touchAction: 'none', cursor: 'grab' }} {...handlers('hotspot')} />}
 
       {/* Recommendation sheet */}
-      <motion.div className="abs" style={{ left: 0, top, width: 440, height: 654, background: '#fff', borderRadius: '22px 22px 0 0', overflow: 'hidden', boxShadow: '0 -6px 24px rgba(42,38,80,0.06)' }}>
+      <motion.div className="abs" data-map-sheet={state} style={{ left: 0, top, bottom: 0, width: 440, background: '#fff', borderRadius: '22px 22px 0 0', overflow: 'hidden', boxShadow: '0 -6px 24px rgba(42,38,80,0.06)' }}>
         <div className="abs" style={{ left: 0, top: 0, width: 440, height: 80, cursor: 'grab', touchAction: 'none', zIndex: 2 }} {...handlers('header')}>
           <div className="abs" style={{ left: 170, top: 10, width: 100, height: 5, borderRadius: 100, background: '#d9d9d9' }} />
           <p className="abs" style={{ left: 20, top: 36, fontSize: 26, fontWeight: 700, color: '#2b2638', lineHeight: 'normal' }}>For You</p>
         </div>
         <div ref={listRef} className="abs scroll" {...handlers('list')}
-          style={{ inset: 'auto', left: 0, top: 80, width: 440, height: 574, overflowY: state === 'full' ? 'auto' : 'hidden', touchAction: state === 'full' ? 'pan-y' : 'none' }}>
+          style={{ inset: 'auto', left: 0, top: 80, bottom: 0, width: 440, overflowY: state === 'full' ? 'auto' : 'hidden', touchAction: state === 'full' ? 'pan-y' : 'none' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24, padding: '0 20px 24px' }}>
             {RECS.map((r, i) => <Recommendation key={r.title} r={r} onOpen={i === 0 ? onOpenVenue : undefined} />)}
           </div>

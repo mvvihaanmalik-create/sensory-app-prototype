@@ -24,6 +24,7 @@ The build produces a single self-contained `dist/index.html`. Dependencies and g
 - Home, Map, and Profile screens
 - Home card gestures and hero motion
 - Map sheet dragging and snap states
+- Expanded Map sheet stops at y=172, directly below the category/filter row. The sheet and its list stay anchored to the screen bottom as the panel expands; half and hidden positions remain y=616 and y=956.
 - Venue page for Foxy Loxy Cafe (Overview, Menu, Reviews, Photos), opened from the front For you card, Popular #2, or the first map result
 - Sense reviews (Sound, Light, Crowd, Temperature, Seating) opened from the sense tiles, with a category bar to switch between them
 - Write a review flow (posts into the Reviews tab)
