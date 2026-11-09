@@ -79,7 +79,7 @@ export default function Profile({ onScroll, savedCount = 12, savedPlaces = [], m
             <SettingsRow icon="sliders" label="App comfort" i={4.5} angle="171.8699deg" />
             <motion.button {...rise(5)} onClick={nudge} style={{ position: 'relative', width: 392, height: 64, textAlign: 'left' }}>
               <Glass radius={32} angle="170.7274deg" style={{ inset: 0 }} contentStyle={{ gap: 12, padding: '10.5px 10.5px 10.5px 18.5px' }}>
-                <img src={A.bell} alt="" /><span style={{ flex: '1 0 0', display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 16, fontWeight: 500, color: NAVY }}>Sensory change alerts</span><span style={{ fontSize: 13, color: MUTED }}>Coming soon</span></span><motion.img animate={knob} src={A.toggle} alt="" />
+                <img src={A.bell} alt="" /><span style={{ flex: '1 0 0', display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 16, fontWeight: 500, color: NAVY }}>Sensory change alerts</span><span style={{ fontSize: 13, color: MUTED }}>Coming soon</span></span><span style={{ position: 'relative', width: 52, height: 32, flex: 'none' }}><motion.img animate={knob} src={A.toggle} alt="" style={{ position: 'absolute', left: 0, top: 0 }} /></span>
               </Glass>
             </motion.button>
           </div>

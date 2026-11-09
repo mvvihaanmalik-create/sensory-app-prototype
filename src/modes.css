@@ -33,3 +33,5 @@
 .mode-name-field label{font-size:15px;font-weight:700;line-height:18px}
 .mode-name-field>div{height:52px;border-radius:16px;padding:0 16px;display:flex;align-items:center;background:rgba(255,255,255,.85);box-shadow:0 4px 14px rgba(27,42,68,.05)}
 .mode-name-field input{all:unset;width:100%;font-size:16px;line-height:19px;color:#14181f}
+
+.mode-choice-title,.mode-choice-description,.mode-choice-edit{flex-shrink:0}
