@@ -179,7 +179,6 @@ export default function App() {
               <div className="label">UXDG 370 · Final flow</div>
               <h1>Calm places,<br />Savannah</h1>
             </div>
-            <p className="lead">Search by place, mood or activity. Start from Search or a For you card on Home. Pull Home down from the top to find a hidden layer.</p>
             <div className="tools"><button onClick={() => { nav('search'); navigateSearch('search'); }}>Search</button>
               <button onClick={() => { try { history.replaceState(null, '', location.pathname); } catch (_) {} location.reload(); }}>Restart</button>
             </div>
