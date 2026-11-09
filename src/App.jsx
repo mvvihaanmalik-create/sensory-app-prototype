@@ -111,7 +111,6 @@ export default function App() {
             </div>
             <p className="lead">Tap through it like the real app. Start from a For you card on Home.</p>
             <div className="tools">
-              <button onClick={() => setReduceMotion((r) => !r)}>{reduceMotion ? 'Motion: reduced' : 'Motion: full'}</button>
               <button onClick={() => { try { history.replaceState(null, '', location.pathname); } catch (_) {} location.reload(); }}>Restart</button>
             </div>
           </aside>
