@@ -180,7 +180,6 @@ function CardFace({ p, prefs, modeName, stamps }) {
           <SenseChip label="Crowd" n={p.c} words={CROWD_W} />
         </div>
         <div style={{ marginTop: 12, borderRadius: 18, background: 'rgba(47,98,201,0.08)', border: '1px solid rgba(47,98,201,0.3)', padding: '10px 14px 11px' }}>
-          <p className="nowrap" style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase', color: INK2, lineHeight: '13px' }}>Why it fits</p>
           <p style={{ fontSize: 14, fontWeight: 600, color: INK, lineHeight: '19px', marginTop: 3 }}>{line}</p>
           {note && <p style={{ fontSize: 13, fontWeight: 500, color: INK2, lineHeight: '17px', marginTop: 3 }}>{note}</p>}
         </div>
@@ -279,11 +278,8 @@ export default function DiscoverLayer({ pull, open, onClose, mode, decided, onDe
       <Backdrop />
       <PullHint pull={pull} />
       <motion.div className="abs" style={{ inset: 0, y: lift, opacity: fade }}>
-        <div className="abs" style={{ left: 24, top: 56, width: 300, pointerEvents: 'none' }}>
+        <div className="abs" style={{ left: 24, top: 62, width: 300, pointerEvents: 'none' }}>
           <p className="nowrap" style={{ fontSize: 24, fontWeight: 700, color: INK, lineHeight: '29px' }}>Discover</p>
-          <p className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: INK2, lineHeight: '16px', marginTop: 2 }}>
-            {deck.length ? `Tuned to ${modeName} · ${deck.length} left` : `Tuned to ${modeName}`}
-          </p>
         </div>
         <G as="button" r={24} aria-label="Close Discover" onClick={onClose} whileTap={{ scale: 0.9 }} transition={TAP}
           style={{ position: 'absolute', left: 368, top: 52, width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 8 }}>
@@ -330,12 +326,7 @@ export default function DiscoverLayer({ pull, open, onClose, mode, decided, onDe
                     style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 700, color: INK }}>
                     <VIcon name={fb.icon} size={16} fill={fb.icon === 'heartFill' ? '#2f62c9' : NAVY} />{fb.text}
                   </motion.span>
-                ) : (
-                  <motion.span key="hint" className="nowrap" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}
-                    style={{ fontSize: 13, fontWeight: 500, color: INK2 }}>
-                    Swipe right to save, left to pass. Tap a card for details.
-                  </motion.span>
-                )}
+                ) : null}
               </AnimatePresence>
             </div>
           </>
@@ -344,3 +335,4 @@ export default function DiscoverLayer({ pull, open, onClose, mode, decided, onDe
     </motion.div>
   );
 }
+

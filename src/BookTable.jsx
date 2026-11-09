@@ -643,7 +643,7 @@ export function BookingConfirmed({ booking, onClose, onChange }) {
           </motion.div>
 
           <motion.p {...rise(3)} style={t(13, 400)}>
-            Your table is held until {fmt(mins(b.time) + 15)}.{b.remind ? ` We'll text you at ${fmt(mins(b.time) - 60)} with the live crowd level.` : ''}
+            Held Until · {fmt(mins(b.time) + 15)}
           </motion.p>
 
           <motion.div {...rise(4)} style={{ display: 'flex', gap: 12 }}>
@@ -675,3 +675,4 @@ export function BookingConfirmed({ booking, onClose, onChange }) {
     </div>
   );
 }
+

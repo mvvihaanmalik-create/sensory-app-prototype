@@ -213,10 +213,10 @@ export default function WriteReview({ onClose, onPosted, mine }) {
             </div>
           </Section>
 
-          <p style={t(13, 400, MUTED, { lineHeight: 1.4 })}>Your sensory picks help others find places that fit them.</p>
         </div>
       </div>
       <PrimaryCTA label={mine ? 'Update review' : 'Post review'} enabled={rating > 0} onClick={post} onBlocked={blocked} busy={busy ? 'Posting…' : null} />
     </div>
   );
 }
+

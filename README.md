@@ -93,6 +93,12 @@ This feature branches from `feature/hidden-discovery` at `dafce5a`, the current 
 
 Use the **Final flow**, **DS · Foundations**, and **DS · Components** pages as the design reference. See [HANDOFF.md](HANDOFF.md) for the original implementation notes and screen node IDs.
 
+## Copy fidelity
+
+Static subtitles and decorative helper copy should come from the corresponding Figma frame. Edit/Add mode has one title at y=62, without a “Your modes” breadcrumb (`984:7582`, `984:7663`, `984:7738`). The Your modes sheet title, mode descriptions, list location subtitles, venue subtitles, and preference hints are retained because they appear in Figma.
+
+Removed prototype-only captions from Edit/Add mode, custom-mode cards, Discovery, Search, the review composer, and the desktop preview panel. Booking confirmation uses the source “Held Until” label with the selected time instead of an added reminder paragraph. Keep implementation and sample-data explanations in this README. Required interaction feedback, result counts, empty-state recovery, conflicts, and choice-dependent summaries remain functional.
+
 ## Validation
 
 - `npm run build` passes.

@@ -51,7 +51,7 @@ function ModeCard({ m, active, onPick, onEdit }) {
           )}
         </AnimatePresence>
       </span>
-      <span className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: INK2, lineHeight: '16px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.desc}</span>
+      {!m.custom && <span className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: INK2, lineHeight: '16px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.desc}</span>}
       <motion.button onClick={(e) => { e.stopPropagation(); onEdit(m.id); }} whileTap={{ scale: 0.94 }} transition={TAP}
         style={{ display: 'flex', alignItems: 'center', gap: 4, height: 16, alignSelf: 'flex-start' }}>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.6665 13.3333H5.33317L12.6665 6.00001L9.99984 3.33334L2.6665 10.6667V13.3333Z" stroke={INK2} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -169,9 +169,8 @@ export function EditMode({ mode, isNew, onBack, onSave, onDelete }) {
   return (
     <div className="abs" style={{ inset: 0, background: '#f7f5f1' }}>
       <BackBtn onClick={onBack} />
-      <div className="abs" style={{ left: 84, top: 53, pointerEvents: 'none' }}>
+      <div className="abs" style={{ left: 84, top: 62, pointerEvents: 'none' }}>
         <p className="nowrap" style={{ fontSize: 24, fontWeight: 700, color: INK, lineHeight: '29px' }}>{title}</p>
-        <p className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: INK2, lineHeight: '16px', marginTop: 2 }}>Your modes</p>
       </div>
       <div className="abs hide-sb" style={{ left: 0, right: 0, top: 112, bottom: 0, overflowY: 'auto', padding: '14px 24px 160px', display: 'flex', flexDirection: 'column', gap: 20 }}>
         {nameable ? (
@@ -209,3 +208,4 @@ export function EditMode({ mode, isNew, onBack, onSave, onDelete }) {
     </div>
   );
 }
+
