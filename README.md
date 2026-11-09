@@ -28,9 +28,18 @@ The build produces a single self-contained `dist/index.html`. Dependencies and g
 - Sense reviews (Sound, Light, Crowd, Temperature, Seating) opened from the sense tiles, with a category bar to switch between them
 - Write a review flow (posts into the Reviews tab)
 - Book a table in three steps (When, Where to sit with a floor plan, Booking for) and Booking confirmed
-- Full motion and Reduce motion controls
+- Home-linked pages: Cafés, Dining, Nightlife, Events, More (category icons), For You and Popular Around You (See all)
+- Sort sheets behind the Sound, Lighting, Crowd, Temperature and Seating chips (they really reorder the list)
+- Modes: Your modes sheet from the Study mode chip, Edit mode (Study, Party, custom), Add custom mode
 
 Search is not implemented yet.
+
+### Home pages and modes rules
+
+- Filter chips sort the list. Venues with unknown data for that sense always sort last. Several chips stack, the latest one wins. Clear resets the chip.
+- Only Foxy Loxy Cafe opens a venue page; other rows show a short note. Back from the venue returns to the same list.
+- Picking a mode updates the Home chip and the For You banner. Save changes stays faded until something changes; Add mode needs a name and at least one preference.
+- Not in Figma, built to match: the preference picker sheet, Delete mode for custom modes, sorts for Lighting, Crowd, Temperature and Seating.
 
 ### Booking flow rules
 

@@ -308,13 +308,13 @@ export function H({ children, right }) {
 }
 
 // Small toast that rises above the CTA
-export function Toast({ text }) {
+export function Toast({ text, icon = 'check' }) {
   return (
     <AnimatePresence>
       {text && (
         <motion.div key={text} className="gl-solid" initial={{ opacity: 0, y: 16, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10 }} transition={GENTLE}
           style={{ position: 'absolute', left: '50%', x: '-50%', top: 790, zIndex: 30, borderRadius: 22, padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <VIcon name="check" size={18} />
+          <VIcon name={icon} size={18} />
           <span className="nowrap" style={t(14, 600)}>{text}</span>
         </motion.div>
       )}
