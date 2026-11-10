@@ -83,6 +83,16 @@ const VIEWS = [
   { id: 'onboarding-seating', label: 'Onboarding · 6 Seating' },
   { id: 'onboarding-done', label: 'Onboarding · 7 Start exploring' },
 ];
+
+// The app opens on onboarding. A link with a view id (#profile, #venue ...) opens that view instead; on the phone build a reload resets to onboarding.
+const START = (() => {
+  try {
+    const nav = performance.getEntriesByType('navigation')[0];
+    if (PHONE && nav && nav.type === 'reload') history.replaceState(null, '', location.pathname + location.search);
+  } catch (_) {}
+  const h = (location.hash || '').slice(1);
+  return VIEWS.some((v) => v.id === h) ? h : 'onboarding';
+})();
 const ONB_VIEWS = VIEWS.filter((v) => v.id.startsWith('onboarding')).map((v) => v.id);
 const onbStep = (id) => Math.max(0, ONBOARDING_STEPS.indexOf(id.replace('onboarding-', '')));
 const SEARCH_ROUTES = ['search', 'search-results', 'search-filters', 'search-place'];
@@ -100,7 +110,7 @@ const SHEET_UP = { initial: { y: 956 }, animate: { y: 0 }, exit: { y: 956 } };
 
 export default function App() {
   const { s: scale, top: cropTop, bottom: cropBottom } = useFitScale();
-  const initial = (() => { const h = (location.hash || '').slice(1); return VIEWS.some((v) => v.id === h) ? h : 'home'; })();
+  const initial = START;
   const [screen, setScreen] = useState(SEARCH_ROUTES.includes(initial) ? 'search' : initial.startsWith('map') ? 'map' : VENUE_VIEWS.includes(initial) || HOME_VIEWS.includes(initial) ? 'home' : initial);
   const [searchRoute, setSearchRoute] = useState(SEARCH_ROUTES.includes(initial) ? initial : 'search');
   const [page, setPage] = useState(PAGE_IDS.includes(initial) || initial === 'sort-sound' ? (initial === 'sort-sound' ? 'cafes' : initial) : null);
