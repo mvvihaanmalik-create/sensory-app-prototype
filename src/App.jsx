@@ -28,22 +28,29 @@ const EASE = { duration: 0.42, ease: [0.22, 1, 0.36, 1] };
 // `vite build --mode phone`: the screen fills the window, no iPhone frame, side panel, fake status bar or home indicator
 const PHONE = import.meta.env.MODE === 'phone';
 
+// Phone build: the screen fills the window width. When the window is shorter than the 956px design (browser toolbars, status bar),
+// the empty status-bar strip above and home-indicator strip below are trimmed before the scale gives way.
+const CROP_TOP = 32, CROP_BOTTOM = 24;
 function useFitScale() {
   const calc = () => {
     const w = window.innerWidth, h = window.innerHeight;
-    if (PHONE) return Math.min(2, w / SCREEN_W, h / SCREEN_H);
+    if (PHONE) {
+      const s = Math.min(2, w / SCREEN_W, h / (SCREEN_H - CROP_TOP - CROP_BOTTOM));
+      const c = Math.max(0, Math.min(CROP_TOP + CROP_BOTTOM, SCREEN_H - h / s));
+      return { s, top: (c * CROP_TOP) / (CROP_TOP + CROP_BOTTOM), bottom: (c * CROP_BOTTOM) / (CROP_TOP + CROP_BOTTOM) };
+    }
     const side = w > 900 ? 276 : 0;
-    return Math.min(1, (h - 40) / DEVICE_H, (w - 32 - side) / DEVICE_W);
+    return { s: Math.min(1, (h - 40) / DEVICE_H, (w - 32 - side) / DEVICE_W), top: 0, bottom: 0 };
   };
-  const [s, setS] = useState(calc);
+  const [fit, setFit] = useState(calc);
   useEffect(() => {
     // On phones the keyboard resizes the window; keep the scale steady while a field is focused
-    const f = () => { const a = document.activeElement; if (PHONE && a && /^(INPUT|TEXTAREA)$/.test(a.tagName)) return; setS(calc()); };
+    const f = () => { const a = document.activeElement; if (PHONE && a && /^(INPUT|TEXTAREA)$/.test(a.tagName)) return; setFit(calc()); };
     const o = () => setTimeout(f, 250);
     window.addEventListener('resize', f); window.addEventListener('orientationchange', o);
     return () => { window.removeEventListener('resize', f); window.removeEventListener('orientationchange', o); };
   }, []);
-  return s;
+  return fit;
 }
 
 const VIEWS = [
@@ -92,7 +99,7 @@ const flowOf = (id) => (id.startsWith('book') ? 'book' : ['review', 'confirmed']
 const SHEET_UP = { initial: { y: 956 }, animate: { y: 0 }, exit: { y: 956 } };
 
 export default function App() {
-  const scale = useFitScale();
+  const { s: scale, top: cropTop, bottom: cropBottom } = useFitScale();
   const initial = (() => { const h = (location.hash || '').slice(1); return VIEWS.some((v) => v.id === h) ? h : 'home'; })();
   const [screen, setScreen] = useState(SEARCH_ROUTES.includes(initial) ? 'search' : initial.startsWith('map') ? 'map' : VENUE_VIEWS.includes(initial) || HOME_VIEWS.includes(initial) ? 'home' : initial);
   const [searchRoute, setSearchRoute] = useState(SEARCH_ROUTES.includes(initial) ? initial : 'search');
@@ -218,8 +225,8 @@ export default function App() {
             </div>
           </aside>}
 
-          <div className="device-wrap" style={{ width: (PHONE ? SCREEN_W : DEVICE_W) * scale, height: (PHONE ? SCREEN_H : DEVICE_H) * scale }}>
-            <div className="device" style={{ transform: `scale(${scale})` }}>
+          <div className="device-wrap" style={{ width: (PHONE ? SCREEN_W : DEVICE_W) * scale, height: ((PHONE ? SCREEN_H - cropTop - cropBottom : DEVICE_H)) * scale, ...(PHONE ? { overflow: 'hidden' } : null) }}>
+            <div className="device" style={{ transform: PHONE ? `translateY(${-cropTop * scale}px) scale(${scale})` : `scale(${scale})` }}>
               <div className="btn" style={{ left: -3, top: 196, height: 34 }} />
               <div className="btn" style={{ left: -3, top: 256, height: 64 }} />
               <div className="btn" style={{ left: -3, top: 334, height: 64 }} />
