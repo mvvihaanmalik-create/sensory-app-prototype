@@ -10,6 +10,7 @@ import WriteReview from './WriteReview.jsx';
 import SenseReviews from './SenseReviews.jsx';
 import ListPage, { SortSheet } from './Lists.jsx';
 import Search from './Search.jsx';
+import Onboarding, { ONBOARDING_STEPS } from './Onboarding.jsx';
 import { ModesSheet, EditMode, INITIAL_MODES, modeLabel } from './Modes.jsx';
 import { PAGE_IDS } from './listData.js';
 import { Toast } from './flow.jsx';
@@ -58,9 +59,18 @@ const VIEWS = [
   { id: 'add-mode', label: 'Add custom mode' },
   { id: 'sort-sound', label: 'Sound sort sheet' },
   { id: 'discover', label: 'Hidden discovery' },
+  { id: 'onboarding', label: 'Onboarding · 1 Welcome' },
+  { id: 'onboarding-sound', label: 'Onboarding · 2 Sound' },
+  { id: 'onboarding-light', label: 'Onboarding · 3 Light' },
+  { id: 'onboarding-crowd', label: 'Onboarding · 4 Crowd' },
+  { id: 'onboarding-temp', label: 'Onboarding · 5 Temperature' },
+  { id: 'onboarding-seating', label: 'Onboarding · 6 Seating' },
+  { id: 'onboarding-done', label: 'Onboarding · 7 Start exploring' },
 ];
+const ONB_VIEWS = VIEWS.filter((v) => v.id.startsWith('onboarding')).map((v) => v.id);
+const onbStep = (id) => Math.max(0, ONBOARDING_STEPS.indexOf(id.replace('onboarding-', '')));
 const MODE_VIEWS = ['modes', 'edit-study', 'edit-party', 'add-mode'];
-const HOME_VIEWS = [...PAGE_IDS, ...MODE_VIEWS, 'sort-sound', 'discover'];
+const HOME_VIEWS = [...PAGE_IDS, ...MODE_VIEWS, 'sort-sound', 'discover', ...ONB_VIEWS];
 const VENUE_VIEWS = ['venue', 'venue-reviews', 'sense', 'review', 'book', 'book-2', 'book-3', 'confirmed'];
 const SAMPLE_DRAFT = { ...emptyDraft(), guests: 2, date: 0, time: '5:30 PM', zone: 'Patio', table: 4, comfort: ['Away from speakers'] };
 const toBooking = (d) => ({ ...d, crowd: slotsFor(d.date, d.guests).find((s) => s.time === d.time).crowd, dayShort: DATES[d.date].short, dayLong: DATES[d.date].long });
@@ -80,6 +90,7 @@ export default function App() {
   const [sortSheet, setSortSheet] = useState(initial === 'sort-sound' ? { sense: 'sound', value: null, onApply: () => {} } : null);
   const [sortsBy, setSortsBy] = useState({});
   const [note, setNote] = useState(null);
+  const [onboarding, setOnboarding] = useState(ONB_VIEWS.includes(initial) ? { start: onbStep(initial), n: 0 } : null);
   const noteTimer = useRef(0);
   const sayNote = (m) => { setNote(m); clearTimeout(noteTimer.current); noteTimer.current = setTimeout(() => setNote(null), 2400); };
   const [venueOpen, setVenueOpen] = useState(VENUE_VIEWS.includes(initial));
@@ -128,9 +139,23 @@ export default function App() {
     setEditing(null); if (editFrom === 'sheet') setModesOpen(true);
     sayNote('Mode deleted');
   };
+  // Onboarding picks become a "My comfort" mode that the rest of the app follows
+  const applyOnboarding = (m) => {
+    if (!m) return;
+    setModes((ms) => (ms.some((x) => x.id === m.id) ? ms.map((x) => (x.id === m.id ? m : x)) : [...ms, m]));
+    setActiveMode(m.id);
+  };
+  const endOnboarding = () => { setOnboarding(null); try { history.replaceState(null, '', '#home'); } catch (_) {} };
+  const startOnboarding = (start = 0) => {
+    closeVenue(); setPage(null); setModesOpen(false); setEditing(null); setSortSheet(null);
+    if (discoverOpen) closeDiscover();
+    if (screen !== 'home') { setScreen('home'); setHomeScroll(0); setSheetCmd(null); }
+    setOnboarding({ start, n: Date.now() });
+  };
   const bannerText = activeM.id === 'study' ? 'Because you like quiet cafés and outdoor seating'
     : `Matched to ${activeM.custom ? activeM.name : activeM.name + ' mode'}: ${[activeM.prefs.sound, activeM.prefs.crowd].filter(Boolean).join(', ').toLowerCase() || 'your picks'}`;
   const jump = (id) => {
+    if (ONB_VIEWS.includes(id)) { startOnboarding(onbStep(id)); try { history.replaceState(null, '', '#' + id); } catch (_) {} return; }
     if (VENUE_VIEWS.includes(id)) {
       setVenueOpen(true); setVenueScroll(0);
       setVenueTab(id === 'venue-reviews' || id === 'review' ? 'reviews' : 'overview');
@@ -165,6 +190,7 @@ export default function App() {
             <p className="lead">Tap through it like the real app. Start from a For you card on Home. Pull Home down from the top to find a hidden layer.</p>
             <div className="tools">
               <button onClick={() => { try { history.replaceState(null, '', location.pathname); } catch (_) {} location.reload(); }}>Restart</button>
+              <button onClick={() => startOnboarding(0)}>Replay onboarding</button>
             </div>
           </aside>
 
@@ -253,6 +279,17 @@ export default function App() {
                     <motion.div key="edit" className="abs" style={{ inset: 0, zIndex: 46 }}
                       initial={{ x: 440 }} animate={{ x: 0 }} exit={{ x: 440 }} transition={{ type: 'spring', stiffness: 260, damping: 32 }}>
                       <EditMode key={editing} mode={modes.find((m) => m.id === editing)} isNew={editing === 'new'} onBack={() => setEditing(null)} onSave={saveMode} onDelete={() => deleteMode(editing)} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <AnimatePresence>
+                  {onboarding && (
+                    <motion.div key={'onb' + onboarding.n} className="abs" style={{ inset: 0, zIndex: 48 }}
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.3 } }} transition={{ duration: 0.3 }}>
+                      <Onboarding start={onboarding.start}
+                        onSkip={endOnboarding}
+                        onFinish={(m) => { applyOnboarding(m); endOnboarding(); if (m) sayNote('My comfort mode is on'); }}
+                        onAddAnother={(m) => { applyOnboarding(m); endOnboarding(); nav('profile'); setEditFrom('profile'); setEditing('new'); }} />
                     </motion.div>
                   )}
                 </AnimatePresence>
