@@ -33,7 +33,7 @@ function Row({ h, r = 28, pad = 16, gap = 16, shadow, onClick, children }) {
   );
 }
 
-function VenueRow({ v, onOpen }) {
+export function VenueRow({ v, onOpen }) {
   return (
     <Row h={112} onClick={() => onOpen(v)}>
       <Thumb />

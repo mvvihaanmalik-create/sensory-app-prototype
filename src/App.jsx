@@ -72,6 +72,7 @@ export default function App() {
   const [modes, setModes] = useState(INITIAL_MODES);
   const [activeMode, setActiveMode] = useState('study');
   const [modesOpen, setModesOpen] = useState(MODE_VIEWS.includes(initial));
+  const [editFrom, setEditFrom] = useState('sheet'); // where Edit mode was opened from, so saving returns to the right place
   const [editing, setEditing] = useState(initial === 'edit-study' ? 'study' : initial === 'edit-party' ? 'party' : initial === 'add-mode' ? 'new' : null);
   const [sortSheet, setSortSheet] = useState(initial === 'sort-sound' ? { sense: 'sound', value: null, onApply: () => {} } : null);
   const [sortsBy, setSortsBy] = useState({});
@@ -116,13 +117,13 @@ export default function App() {
   const setSortsFor = (k) => (fn) => setSortsBy((b) => ({ ...b, [k]: fn(b[k] || []) }));
   const saveMode = (m) => {
     setModes((ms) => (ms.some((x) => x.id === m.id) ? ms.map((x) => (x.id === m.id ? m : x)) : [...ms, m]));
-    setEditing(null); setModesOpen(true);
+    setEditing(null); if (editFrom === 'sheet') setModesOpen(true);
     sayNote(editing === 'new' ? `${m.name} added` : 'Mode saved');
   };
   const deleteMode = (id) => {
     setModes((ms) => ms.filter((x) => x.id !== id));
     if (activeMode === id) setActiveMode('study');
-    setEditing(null); setModesOpen(true);
+    setEditing(null); if (editFrom === 'sheet') setModesOpen(true);
     sayNote('Mode deleted');
   };
   const bannerText = activeM.id === 'study' ? 'Because you like quiet cafés and outdoor seating'
@@ -179,7 +180,9 @@ export default function App() {
                       onDecide={(id, d) => setDecided((m) => ({ ...m, [id]: d }))} onShowPassed={showPassed} onOpenVenue={openVenue} blocked={venueOpen || !!sense || !!flow} />}
                     {screen === 'home' && <Home pull={pull} pullOn={!discoverOpen} onDiscover={() => setDiscoverOpen(true)} onOpenMap={() => nav('map')} onOpenVenue={openVenue} onOpenPage={setPage} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} reduceMotion={reduceMotion} />}
                     {screen === 'map' && <MapScreen command={sheetCmd} onOpenVenue={openVenue} />}
-                    {screen === 'profile' && <Profile onScroll={setHomeScroll} savedCount={savedCount} />}
+                    {screen === 'profile' && <Profile onScroll={setHomeScroll} savedCount={savedCount} decided={decided} modes={modes} activeId={activeMode}
+                      onPickMode={setActiveMode} onEditMode={(id) => { setEditFrom('profile'); setEditing(id); }} onAddMode={() => { setEditFrom('profile'); setEditing('new'); }}
+                      onOpenVenue={openVenue} onNote={sayNote} />}
                   </motion.div>
                 </AnimatePresence>
                 <AnimatePresence>
@@ -239,8 +242,8 @@ export default function App() {
                   {sortSheet && <SortSheet key={sortSheet.sense} sense={sortSheet.sense} value={sortSheet.value} onApply={sortSheet.onApply} onClose={() => setSortSheet(null)} />}
                 </AnimatePresence>
                 <AnimatePresence>
-                  {modesOpen && <ModesSheet key="modes" modes={modes} activeId={activeMode} onPick={(id) => { setActiveMode(id); }} onEdit={(id) => setEditing(id)}
-                    onAdd={() => setEditing('new')} onClose={() => setModesOpen(false)} />}
+                  {modesOpen && <ModesSheet key="modes" modes={modes} activeId={activeMode} onPick={(id) => { setActiveMode(id); }} onEdit={(id) => { setEditFrom('sheet'); setEditing(id); }}
+                    onAdd={() => { setEditFrom('sheet'); setEditing('new'); }} onClose={() => setModesOpen(false)} />}
                 </AnimatePresence>
                 <AnimatePresence>
                   {editing && (
