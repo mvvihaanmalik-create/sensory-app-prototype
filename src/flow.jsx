@@ -82,7 +82,7 @@ export function Chip({ label, on, onClick, disabled }) {
 }
 
 // "+ Other" chip that turns into an inline text field, then into a selected chip.
-export function OtherChip({ onAdd }) {
+export function OtherChip({ onAdd, color }) {
   const [editing, setEditing] = useState(false);
   const [val, setVal] = useState('');
   const ref = useRef(null);
@@ -103,8 +103,8 @@ export function OtherChip({ onAdd }) {
   return (
     <G as="button" r={22} onClick={() => setEditing(true)} whileTap={{ scale: 0.95 }} transition={TAP}
       style={{ height: 44, padding: '0 16px 0 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
-      <VIcon name="plus" size={16} />
-      <span style={t(14, 500)}>Other</span>
+      <VIcon name="plus" size={16} {...(color ? { fill: color } : {})} />
+      <span style={t(14, 500, color)}>Other</span>
     </G>
   );
 }

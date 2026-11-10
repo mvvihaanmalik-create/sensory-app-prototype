@@ -1,6 +1,6 @@
 // Onboarding (Figma section 978:5405): Welcome, Sound, Light, Crowd, Temperature, Seating, Start exploring.
 // A skippable first-run overlay. Picks become a "My comfort" mode (see toMode) that follows the person through the app.
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, animate, motion, useMotionValue, useTransform } from 'motion/react';
 import { GENTLE, NAVY, MUTED, Icon } from './ui.jsx';
 import { paths } from './svgs.js';
@@ -14,6 +14,7 @@ import boothsImg from './assets/onboarding/booths.png';
 import fitsImg from './assets/onboarding/fits.png';
 import cafesImg from './assets/onboarding/cafes.png';
 import musicImg from './assets/onboarding/music.png';
+import contoursImg from './assets/onboarding/contours.svg';
 
 const INDIGO = '#5b52c9';
 // Figma onboarding chip: navy text (#2a2650), unlike the venue pages' #5e5a7e
@@ -67,9 +68,10 @@ const Thermo = ({ size = 24, color = NAVY }) => (
     <path d="M12 9.5v7" stroke={color} strokeWidth="1.5" strokeLinecap="round" /><circle cx="12" cy="17.2" r="1.6" fill={color} />
   </svg>
 );
-const SenseGlyph = ({ k, size = 24, color = NAVY }) => (k === 'temp' ? <Thermo size={size} color={color} />
+// `one` swaps the crowd glyph for the single-person icon the Figma slider tooltip uses (header and summary keep the group icon).
+const SenseGlyph = ({ k, size = 24, color = NAVY, one }) => (k === 'temp' ? <Thermo size={size} color={color} />
   : k === 'seat' ? <VIcon name="chair" size={size} fill={color} />
-  : <Icon d={paths[k === 'sound' ? 'speaker' : k === 'light' ? 'sun' : 'users']} size={size} fill={color} />);
+  : <Icon d={paths[k === 'sound' ? 'speaker' : k === 'light' ? 'sun' : one ? 'user' : 'users']} size={size} fill={color} />);
 
 function Progress({ n }) {
   return (
@@ -94,26 +96,6 @@ const Title = ({ top, children }) => (
 );
 
 /* ---------- Welcome ---------- */
-// Contour lines: 16 nested wobbly rings, sized from the Figma "Contour lines" vectors.
-const RINGS = [[197.5, 282.5, 48.9, 44.9], [176, 258.8, 96.6, 90.6], [155.2, 235.1, 142.9, 137.2], [135.2, 211.6, 187.9, 184.5], [115.8, 188.1, 231.5, 232.2], [96.7, 165, 274, 280.1],
-  [77.3, 142.4, 315.8, 328], [57, 120.4, 357.6, 375.6], [35.3, 99, 399.9, 422.7], [11.8, 78.4, 443.7, 469], [-13.5, 58.6, 492.7, 514.4], [-40.4, 39.6, 545.2, 558.7],
-  [-68.8, 21.6, 599.8, 601.6], [-98.4, 4.5, 655.8, 643], [-129, -11.8, 712.7, 682.9], [-160.6, -27.3, 770.4, 721.1]];
-const ringPath = ([x, y, w, h]) => {
-  const cx = x + w / 2, cy = y + h / 2, N = 16;
-  const pts = Array.from({ length: N }, (_, k) => {
-    const a = (k / N) * Math.PI * 2;
-    const m = 1 + 0.045 * Math.sin(2 * a + 1) + 0.03 * Math.sin(3 * a + 2.2);
-    return [cx + (w / 2) * m * Math.cos(a), cy + (h / 2) * m * Math.sin(a)];
-  });
-  let d = '';
-  pts.forEach((p, k) => {
-    const p0 = pts[(k - 1 + N) % N], p1 = p, p2 = pts[(k + 1) % N], p3 = pts[(k + 2) % N];
-    if (k === 0) d += `M${p1[0].toFixed(1)} ${p1[1].toFixed(1)}`;
-    d += `C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(1)} ${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(1)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(1)} ${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
-  });
-  return d + 'Z';
-};
-
 const ORBIT = [
   { src: soundImg, left: 46, top: 150, s: 84, dur: 5.4, dy: -6 },
   { src: lightImg, left: 294, top: 130, s: 84, dur: 6.2, dy: 6 },
@@ -122,12 +104,9 @@ const ORBIT = [
 ];
 
 function Welcome({ onNext, onSkip }) {
-  const rings = useMemo(() => RINGS.map(ringPath), []);
   return (
     <>
-      <svg className="abs" style={{ left: 0, top: 0 }} width="440" height="956" viewBox="0 0 440 956" fill="none">
-        {rings.map((d, i) => <path key={i} d={d} stroke="#5e5a7e" strokeOpacity="0.16" strokeWidth="1" />)}
-      </svg>
+      <img className="abs" src={contoursImg} alt="" draggable={false} style={{ left: 0, top: 0, width: 440, height: 956 }} />
       <div className="abs" style={{ left: 0, top: 430, width: 440, height: 456, background: 'linear-gradient(180deg, rgba(247,245,241,0) 0%, #f7f5f1 45%, #f7f5f1 100%)' }} />
       <SkipBtn onClick={onSkip} />
       <motion.div className="abs" style={{ left: 132, top: 218, width: 176, height: 176, borderRadius: 88, background: 'rgba(255,255,255,0.85)', boxShadow: '0 2px 8px rgba(42,38,80,0.06)' }}
@@ -194,7 +173,7 @@ function Slider({ cfg, value, onChange }) {
         <div style={{ position: 'relative', minHeight: 92, width: 104, borderRadius: 20, background: 'rgba(255,255,255,0.96)', border: '1.5px solid #fff', boxSizing: 'border-box',
           WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)', boxShadow: '0 10px 28px rgba(42,38,80,0.16)', padding: '14px 8px 12px',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-          <SenseGlyph k={cfg.icon} size={32} />
+          <SenseGlyph k={cfg.icon} size={32} one />
           <span className="nowrap" style={t(14, 600, NAVY, { lineHeight: 1.2 })}>{cfg.steps[i]}</span>
         </div>
       </motion.div>
@@ -210,7 +189,7 @@ function SliderScreen({ k, picks, setPick, onNext, onBack, onSkip }) {
   const setAny = () => setPick(k, { ...v, any: !v.any });
   return (
     <>
-      <CircleBtn icon="caretLeft" label="Back" onClick={onBack} style={{ position: 'absolute', left: 24, top: 56 }} />
+      <CircleBtn label="Back" onClick={onBack} style={{ position: 'absolute', left: 24, top: 56 }}><VIcon name="caretLeft" fill={NAVY} /></CircleBtn>
       <Progress n={ONBOARDING_STEPS.indexOf(k)} />
       <SkipBtn onClick={onSkip} />
       <Title top={cfg.titleTop}>{cfg.title}</Title>
@@ -250,7 +229,7 @@ function Seating({ picks, setSeat, onNext, onBack, onSkip }) {
   const toggle = (s) => setSeat(picks.seat.includes(s) ? picks.seat.filter((x) => x !== s) : [...picks.seat, s]);
   return (
     <>
-      <CircleBtn icon="caretLeft" label="Back" onClick={onBack} style={{ position: 'absolute', left: 24, top: 56 }} />
+      <CircleBtn label="Back" onClick={onBack} style={{ position: 'absolute', left: 24, top: 56 }}><VIcon name="caretLeft" fill={NAVY} /></CircleBtn>
       <Progress n={5} />
       <SkipBtn onClick={onSkip} />
       <Title top={171}>Where do you like to sit?</Title>
@@ -262,7 +241,7 @@ function Seating({ picks, setSeat, onNext, onBack, onSkip }) {
           </motion.div>
         ))}
         <motion.div layout transition={GENTLE}>
-          <OtherChip onAdd={(v) => { if (!all.includes(v)) setExtra((e) => [...e, v]); if (!picks.seat.includes(v)) setSeat([...picks.seat, v]); }} />
+          <OtherChip color={NAVY} onAdd={(v) => { if (!all.includes(v)) setExtra((e) => [...e, v]); if (!picks.seat.includes(v)) setSeat([...picks.seat, v]); }} />
         </motion.div>
       </motion.div>
       <PrimaryCTA label="Next" top={853} color={NAVY} onClick={onNext} />
