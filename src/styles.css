@@ -31,7 +31,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webki
   box-shadow:0 50px 90px -20px rgba(30,28,40,.35),0 18px 36px -12px rgba(30,28,40,.25),inset 0 0 0 1px rgba(255,255,255,.5)}
 .device::before{content:'';position:absolute;inset:3px;border-radius:73px;background:#0b0b0d}
 .device .btn{position:absolute;width:4px;border-radius:2px;background:linear-gradient(90deg,#8f8c87,#c9c6c0)}
-.screen{position:absolute;left:14px;top:14px;width:440px;height:956px;border-radius:62px;overflow:hidden;background:#f7f5f1;isolation:isolate}
+.screen{position:absolute;left:14px;top:14px;width:440px;height:956px;border-radius:62px;overflow:clip;background:#f7f5f1;isolation:isolate}
 .island{position:absolute;left:50%;top:12px;width:86px;height:30px;margin-left:-43px;border-radius:15px;background:#000;z-index:60;pointer-events:none}
 
 /* Glass (Figma "Glass / ... / Light") */
@@ -62,3 +62,4 @@ textarea.field{all:unset;display:block;width:100%;font:400 15px/1.3 Figtree,sans
 textarea.field::placeholder{color:#5e5a7e;opacity:1}
 
 img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
+

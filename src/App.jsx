@@ -125,9 +125,10 @@ export default function App() {
   };
   const navigateSearch = (route, replace = false) => {
     setSearchRoute(route); setScreen('search');
-    try { if (location.hash !== '#' + route) history[replace ? 'replaceState' : 'pushState']({ search: true }, '', '#' + route); } catch (_) {}
+    const modal = route === 'search-filters' || route === 'search-place';
+    try { if (location.hash !== '#' + route) history[replace ? 'replaceState' : 'pushState']({ search: true, ...(modal ? { searchReturn: searchRoute } : {}) }, '', '#' + route); } catch (_) {}
   };
-  const backSearch = fallback => { if (history.state?.search) history.back(); else navigateSearch(fallback, true); };
+  const backSearch = fallback => { if (history.state?.searchReturn === fallback) history.back(); else navigateSearch(fallback, true); };
   const openSearchVenue = () => { openVenue(); try { history.pushState({ search: true }, '', '#venue'); } catch (_) {} };
   useEffect(() => {
     const restore = () => { const id = location.hash.slice(1); if (SEARCH_ROUTES.includes(id)) { setSearchRoute(id); setScreen('search'); setVenueOpen(false); setFlow(null); setSense(null); } else if (['home','map-half','profile'].includes(id)) { setScreen(id === 'map-half' ? 'map' : id); } };
