@@ -5,6 +5,8 @@ import { drops, ripples, toTransition, LOOP } from './fountain.js';
 import { GENTLE, INK, INK2, useScale } from './ui.jsx';
 import sceneMorning from './assets/scene-morning.jpg';
 import { usePullDown } from './Discover.jsx';
+import { H } from './homeUpdateAssets.js';
+import { ExploreFeed } from './Explore.jsx';
 
 const lightGlass = {
   background: 'rgba(255,255,255,0.62)', border: '1px solid rgba(255,255,255,0.7)', boxShadow: '0 4px 14px rgba(27,42,68,0.1)',
@@ -50,24 +52,14 @@ function Hero({ reduce, pull }) {
 }
 
 const CATS = [
-  { k: 'illCafe', label: 'Café', page: 'cafes', inset: '15.13% 18.49%' },
-  { k: 'illDining', label: 'Dining', page: 'dining', inset: '19.93% 13.46%' },
-  { k: 'illNightlife', label: 'Nightlife', page: 'nightlife', inset: '12.5% 21.58%' },
-  { k: 'illEvents', label: 'Events', page: 'events', inset: '20.73% 13.28%' },
-  { k: 'illMore', label: 'More', page: 'more', inset: '15.89% 17.79%' },
+  {k:'Cafe',label:'Café',page:'cafes',x:8.5,y:3.98,size:58.438},
+  {k:'Dining',label:'Dining',page:'dining',x:0,y:-1.7,size:68},
+  {k:'Nightlife',label:'Nightlife',page:'nightlife',x:7.28,y:6.43,size:54.188},
+  {k:'Events',label:'Events',page:'events',x:2.13,y:-1.06,size:63.75},
+  {k:'More',label:'More',page:'more',x:2.76,y:3.98,size:60.031},
 ];
-function Categories({ onOpen }) {
-  return (
-    <div className="abs" style={{ left: 24, top: 322, width: 392, display: 'flex', justifyContent: 'space-between' }}>
-      {CATS.map((c) => (
-        <motion.button key={c.k} onClick={() => onOpen?.(c.page)} whileTap={{ scale: 0.92 }} transition={GENTLE}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7.685 }}>
-          <img src={uri(c.k)} alt="" style={{ width: 61.481, height: 61.481, display: 'block' }} />
-          <span style={{ fontSize: 12, color: INK2, lineHeight: 'normal' }}>{c.label}</span>
-        </motion.button>
-      ))}
-    </div>
-  );
+function Categories({onOpen}) {
+ return <div className="abs" style={{left:24,top:322,width:392,display:'flex',justifyContent:'space-between'}}>{CATS.map(c=><motion.button key={c.k} onClick={()=>onOpen?.(c.page)} whileTap={{scale:.92}} transition={GENTLE} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:7.685}}><div style={{width:68,height:68,position:'relative',overflow:'hidden'}}><div style={{position:'absolute',left:c.x,top:c.y,width:c.size,height:c.size,overflow:'hidden'}}><img src={H['himg'+c.k+'TransparentPng']} alt="" style={{position:'absolute',width:c.k==='Cafe'?'110%':'100%',height:c.k==='Cafe'?'110%':'100%',left:c.k==='Cafe'?'-5%':c.k==='Events'?'0.15%':0,top:c.k==='Cafe'?'-5%':c.k==='Events'?'10.26%':0,objectFit:'contain'}}/></div></div><span style={{fontSize:12,color:INK2,lineHeight:'normal'}}>{c.label}</span></motion.button>)}</div>;
 }
 
 function SectionHeader({ top, title, onSeeAll }) {
@@ -81,9 +73,9 @@ function SectionHeader({ top, title, onSeeAll }) {
 
 /* ---------- For you stack (component 685:328, variants Front=A/B/C) ---------- */
 const VENUES = {
-  A: { name: 'Foxy Loxy Café', meta: 'Café · 0.5 mi', level: 'Level 2' },
-  B: { name: 'Gallery Café', meta: 'Café · 1.1 mi', level: 'Level 1' },
-  C: { name: 'The Sentient', meta: 'Café · 0.8 mi', level: 'Level 2' },
+  A: { name: 'Foxy Loxy Café', meta: 'Café · 0.5 mi', level: 'Level 2', photo: H.himgPhotoSlot5 },
+  B: { name: 'Gallery Espresso', meta: 'Café · 1.1 mi', level: 'Level 1', photo: H.himgPhotoSlot4 },
+  C: { name: 'The Sentient', meta: 'Café · 0.8 mi', level: 'Level 2' , photo: H.himgPhotoSlot3 },
 };
 const KEYS = ['A', 'B', 'C'];
 const ROLE = {
@@ -97,14 +89,14 @@ const DOT_FOR = { A: 1, B: 2, C: 0 };
 function VenueCard({ v }) {
   return (
     <>
-      <div className="abs" style={{ inset: 0, background: 'rgba(20,24,31,0.06)' }} />
+      <img src={v.photo} alt="" className="abs" style={{inset:0,width:260,height:350,objectFit:'cover'}} />
       <div className="abs" style={{ left: 10, top: 10, display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 999,
         background: '#f7f5f1', boxShadow: '0 4px 14px rgba(27,42,68,0.05)' }}>
         <img src={uri('rippleCard')} alt="" style={{ width: 28, height: 28, display: 'block' }} />
         <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: INK }}>{v.level}</span>
       </div>
       <div className="abs" style={{ left: 10, top: 224, width: 236, height: 112, borderRadius: 20, border: '1px solid rgba(20,24,31,0.08)',
-        WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)', padding: 16, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+        background:'rgba(255,255,255,0.8)', WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)', padding: 16, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
         <p className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: INK }}>{v.name}</p>
         <p className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: INK2 }}>{v.meta}</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '2px 0' }}>
@@ -175,12 +167,12 @@ function ForYouStack({ onOpenVenue }) {
   );
 }
 
-function RankingRow({ top, n, name, meta, level, onClick }) {
+function RankingRow({ top, n, name, meta, level, onClick, photo, wordmark }) {
   return (
     <motion.button className="abs" onClick={onClick} whileTap={{ scale: 0.985 }} transition={GENTLE}
       style={{ left: 24, top, width: 392, height: 92, borderRadius: 24, ...cardGlass, display: 'flex', alignItems: 'center', gap: 16, padding: '0 20px', textAlign: 'left' }}>
       <span style={{ ...h2, width: 22 }}>{n}</span>
-      <img src={uri('photoSlot')} alt="" style={{ width: 56, height: 56, display: 'block' }} />
+      {wordmark ? <div style={{width:56,height:56,borderRadius:28,background:'#fff8ef',color:'#c62f29',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',fontWeight:700,flex:'none'}}><span style={{fontSize:11,lineHeight:'11px',textAlign:'center'}}>FOXY<br/>LOXY</span><span style={{fontSize:6}}>CAFÉ</span></div> : <img src={photo} alt="" style={{width:56,height:56,objectFit:'cover',borderRadius:12,display:'block'}}/>}
       <span style={{ flex: '1 0 0', display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
         <span className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: INK }}>{name}</span>
         <span className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: INK2 }}>{meta}</span>
@@ -193,7 +185,7 @@ function RankingRow({ top, n, name, meta, level, onClick }) {
   );
 }
 
-export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, reduceMotion, pull, onDiscover, pullOn = true }) {
+export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, reduceMotion, pull, onDiscover, pullOn = true, onOpenExplore, exploreLiked }) {
   const scrollRef = useRef(null);
   usePullDown({ el: scrollRef, pull, enabled: pullOn, onCommit: onDiscover });
   const r = useTransform(pull, [0, 24], [0, 32]);
@@ -201,7 +193,7 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
   return (
     <motion.div className="abs" style={{ inset: 0, y: pull, overflow: 'hidden', background: '#f7f5f1', borderTopLeftRadius: r, borderTopRightRadius: r, boxShadow: sh, zIndex: 1, userSelect: 'none', WebkitUserSelect: 'none' }} onDragStart={(e) => e.preventDefault()}>
     <div ref={scrollRef} className="scroll" style={{ background: '#f7f5f1' }} onScroll={(e) => onScroll?.(e.currentTarget.scrollTop)}>
-      <div style={{ position: 'relative', width: 440, height: 1753.83 }}>
+      <div style={{ position: 'relative', width: 440, height: 2663 }}>
         <Hero reduce={reduceMotion} pull={pull} />
         <p className="abs nowrap" style={{ left: 24, top: 59, fontSize: 15, fontWeight: 500, color: INK2 }}>Savannah, GA</p>
         <motion.button className="abs nowrap" onClick={onOpenModes} whileTap={{ scale: 0.95 }} transition={GENTLE}
@@ -223,17 +215,19 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
         <ForYouStack onOpenVenue={onOpenVenue} />
 
         <SectionHeader top={946} title="Popular Around you" onSeeAll={() => onOpenPage?.('popular')} />
-        <RankingRow top={998} n={1} name="Gallery Café" meta="Café · 1.1 mi" level={1} />
-        <RankingRow top={1106} n={2} name="Foxy Loxy Café" meta="Café · 0.5 mi" level={2} onClick={onOpenVenue} />
-        <RankingRow top={1214} n={3} name="The Sentient" meta="Café · 0.8 mi" level={2} />
+        <RankingRow top={998} n={1} photo={H.himgPhotoSlot} name="Gallery Espresso" meta="Café · 1.1 mi" level={1} />
+        <RankingRow top={1106} n={2} wordmark name="Foxy Loxy Café" meta="Café · 0.5 mi" level={2} onClick={onOpenVenue} />
+        <RankingRow top={1214} n={3} photo={H.himgPhotoSlot2} name="The Sentient" meta="Café · 0.8 mi" level={2} />
 
-        <div className="abs" style={{ left: 24, top: 1346, width: 392, height: 164, borderRadius: 24, overflow: 'hidden', background: 'rgba(20,24,31,0.06)', boxShadow: '0 12px 32px rgba(27,42,68,0.06)' }}>
+        <div className="abs" style={{ left: 24, top: 1346, width: 392, height: 164, borderRadius: 24, overflow: 'hidden', background: '#c2ddd2', boxShadow: '0 12px 32px rgba(27,42,68,0.06)' }}>
           <span className="abs nowrap" style={{ left: 24, top: 24, padding: '4px 12px', borderRadius: 999, background: INK, color: '#fff', fontSize: 13, fontWeight: 700, boxShadow: '0 6px 18px rgba(27,42,68,0.12)' }}>Quiet hour</span>
           <p className="abs nowrap" style={{ ...h2, left: 24, top: 60 }}>The Sentient</p>
           <p className="abs nowrap" style={{ left: 24, top: 96, fontSize: 15, fontWeight: 500, color: INK2 }}>2 – 4 pm · 10% off pastries</p>
           <button className="abs nowrap" style={{ left: 24, top: 122, fontSize: 13, fontWeight: 700, color: INK }}>Plan a calm visit</button>
         </div>
 
+        <img src={H.himgIllustrationCatchup} alt="" className="abs" style={{left:267,top:1346,width:164,height:164,objectFit:'contain',pointerEvents:'none'}}/>
+        <ExploreFeed onOpen={onOpenExplore} liked={exploreLiked}/>
         <motion.button className="abs" onClick={onOpenMap} whileTap={{ scale: 0.98 }} transition={GENTLE}
           style={{ left: 24, top: 1550, width: 392, height: 80, borderRadius: 24, ...cardGlass, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 16px 18px 20px', textAlign: 'left' }}>
           <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
