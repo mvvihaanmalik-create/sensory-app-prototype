@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, animate, motion, MotionConfig, useMotionValue, useIsPresent } from 'motion/react';
 import Home from './Home.jsx';
+import ExplorePost from './Explore.jsx';
 import MapScreen from './Map.jsx';
 import Profile from './Profile.jsx';
 import Search from './Search.jsx';
@@ -55,6 +56,7 @@ function useFitScale() {
 
 const VIEWS = [
   { id: 'home', label: 'Home' },
+  { id: 'explore-post', label: 'Explore' },
   ...['search', 'search-results', 'search-filters', 'search-place'].map(id => ({ id, label: id })),
   { id: 'map-half', label: 'Map' },
   { id: 'map-full', label: 'Map · sheet up' },
@@ -101,7 +103,7 @@ function ScreenLayer({ screen, children }) {
   return <motion.div className="abs" aria-hidden={!present || undefined} style={{ inset: 0, pointerEvents: present ? 'auto' : 'none' }} initial={SCREEN_IN[screen].initial} animate={SCREEN_IN[screen].animate} exit={{ opacity: 0, transition: { duration: .28 } }} transition={EASE}>{children}</motion.div>;
 }
 const MODE_VIEWS = ['modes', 'edit-study', 'edit-party', 'add-mode'];
-const HOME_VIEWS = [...PAGE_IDS, ...MODE_VIEWS, 'sort-sound', 'discover', ...ONB_VIEWS];
+const HOME_VIEWS = [...PAGE_IDS, ...MODE_VIEWS, 'sort-sound', 'discover', 'explore-post', ...ONB_VIEWS];
 const VENUE_VIEWS = ['venue', 'venue-reviews', 'sense', 'review', 'book', 'book-2', 'book-3', 'confirmed'];
 const SAMPLE_DRAFT = { ...emptyDraft(), guests: 2, date: 0, time: '5:30 PM', zone: 'Patio', table: 4, comfort: ['Away from speakers'] };
 const toBooking = (d) => ({ ...d, crowd: slotsFor(d.date, d.guests).find((s) => s.time === d.time).crowd, dayShort: DATES[d.date].short, dayLong: DATES[d.date].long });
@@ -125,6 +127,12 @@ export default function App() {
   const [onboarding, setOnboarding] = useState(ONB_VIEWS.includes(initial) ? { start: onbStep(initial), n: 0 } : null);
   const noteTimer = useRef(0);
   const sayNote = (m) => { setNote(m); clearTimeout(noteTimer.current); noteTimer.current = setTimeout(() => setNote(null), 2400); };
+  const [exploreOpen, setExploreOpen] = useState(initial === 'explore-post');
+  const [exploreLiked, setExploreLiked] = useState(false), [exploreSaved,setExploreSaved] = useState(false);
+  const [exploreFollow,setExploreFollow]=useState(false),[exploreReplies,setExploreReplies]=useState([]);
+  const openExplore = () => { setExploreOpen(true); history.pushState({explore:true},'', '#explore-post'); };
+  const closeExplore = () => { setExploreOpen(false); if(history.state?.explore) history.back(); else history.replaceState(null,'','#home'); };
+  useEffect(()=>{ const back=()=>setExploreOpen(location.hash === '#explore-post'); window.addEventListener('popstate',back); return()=>window.removeEventListener('popstate',back); },[]);
   const [venueOpen, setVenueOpen] = useState(VENUE_VIEWS.includes(initial));
   const [flow, setFlow] = useState(flowOf(initial));
   const [bookStep, setBookStep] = useState(initial === 'book-2' ? 2 : initial === 'book-3' ? 3 : 1);
@@ -158,6 +166,7 @@ export default function App() {
   const nav = (to) => {
     if (screen === 'search' && to !== 'search') { try { history.pushState(null, '', '#' + (to === 'map' ? 'map-half' : to)); } catch (_) {} }
     if (discoverOpen) closeDiscover();
+    setExploreOpen(false);
     if (page) setPage(null);
     if (to !== screen) { setScreen(to); setSheetCmd(null); }
   };
@@ -211,6 +220,7 @@ export default function App() {
       return;
     }
     closeVenue();
+    if (id === 'explore-post') { nav('home'); setExploreOpen(true); history.replaceState(null,'','#explore-post'); return; }
     if (id === 'discover') { nav('home'); setDiscoverOpen(true); animate(pull, SCREEN_H, OPEN_SPRING); try { history.replaceState(null, '', '#discover'); } catch (_) {} return; }
     if (id.startsWith('map')) {
       const st = id.slice(4) || 'half';
@@ -245,7 +255,7 @@ export default function App() {
                 <div className="abs" style={{ inset: 0, display: screen === 'home' ? 'block' : 'none' }} aria-hidden={screen !== 'home'}>
                     {<DiscoverLayer pull={pull} open={discoverOpen} onClose={closeDiscover} mode={activeM} decided={decided}
                       onDecide={(id, d) => setDecided((m) => ({ ...m, [id]: d }))} onShowPassed={showPassed} onOpenVenue={openVenue} blocked={venueOpen || !!sense || !!flow} />}
-                    {<Home pull={pull} pullOn={screen === 'home' && !discoverOpen} onDiscover={() => setDiscoverOpen(true)} onOpenMap={() => nav('map')} onOpenSearch={() => { nav('search'); navigateSearch(searchRoute); }} onOpenVenue={openVenue} onOpenPage={setPage} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} reduceMotion={reduceMotion} />}
+                    {<Home pull={pull} onOpenExplore={openExplore} exploreLiked={exploreLiked} pullOn={screen === 'home' && !discoverOpen && !exploreOpen} onDiscover={() => setDiscoverOpen(true)} onOpenMap={() => nav('map')} onOpenSearch={() => { nav('search'); navigateSearch(searchRoute); }} onOpenVenue={openVenue} onOpenPage={setPage} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} reduceMotion={reduceMotion} />}
                 </div>
                 <AnimatePresence>{!['home', 'search'].includes(screen) && <ScreenLayer key={screen} screen={screen}>
                   {screen === 'map' && <MapScreen command={sheetCmd} onOpenVenue={openVenue} onOpenSearch={() => { nav('search'); navigateSearch(searchRoute); }} savedIds={Object.keys(decided).filter(id => decided[id] === 'save')} onToggleSaved={toggleSaved} />}
@@ -254,6 +264,7 @@ export default function App() {
                 <motion.div className="abs" style={{ inset: 0, display: screen === 'search' ? 'block' : 'none' }} aria-hidden={screen !== 'search'} initial={false} animate={{ opacity: screen === 'search' ? 1 : 0 }} transition={GENTLE}>
                   <Search route={searchRoute} active={screen === 'search' && !venueOpen} onNavigate={navigateSearch} onBack={backSearch} onOpenVenue={openSearchVenue} hasSaved={decided.foxy === 'save'} activeMode={activeM} booking={booking} />
                 </motion.div>
+                {exploreOpen && <ExplorePost onBack={closeExplore} onOpenVenue={openVenue} liked={exploreLiked} setLiked={setExploreLiked} saved={exploreSaved} setSaved={setExploreSaved} follow={exploreFollow} setFollow={setExploreFollow} replies={exploreReplies} setReplies={setExploreReplies}/>}
                 <AnimatePresence>
                   {venueOpen && (
                     <motion.div key="venue" className="abs" style={{ inset: 0, zIndex: 42, boxShadow: '-12px 0 40px rgba(42,38,80,0.12)' }}
@@ -335,7 +346,7 @@ export default function App() {
                 </AnimatePresence>
                 <div className="abs" style={{ inset: 0, zIndex: 60, pointerEvents: 'none' }}><Toast text={note} icon={note && /Only|later/.test(note) ? 'info' : 'check'} /></div>
                 {!PHONE && <StatusBar shade={screen === 'search' && !venueOpen ? 0 : flow || sense ? 0 : venueOpen ? (venueScroll > 270 ? 1 : 0) : screen !== 'map' && homeScroll > 24 ? 1 : 0} />}
-                <TabBar active={screen} onNav={to => { nav(to); if (to === 'search') navigateSearch(searchRoute); }} top={venueOpen || modesOpen || editing || (screen === 'search' && ['search-filters','search-place'].includes(searchRoute)) ? 1000 : page ? TAB_TOP.home : TAB_TOP[screen]} yMV={screen === 'home' ? pull : undefined} />
+                <TabBar active={screen} onNav={to => { nav(to); if (to === 'search') navigateSearch(searchRoute); }} top={exploreOpen || venueOpen || modesOpen || editing || (screen === 'search' && ['search-filters','search-place'].includes(searchRoute)) ? 1000 : page ? TAB_TOP.home : TAB_TOP[screen]} yMV={screen === 'home' ? pull : undefined} />
                 {!PHONE && <div className="abs" style={{ left: 150, top: editing || (screen === 'home' && discoverOpen) ? 935 : 943, width: 140, height: 5, borderRadius: 3, background: screen === 'home' && discoverOpen ? '#2a2650' : screen === 'map' ? 'rgba(20,24,31,0.85)' : '#14181f', zIndex: 55 }} />}
                 {!PHONE && <div className="island" />}
               </div>
