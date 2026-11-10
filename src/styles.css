@@ -34,6 +34,14 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webki
 .screen{position:absolute;left:14px;top:14px;width:440px;height:956px;border-radius:62px;overflow:clip;background:#f7f5f1;isolation:isolate}
 .island{position:absolute;left:50%;top:12px;width:86px;height:30px;margin-left:-43px;border-radius:15px;background:#000;z-index:60;pointer-events:none}
 
+/* Phone build (vite --mode phone): the screen is the whole page */
+html.phone,html.phone body{background:#f7f5f1;overscroll-behavior:none;-webkit-touch-callout:none;touch-action:manipulation}
+.stage.phone{gap:0;background:#f7f5f1}
+.stage.phone :not(input):not(textarea){-webkit-user-select:none;user-select:none}
+.stage.phone .device{width:440px;height:956px;border-radius:0;background:none;box-shadow:none}
+.stage.phone .device::before,.stage.phone .device .btn,.stage.phone .island{display:none}
+.stage.phone .screen{left:0;top:0;border-radius:0}
+
 /* Glass (Figma "Glass / ... / Light") */
 .glass{position:absolute;border:1.5px solid rgba(255,255,255,.95);box-shadow:0 14px 18px rgba(42,38,80,.1)}
 .glass>.g-bg{position:absolute;inset:0;border-radius:inherit;pointer-events:none;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);

@@ -138,8 +138,15 @@ Only source copy and user-entered custom names appear in these updated flows. Re
 
 ## Onboarding
 
-Source section `978:5405`: Welcome `978:5406`, Sound `978:5432`, Light `978:5513`, Crowd `978:5594`, Temperature `978:5644`, Seating `978:5725`, Start exploring `978:5767`. Deep links are `#onboarding`, `#onboarding-sound`, `-light`, `-crowd`, `-temp`, `-seating` and `-done`; the side panel has a Replay onboarding button. The app still opens on Home.
+Source section `978:5405`: Welcome `978:5406`, Sound `978:5432`, Light `978:5513`, Crowd `978:5594`, Temperature `978:5644`, Seating `978:5725`, Start exploring `978:5767`. Deep links are `#onboarding`, `#onboarding-sound`, `-light`, `-crowd`, `-temp`, `-seating` and `-done`; the side panel has a Replay onboarding button. The app opens on Welcome, and Skip or finishing lands on Home; a link with a view id (for example `#profile` or `#venue`) opens that view instead.
 
 Skip leaves at any step and saves nothing. Back steps one screen. Sliders drag, tap and take arrow keys; Any clears that preference. Finishing, or Skip for now on the last screen, saves the picks as a "My comfort" custom mode and makes it active, so Home, Search, Discover and Profile follow it. Replaying onboarding replaces that mode. Add another profile saves the same mode and opens Add custom mode from Profile.
 
 Scales: Sound Quiet / Easy to talk / Lively / Loud, Light Dim / Warm & cozy / Natural / Bright, Crowd Almost empty / Relaxed / Moderate / Busy / Packed, Temperature Cool / Mild / Warm. Every label is from Figma or the mode editor except Light's third step, Natural, which is a placeholder. The saved mode is named My comfort and has no description line; that name is not in Figma. Steps past the end of a mode scale fold into its last value (Loud becomes Lively, Packed becomes Busy). Seating chips map to the mode's seat position and layout. Illustrations are 1x Figma exports. The Welcome contour lines are the exported Figma vectors (`src/assets/onboarding/contours.svg`). The Crowd slider's tooltip uses the single-person icon, as in Figma.
+
+
+## Phone build
+
+A second build for testing on a phone. It is the same app and the same code with the iPhone frame, island, status bar, home indicator and side panel removed, so the screen fills the device and text is as large as it can be. Build it with `npm run build:phone` (output `dist/phone/index.html`); `npm run build` produces both builds, the framed laptop version at `dist/index.html` and this one.
+
+The screen keeps its 440 x 956 layout and fills the window width, in portrait or landscape, so an iPhone 14 (390 wide) and an iPhone 17 or 18 (402 wide) get the screen edge to edge. When the window is shorter than the screen (Safari's toolbars, the status bar of a home-screen app), the empty strips at the top (32px) and bottom (24px) of the design are trimmed before the scale shrinks. On iPhone, open the link in Safari and use Share, Add to Home Screen to run it full screen; with Safari's toolbars showing there is less height, so the app scales down to fit. Page zoom, text selection and overscroll are off in this build. Reload, or close and reopen the app, to reset to Welcome between testers.

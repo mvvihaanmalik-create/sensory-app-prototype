@@ -16,7 +16,7 @@ import { PAGE_IDS, PAGES } from './listData.js';
 import { Toast } from './flow.jsx';
 import { GENTLE, ScaleCtx, StatusBar, TabBar } from './ui.jsx';
 
-const DEVICE_W = 468, DEVICE_H = 984;
+const DEVICE_W = 468, DEVICE_H = 984, SCREEN_W = 440;
 const TAB_TOP = { home: 852, search: 862, map: 862, profile: 852 };
 const SCREEN_IN = {
   home: { initial: { opacity: 0, scale: 0.985 }, animate: { opacity: 1, scale: 1 } },
@@ -25,15 +25,32 @@ const SCREEN_IN = {
 };
 const EASE = { duration: 0.42, ease: [0.22, 1, 0.36, 1] };
 
+// `vite build --mode phone`: the screen fills the window, no iPhone frame, side panel, fake status bar or home indicator
+const PHONE = import.meta.env.MODE === 'phone';
+
+// Phone build: the screen fills the window width. When the window is shorter than the 956px design (browser toolbars, status bar),
+// the empty status-bar strip above and home-indicator strip below are trimmed before the scale gives way.
+const CROP_TOP = 32, CROP_BOTTOM = 24;
 function useFitScale() {
   const calc = () => {
     const w = window.innerWidth, h = window.innerHeight;
+    if (PHONE) {
+      const s = Math.min(2, w / SCREEN_W, h / (SCREEN_H - CROP_TOP - CROP_BOTTOM));
+      const c = Math.max(0, Math.min(CROP_TOP + CROP_BOTTOM, SCREEN_H - h / s));
+      return { s, top: (c * CROP_TOP) / (CROP_TOP + CROP_BOTTOM), bottom: (c * CROP_BOTTOM) / (CROP_TOP + CROP_BOTTOM) };
+    }
     const side = w > 900 ? 276 : 0;
-    return Math.min(1, (h - 40) / DEVICE_H, (w - 32 - side) / DEVICE_W);
+    return { s: Math.min(1, (h - 40) / DEVICE_H, (w - 32 - side) / DEVICE_W), top: 0, bottom: 0 };
   };
-  const [s, setS] = useState(calc);
-  useEffect(() => { const f = () => setS(calc()); window.addEventListener('resize', f); return () => window.removeEventListener('resize', f); }, []);
-  return s;
+  const [fit, setFit] = useState(calc);
+  useEffect(() => {
+    // On phones the keyboard resizes the window; keep the scale steady while a field is focused
+    const f = () => { const a = document.activeElement; if (PHONE && a && /^(INPUT|TEXTAREA)$/.test(a.tagName)) return; setFit(calc()); };
+    const o = () => setTimeout(f, 250);
+    window.addEventListener('resize', f); window.addEventListener('orientationchange', o);
+    return () => { window.removeEventListener('resize', f); window.removeEventListener('orientationchange', o); };
+  }, []);
+  return fit;
 }
 
 const VIEWS = [
@@ -66,6 +83,16 @@ const VIEWS = [
   { id: 'onboarding-seating', label: 'Onboarding · 6 Seating' },
   { id: 'onboarding-done', label: 'Onboarding · 7 Start exploring' },
 ];
+
+// The app opens on onboarding. A link with a view id (#profile, #venue ...) opens that view instead; on the phone build a reload resets to onboarding.
+const START = (() => {
+  try {
+    const nav = performance.getEntriesByType('navigation')[0];
+    if (PHONE && nav && nav.type === 'reload') history.replaceState(null, '', location.pathname + location.search);
+  } catch (_) {}
+  const h = (location.hash || '').slice(1);
+  return VIEWS.some((v) => v.id === h) ? h : 'onboarding';
+})();
 const ONB_VIEWS = VIEWS.filter((v) => v.id.startsWith('onboarding')).map((v) => v.id);
 const onbStep = (id) => Math.max(0, ONBOARDING_STEPS.indexOf(id.replace('onboarding-', '')));
 const SEARCH_ROUTES = ['search', 'search-results', 'search-filters', 'search-place'];
@@ -82,8 +109,8 @@ const flowOf = (id) => (id.startsWith('book') ? 'book' : ['review', 'confirmed']
 const SHEET_UP = { initial: { y: 956 }, animate: { y: 0 }, exit: { y: 956 } };
 
 export default function App() {
-  const scale = useFitScale();
-  const initial = (() => { const h = (location.hash || '').slice(1); return VIEWS.some((v) => v.id === h) ? h : 'home'; })();
+  const { s: scale, top: cropTop, bottom: cropBottom } = useFitScale();
+  const initial = START;
   const [screen, setScreen] = useState(SEARCH_ROUTES.includes(initial) ? 'search' : initial.startsWith('map') ? 'map' : VENUE_VIEWS.includes(initial) || HOME_VIEWS.includes(initial) ? 'home' : initial);
   const [searchRoute, setSearchRoute] = useState(SEARCH_ROUTES.includes(initial) ? initial : 'search');
   const [page, setPage] = useState(PAGE_IDS.includes(initial) || initial === 'sort-sound' ? (initial === 'sort-sound' ? 'cafes' : initial) : null);
@@ -196,8 +223,8 @@ export default function App() {
   return (
     <MotionConfig reducedMotion={reduceMotion ? 'always' : 'never'}>
       <ScaleCtx.Provider value={scale}>
-        <div className="stage">
-          <aside className="panel">
+        <div className={PHONE ? 'stage phone' : 'stage'}>
+          {!PHONE && <aside className="panel">
             <div>
               <div className="label">UXDG 370 · Final flow</div>
               <h1>Calm places,<br />Savannah</h1>
@@ -206,10 +233,10 @@ export default function App() {
               <button onClick={() => { try { history.replaceState(null, '', location.pathname); } catch (_) {} location.reload(); }}>Restart</button>
               <button onClick={() => startOnboarding(0)}>Replay onboarding</button>
             </div>
-          </aside>
+          </aside>}
 
-          <div className="device-wrap" style={{ width: DEVICE_W * scale, height: DEVICE_H * scale }}>
-            <div className="device" style={{ transform: `scale(${scale})` }}>
+          <div className="device-wrap" style={{ width: (PHONE ? SCREEN_W : DEVICE_W) * scale, height: ((PHONE ? SCREEN_H - cropTop - cropBottom : DEVICE_H)) * scale, ...(PHONE ? { overflow: 'hidden' } : null) }}>
+            <div className="device" style={{ transform: PHONE ? `translateY(${-cropTop * scale}px) scale(${scale})` : `scale(${scale})` }}>
               <div className="btn" style={{ left: -3, top: 196, height: 34 }} />
               <div className="btn" style={{ left: -3, top: 256, height: 64 }} />
               <div className="btn" style={{ left: -3, top: 334, height: 64 }} />
@@ -307,10 +334,10 @@ export default function App() {
                   )}
                 </AnimatePresence>
                 <div className="abs" style={{ inset: 0, zIndex: 60, pointerEvents: 'none' }}><Toast text={note} icon={note && /Only|later/.test(note) ? 'info' : 'check'} /></div>
-                <StatusBar shade={screen === 'search' && !venueOpen ? 0 : flow || sense ? 0 : venueOpen ? (venueScroll > 270 ? 1 : 0) : screen !== 'map' && homeScroll > 24 ? 1 : 0} />
+                {!PHONE && <StatusBar shade={screen === 'search' && !venueOpen ? 0 : flow || sense ? 0 : venueOpen ? (venueScroll > 270 ? 1 : 0) : screen !== 'map' && homeScroll > 24 ? 1 : 0} />}
                 <TabBar active={screen} onNav={to => { nav(to); if (to === 'search') navigateSearch(searchRoute); }} top={venueOpen || modesOpen || editing || (screen === 'search' && ['search-filters','search-place'].includes(searchRoute)) ? 1000 : page ? 876 : TAB_TOP[screen]} yMV={screen === 'home' ? pull : undefined} />
-                <div className="abs" style={{ left: 150, top: editing || (screen === 'home' && discoverOpen) ? 935 : 943, width: 140, height: 5, borderRadius: 3, background: screen === 'home' && discoverOpen ? '#2a2650' : screen === 'map' ? 'rgba(20,24,31,0.85)' : '#14181f', zIndex: 55 }} />
-                <div className="island" />
+                {!PHONE && <div className="abs" style={{ left: 150, top: editing || (screen === 'home' && discoverOpen) ? 935 : 943, width: 140, height: 5, borderRadius: 3, background: screen === 'home' && discoverOpen ? '#2a2650' : screen === 'map' ? 'rgba(20,24,31,0.85)' : '#14181f', zIndex: 55 }} />}
+                {!PHONE && <div className="island" />}
               </div>
             </div>
           </div>
