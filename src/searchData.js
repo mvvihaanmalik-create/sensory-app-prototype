@@ -57,14 +57,14 @@ export const PLACES = [...inventory.values()].map(p => {
   add(p.l != null && p.l <= 2 && p.s != null && p.s <= 3, 'Romantic');
   add(p.s != null && p.s <= 2 && ['Café', 'Bookstore'].includes(p.type), 'Study & work');
   add(p.id === 'opening', 'New in Savannah');
-  return { ...p, l: lightLevel, tags, art, color, area: p.type === 'Event' ? p.meta?.split(' · ')[0] || 'Savannah' : 'Savannah', distance: p.dist || p.meta?.match(/[0-9.]+ mi/)?.[0] || 'Nearby', sound: SOUND_W[p.s] || 'Unknown', light: LIGHT_W[lightLevel] || 'Unknown', crowd: CROWD_W[p.c] || 'Unknown', seating: p.seat?.includes('outdoor') ? 'Patio' : p.seat?.includes('booth') ? 'Booths' : p.seat?.includes('indoor') ? 'Indoor' : 'Unknown' };
+  return { ...p, l: lightLevel, tags, art, color, area: p.type === 'Event' ? p.meta?.split(' · ')[0] || 'Savannah' : 'Savannah', distance: p.dist || p.meta?.match(/[0-9.]+ mi/)?.[0] || 'Nearby', sound: SOUND_W[p.s] || 'Unknown', light: LIGHT_W[lightLevel] || 'Unknown', crowd: CROWD_W[p.c] || 'Unknown', seating: p.seat?.includes('outdoor') ? p.type === 'Event' ? 'Outdoor' : 'Patio' : p.seat?.includes('booth') ? 'Booths' : p.seat?.includes('indoor') ? 'Indoor' : 'Unknown' };
 });
 // Figma includes Bakeries; the existing inventory has none. One explicit fixture
 // keeps this card usable until bakery data is supplied.
 PLACES.push({ id: 'bakery-demo', name: 'Auspicious Baking Co.', type: 'Bakery', area: 'Savannah', distance: '2.1 mi', s: 2, l: 4, c: 2, seat: ['outdoor'], sound: 'Quiet', light: 'Natural', crowd: 'Calm', seating: 'Patio', art: 'Bakeries', color: '#ebd7b4', tags: ['Bakeries', 'Brunch', 'Low-key', 'Cozy', 'Quiet now', 'Outdoor seating', 'Natural light', 'New in Savannah'] });
 
 export function matchesFilters(place, filters) {
-  return filters.every(f => f === 'Quiet' ? place.s != null && place.s <= 2 : f === 'Natural light' ? place.light === 'Natural' : f === 'Outdoor seating' ? ['Patio', 'Outdoor'].includes(place.seating) : place.c != null && place.c <= 2);
+  return filters.every(f => f === 'Quiet' ? place.s != null && place.s <= 2 : f === 'Natural light' ? place.tags.includes('Natural light') : f === 'Outdoor seating' ? ['Patio', 'Outdoor'].includes(place.seating) : f === 'Less crowded' && place.c != null && place.c <= 2);
 }
 export function searchPlaces(query, category, filters, hasSavedPlace, mode) {
   const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
