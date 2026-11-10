@@ -17,14 +17,14 @@ export function CloseX({ onClick, top = 30 }) {
 }
 
 // Dimmed backdrop (44%) plus a white sheet with a handle. Slides up from the bottom edge.
-export function SheetFrame({ top, height, onClose, z = 45, children }) {
+export function SheetFrame({ top, height, onClose, z = 45, children, sheetStyle }) {
   const place = top != null ? { top, bottom: 0 } : { bottom: 0, height };
   return (
     <div className="abs" style={{ inset: 0, zIndex: z }}>
       <motion.div className="abs" style={{ inset: 0, background: INK }} initial={{ opacity: 0 }} animate={{ opacity: 0.44 }} exit={{ opacity: 0 }}
         transition={{ duration: 0.25 }} onClick={onClose} />
       <motion.div className="abs" style={{ left: 0, width: 440, ...place, background: '#fff', borderRadius: '32px 32px 0 0', border: '1px solid rgba(20,24,31,0.08)', borderBottom: 0,
-        boxShadow: '0 12px 32px rgba(27,42,68,0.06)', overflow: 'hidden' }}
+        boxShadow: '0 12px 32px rgba(27,42,68,0.06)', overflow: 'hidden', ...sheetStyle }}
         initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={SHEET_SPRING}>
         <div className="abs" style={{ left: 200, top: 14, width: 40, height: 5, borderRadius: 3, background: 'rgba(42,38,80,0.2)' }} />
         {children}
@@ -57,3 +57,4 @@ export function TextBtn({ children, onClick, style }) {
       style={{ height: 44, borderRadius: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 700, color: INK2, ...style }}>{children}</motion.button>
   );
 }
+

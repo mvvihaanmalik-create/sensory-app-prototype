@@ -1,0 +1,37 @@
+.mode-choice{position:relative;width:392px;height:96px;flex:none;border:1px solid rgba(20,24,31,.08);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:6px;text-align:left}
+.mode-choice-pick{position:absolute;inset:0;border-radius:inherit}
+.mode-choice-title{display:flex;align-items:center;justify-content:space-between;height:20px;font-size:17px;line-height:20px;font-weight:700;pointer-events:none;gap:8px}
+.mode-choice-title>span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mode-active{border-radius:999px;background:rgba(47,98,201,.08);font-size:12px;line-height:14px;padding:2px 8px;flex:none}
+.mode-choice-description{font-size:13px;font-weight:500;line-height:16px;color:#4b5462;pointer-events:none}
+.mode-choice-edit{position:relative;display:flex;align-items:center;gap:4px;align-self:flex-start;font-size:12px;line-height:16px;font-weight:500;color:#4b5462}
+.mode-choice-edit img,.mode-add img{display:block;flex:none}
+.mode-choice-section{display:flex;flex-direction:column;gap:12px}
+.mode-section-title{font-size:17px;font-weight:700;line-height:20px;color:#14181f}
+.mode-add{height:44px;flex:none;border-radius:24px;background:#14181f;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 18px rgba(27,42,68,.12);font-size:15px;font-weight:700;color:white}
+.mode-editor-content{position:relative;display:flex;flex-direction:column;gap:20px;width:440px;padding:14px 24px 150px}
+.mode-identity{padding:20px;border-radius:24px;display:flex;flex-direction:column;gap:8px}
+.mode-identity p:first-child{font-size:32px;font-weight:600;line-height:36px;letter-spacing:-.64px}
+.mode-identity p:last-child{font-size:15px;font-weight:500;line-height:18px;color:#4b5462}
+.mode-preferences{display:flex;flex-direction:column;gap:8px}
+.mode-slider{position:relative;width:392px;height:108px;flex:none;background:white;border-radius:22px}
+.mode-slider-title{position:absolute;left:16px;top:13px;font-size:16px;font-weight:600;line-height:19px;color:#141a21}
+.mode-slider-value{position:absolute;right:16px;top:15px;font-size:14px;line-height:17px;color:#386b5e}
+.mode-slider-track,.mode-slider-fill{position:absolute;left:24px;top:56px;height:6px;border-radius:4px;background:rgba(42,38,80,.1);width:344px;pointer-events:none}
+.mode-slider-fill{background:#386b5e;width:0}
+.mode-slider-thumb{position:absolute;left:16px;top:51px;width:16px;height:16px;border-radius:8px;background:#386b5e;pointer-events:none}
+.mode-slider-input{position:absolute;left:16px;top:43px;width:360px;height:32px;margin:0;padding:0;opacity:0;cursor:pointer;touch-action:pan-y}
+.mode-slider:focus-within{outline:2px solid rgba(56,107,94,.35);outline-offset:2px}
+.mode-slider-labels button{position:absolute;top:76px;height:28px;font-size:12px;line-height:14px;color:#4d5766;white-space:nowrap}
+.mode-seating{position:relative;width:392px;height:84px;background:white;flex:none;border-radius:22px}
+.mode-seating>p{position:absolute;left:16px;top:12px;font-size:16px;font-weight:600;line-height:19px;color:#141a21}
+.mode-seating>button{position:absolute;top:41px;height:28px;border-radius:14px;background:#e5f0e8;font-size:12px;line-height:14px;color:#141a21}
+.mode-save-wrap{left:24px;width:392px;display:flex;justify-content:center;pointer-events:none;z-index:20}
+.mode-save{pointer-events:auto;height:63px;border:1.5px solid rgba(255,255,255,.95);border-radius:30px;padding:0 36px;background:#14181f;box-shadow:0 14px 18px rgba(42,38,80,.1),inset 0 1px rgba(255,255,255,.9);color:white;font-size:17px;font-weight:600}
+.mode-save:disabled{opacity:.42;cursor:default}
+.mode-name-field{display:flex;flex-direction:column;gap:10px}
+.mode-name-field label{font-size:15px;font-weight:700;line-height:18px}
+.mode-name-field>div{height:52px;border-radius:16px;padding:0 16px;display:flex;align-items:center;background:rgba(255,255,255,.85);box-shadow:0 4px 14px rgba(27,42,68,.05)}
+.mode-name-field input{all:unset;width:100%;font-size:16px;line-height:19px;color:#14181f}
+
+.mode-choice-title,.mode-choice-description,.mode-choice-edit{flex-shrink:0}

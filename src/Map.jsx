@@ -10,13 +10,12 @@ export const SNAP = { full: 172, half: 616, hidden: 956 };
 const SNAPS = [SNAP.full, SNAP.half, SNAP.hidden];
 
 const RECS = [
-  { title: 'Foxy Loxy Café', meta: 'Level 2 · 0.5 mi · Updated 1h ago', reason: 'Good fit · Quiet · natural light' },
-  { title: 'The Sentient', meta: 'Level 2 · 0.5 mi · Updated 1h ago', reason: 'Good fit · Quiet · natural light' },
-  { title: 'Gallery Café', meta: 'Level 3 · 0.5 mi · Updated 1h ago', reason: 'Mixed fit · More crowded' },
+  { id: 'foxy', title: 'Foxy Loxy Café', meta: 'Level 2 · 0.5 mi · Updated 1h ago', reason: 'Good fit · Quiet · natural light' },
+  { id: 'sentient', title: 'The Sentient', meta: 'Level 2 · 0.5 mi · Updated 1h ago', reason: 'Good fit · Quiet · natural light' },
+  { id: 'gallery', title: 'Gallery Café', meta: 'Level 3 · 0.5 mi · Updated 1h ago', reason: 'Mixed fit · More crowded' },
 ];
 
-function Recommendation({ r, onOpen }) {
-  const [saved, setSaved] = useState(false);
+function Recommendation({ r, onOpen, saved, onToggleSaved }) {
   return (
     <div onClick={onOpen} style={{ width: 400, display: 'flex', flexDirection: 'column', gap: 8, cursor: onOpen ? 'pointer' : 'default' }}>
       <div style={{ width: 400, height: 191, borderRadius: 8, background: '#d7d7d7' }} />
@@ -25,7 +24,7 @@ function Recommendation({ r, onOpen }) {
           <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 17, lineHeight: 1.3, color: '#383838' }}>{r.title}</p>
           <p style={{ fontSize: 12, color: '#6a6478' }}>{r.meta}</p>
         </div>
-        <motion.button aria-label="Save venue" onClick={(e) => { e.stopPropagation(); setSaved((s) => !s); }}
+        <motion.button aria-label="Save venue" aria-pressed={saved} onClick={(e) => { e.stopPropagation(); onToggleSaved(r.id); }}
           whileTap={{ scale: 0.8 }} style={{ position: 'relative', width: 44, height: 44, flex: 'none' }}>
           <img src={uri('heart')} alt="" className="abs" style={{ left: 12, top: 10, width: 20, height: 20 }} />
           <motion.svg className="abs" style={{ left: 12, top: 10 }} width="20" height="20" viewBox="0 0 20 20"
@@ -56,7 +55,7 @@ const SENSES = [
   { key: 'Crowd', d: paths.users },
 ];
 
-export default function MapScreen({ command, onOpenVenue, onOpenSearch }) {
+export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds = [], onToggleSaved = () => {} }) {
   const scale = useScale();
   const top = useMotionValue(SNAP.half);
   const [state, setState] = useState('half');
@@ -200,7 +199,7 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch }) {
         <div ref={listRef} className="abs scroll" {...handlers('list')}
           style={{ inset: 'auto', left: 0, top: 80, bottom: 0, width: 440, overflowY: state === 'full' ? 'auto' : 'hidden', touchAction: state === 'full' ? 'pan-y' : 'none' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24, padding: '0 20px 112px' }}>
-            {RECS.map((r, i) => <Recommendation key={r.title} r={r} onOpen={i === 0 ? onOpenVenue : undefined} />)}
+            {RECS.map((r, i) => <Recommendation key={r.title} r={r} saved={savedIds.includes(r.id)} onToggleSaved={onToggleSaved} onOpen={i === 0 ? onOpenVenue : undefined} />)}
           </div>
         </div>
       </motion.div>

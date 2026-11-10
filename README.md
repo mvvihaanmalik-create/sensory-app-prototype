@@ -126,3 +126,11 @@ git pull --ff-only
 git switch -c feature/short-description
 ```
 
+
+## Home and Profile update
+
+Source frames: Home selector `909:3822`; mode editors `984:7582`, `984:7663`, `984:7738`; Profile `737:2790`, `1025:6415`, `1025:6438`, `1025:6461`. The Home hero and linked category layouts were checked against the current file.
+
+Profile uses the authored My modes carousel and Saved places page. Mode changes, edits and custom names share App state with Home, Search and Discover. Editors use the four source sliders and seating choices. Save and Back return to the screen that opened the editor. Saved places starts with the source Foxy Loxy/The Grey fixtures and reflects later venue, map and Discover saves.
+
+Only source copy and user-entered custom names appear in these updated flows. Removed the old preference hints, picker-only labels, mode-save notifications and prototype-only list notices.
