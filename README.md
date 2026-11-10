@@ -143,3 +143,10 @@ Source section `978:5405`: Welcome `978:5406`, Sound `978:5432`, Light `978:5513
 Skip leaves at any step and saves nothing. Back steps one screen. Sliders drag, tap and take arrow keys; Any clears that preference. Finishing, or Skip for now on the last screen, saves the picks as a "My comfort" custom mode and makes it active, so Home, Search, Discover and Profile follow it. Replaying onboarding replaces that mode. Add another profile saves the same mode and opens Add custom mode from Profile.
 
 Scales: Sound Quiet / Easy to talk / Lively / Loud, Light Dim / Warm & cozy / Natural / Bright, Crowd Almost empty / Relaxed / Moderate / Busy / Packed, Temperature Cool / Mild / Warm. Every label is from Figma or the mode editor except Light's third step, Natural, which is a placeholder. The saved mode is named My comfort and has no description line; that name is not in Figma. Steps past the end of a mode scale fold into its last value (Loud becomes Lively, Packed becomes Busy). Seating chips map to the mode's seat position and layout. Illustrations are 1x Figma exports. The Welcome contour lines are redrawn as nested rings rather than the Figma vectors.
+
+
+## Phone build
+
+A second build for testing on a phone. It is the same app and the same code with the iPhone frame, island, status bar, home indicator and side panel removed, so the screen fills the device and text is as large as it can be. Build it with `npm run build:phone` (output `dist/phone/index.html`); `npm run build` produces both builds, the framed laptop version at `dist/index.html` and this one.
+
+The screen keeps its 440 x 956 layout and scales to fit the window, in portrait or landscape. On iPhone, open the link in Safari and use Share, Add to Home Screen to run it full screen; with Safari's toolbars showing the usable height is smaller, so the app scales down to fit. Page zoom, text selection and overscroll are off in this build. Reload, or close and reopen the app, to reset between testers.
