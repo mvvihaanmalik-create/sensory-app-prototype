@@ -4,6 +4,7 @@ import Home from './Home.jsx';
 import MapScreen from './Map.jsx';
 import Profile from './Profile.jsx';
 import Search from './Search.jsx';
+import Onboarding, { ONBOARDING_STEPS } from './Onboarding.jsx';
 import DiscoverLayer, { SCREEN_H, OPEN_SPRING, CLOSE_SPRING } from './Discover.jsx';
 import Venue from './Venue.jsx';
 import BookTable, { BookingConfirmed, emptyDraft, slotsFor, DATES } from './BookTable.jsx';
@@ -57,14 +58,23 @@ const VIEWS = [
   { id: 'add-mode', label: 'Add custom mode' },
   { id: 'sort-sound', label: 'Sound sort sheet' },
   { id: 'discover', label: 'Hidden discovery' },
+  { id: 'onboarding', label: 'Onboarding · 1 Welcome' },
+  { id: 'onboarding-sound', label: 'Onboarding · 2 Sound' },
+  { id: 'onboarding-light', label: 'Onboarding · 3 Light' },
+  { id: 'onboarding-crowd', label: 'Onboarding · 4 Crowd' },
+  { id: 'onboarding-temp', label: 'Onboarding · 5 Temperature' },
+  { id: 'onboarding-seating', label: 'Onboarding · 6 Seating' },
+  { id: 'onboarding-done', label: 'Onboarding · 7 Start exploring' },
 ];
+const ONB_VIEWS = VIEWS.filter((v) => v.id.startsWith('onboarding')).map((v) => v.id);
+const onbStep = (id) => Math.max(0, ONBOARDING_STEPS.indexOf(id.replace('onboarding-', '')));
 const SEARCH_ROUTES = ['search', 'search-results', 'search-filters', 'search-place'];
 function ScreenLayer({ screen, children }) {
   const present = useIsPresent();
   return <motion.div className="abs" aria-hidden={!present || undefined} style={{ inset: 0, pointerEvents: present ? 'auto' : 'none' }} initial={SCREEN_IN[screen].initial} animate={SCREEN_IN[screen].animate} exit={{ opacity: 0, transition: { duration: .28 } }} transition={EASE}>{children}</motion.div>;
 }
 const MODE_VIEWS = ['modes', 'edit-study', 'edit-party', 'add-mode'];
-const HOME_VIEWS = [...PAGE_IDS, ...MODE_VIEWS, 'sort-sound', 'discover'];
+const HOME_VIEWS = [...PAGE_IDS, ...MODE_VIEWS, 'sort-sound', 'discover', ...ONB_VIEWS];
 const VENUE_VIEWS = ['venue', 'venue-reviews', 'sense', 'review', 'book', 'book-2', 'book-3', 'confirmed'];
 const SAMPLE_DRAFT = { ...emptyDraft(), guests: 2, date: 0, time: '5:30 PM', zone: 'Patio', table: 4, comfort: ['Away from speakers'] };
 const toBooking = (d) => ({ ...d, crowd: slotsFor(d.date, d.guests).find((s) => s.time === d.time).crowd, dayShort: DATES[d.date].short, dayLong: DATES[d.date].long });
@@ -85,6 +95,7 @@ export default function App() {
   const [sortSheet, setSortSheet] = useState(initial === 'sort-sound' ? { sense: 'sound', value: null, onApply: () => {} } : null);
   const [sortsBy, setSortsBy] = useState({});
   const [note, setNote] = useState(null);
+  const [onboarding, setOnboarding] = useState(ONB_VIEWS.includes(initial) ? { start: onbStep(initial), n: 0 } : null);
   const noteTimer = useRef(0);
   const sayNote = (m) => { setNote(m); clearTimeout(noteTimer.current); noteTimer.current = setTimeout(() => setNote(null), 2400); };
   const [venueOpen, setVenueOpen] = useState(VENUE_VIEWS.includes(initial));
@@ -144,8 +155,21 @@ export default function App() {
     setEditing(null); setModesOpen(modeOrigin === 'home');
   };
   const editMode = (id, origin) => { setModeOrigin(origin); setEditing(id); };
+  // Onboarding picks become a "My comfort" mode that the rest of the app follows
+  const applyOnboarding = (m) => {
+    if (!m) return;
+    setModes((ms) => (ms.some((x) => x.id === m.id) ? ms.map((x) => (x.id === m.id ? m : x)) : [...ms, m]));
+    setActiveMode(m.id);
+  };
+  const endOnboarding = () => { setOnboarding(null); try { history.replaceState(null, '', '#' + (screen === 'map' ? 'map-half' : screen === 'search' ? searchRoute : screen)); } catch (_) {} };
+  const startOnboarding = (start = 0) => {
+    closeVenue(); setPage(null); setModesOpen(false); setEditing(null); setSortSheet(null);
+    if (discoverOpen) closeDiscover();
+    setOnboarding({ start, n: Date.now() });
+  };
   const bannerText = activeM.id === 'study' && activeM.prefs.sound === 'Quiet' ? 'Because you like quiet cafés and outdoor seating' : null;
   const jump = (id) => {
+    if (ONB_VIEWS.includes(id)) { startOnboarding(onbStep(id)); try { history.replaceState(null, '', '#' + id); } catch (_) {} return; }
     if (SEARCH_ROUTES.includes(id)) { closeVenue(); nav('search'); navigateSearch(id); return; }
     if (VENUE_VIEWS.includes(id)) {
       setVenueOpen(true); setVenueScroll(0);
@@ -180,6 +204,7 @@ export default function App() {
             </div>
             <div className="tools"><button onClick={() => { nav('search'); navigateSearch('search'); }}>Search</button>
               <button onClick={() => { try { history.replaceState(null, '', location.pathname); } catch (_) {} location.reload(); }}>Restart</button>
+              <button onClick={() => startOnboarding(0)}>Replay onboarding</button>
             </div>
           </aside>
 
@@ -267,6 +292,17 @@ export default function App() {
                     <motion.div key="edit" className="abs" style={{ inset: 0, zIndex: 46 }}
                       initial={{ x: 440 }} animate={{ x: 0 }} exit={{ x: 440 }} transition={{ type: 'spring', stiffness: 260, damping: 32 }}>
                       <EditMode key={editing} mode={modes.find((m) => m.id === editing)} isNew={editing === 'new'} onBack={() => setEditing(null)} onSave={saveMode} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <AnimatePresence>
+                  {onboarding && (
+                    <motion.div key={'onb' + onboarding.n} className="abs" style={{ inset: 0, zIndex: 48 }}
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.3 } }} transition={{ duration: 0.3 }}>
+                      <Onboarding start={onboarding.start}
+                        onSkip={endOnboarding}
+                        onFinish={(m) => { applyOnboarding(m); endOnboarding(); }}
+                        onAddAnother={(m) => { applyOnboarding(m); setOnboarding(null); nav('profile'); try { history.replaceState(null, '', '#profile'); } catch (_) {} editMode('new', 'profile'); }} />
                     </motion.div>
                   )}
                 </AnimatePresence>

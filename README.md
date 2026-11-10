@@ -134,3 +134,12 @@ Source frames: Home selector `909:3822`; mode editors `984:7582`, `984:7663`, `9
 Profile uses the authored My modes carousel and Saved places page. Mode changes, edits and custom names share App state with Home, Search and Discover. Editors use the four source sliders and seating choices. Save and Back return to the screen that opened the editor. Saved places starts with the source Foxy Loxy/The Grey fixtures and reflects later venue, map and Discover saves.
 
 Only source copy and user-entered custom names appear in these updated flows. Removed the old preference hints, picker-only labels, mode-save notifications and prototype-only list notices.
+
+
+## Onboarding
+
+Source section `978:5405`: Welcome `978:5406`, Sound `978:5432`, Light `978:5513`, Crowd `978:5594`, Temperature `978:5644`, Seating `978:5725`, Start exploring `978:5767`. Deep links are `#onboarding`, `#onboarding-sound`, `-light`, `-crowd`, `-temp`, `-seating` and `-done`; the side panel has a Replay onboarding button. The app still opens on Home.
+
+Skip leaves at any step and saves nothing. Back steps one screen. Sliders drag, tap and take arrow keys; Any clears that preference. Finishing, or Skip for now on the last screen, saves the picks as a "My comfort" custom mode and makes it active, so Home, Search, Discover and Profile follow it. Replaying onboarding replaces that mode. Add another profile saves the same mode and opens Add custom mode from Profile.
+
+Scales: Sound Very quiet / Easy to talk / Lively / Loud, Light Dim / Warm & cozy / Natural / Bright, Crowd Almost empty to Packed (5 steps), Temperature Cool / Mild / Warm. Only the labels shown in Figma are source copy; the intermediate step labels are inferred. Steps past the end of a mode scale fold into its last value (Loud becomes Lively, Packed becomes Busy). Seating chips map to the mode's seat position and layout. Illustrations are 1x Figma exports. The Welcome contour lines are redrawn as nested rings rather than the Figma vectors.
