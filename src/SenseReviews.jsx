@@ -197,10 +197,9 @@ function SenseBody({ sense }) {
           </motion.div>
         ))}
       </div>
-      {list.length === 0 && <p style={{ ...t(14, 400), textAlign: 'center', padding: '12px 0' }}>No photos tagged {filter.toLowerCase()} yet.</p>}
       <G as="button" r={26} onClick={() => setMore(true)} whileTap={!more ? { scale: 0.98 } : undefined} transition={TAP}
         style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: more ? 0.5 : 1, cursor: more ? 'default' : 'pointer' }}>
-        <span style={t(15, 600)}>{more ? `That's all for now` : `See more ${d.title.toLowerCase()} photos`}</span>
+        <span style={t(15, 600)}>{`See more ${d.title.toLowerCase()} photos`}</span>
       </G>
     </div>
   );

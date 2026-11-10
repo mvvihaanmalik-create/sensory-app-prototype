@@ -208,14 +208,7 @@ function StepWhen({ draft, set, refs, ctl }) {
               </motion.button>
             </div>
           </G>
-          <AnimatePresence initial={false}>
-            {guests >= 6 && (
-              <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={GENTLE}
-                style={{ ...t(13, 400), overflow: 'hidden', marginTop: -6, paddingLeft: 4 }}>
-                Bigger tables are limited at busy times, so some times close up.
-              </motion.p>
-            )}
-          </AnimatePresence>
+
         </Section>
       </motion.div>
 
@@ -273,14 +266,7 @@ function StepWhen({ draft, set, refs, ctl }) {
               );
             })}
           </div>
-          <AnimatePresence initial={false}>
-            {date != null && slots.some((s) => !s.ok) && (
-              <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={GENTLE}
-                style={{ ...t(13, 400), overflow: 'hidden', marginTop: -4 }}>
-                Faded times are full or after closing.
-              </motion.p>
-            )}
-          </AnimatePresence>
+
         </Section>
       </motion.div>
     </div>
@@ -412,30 +398,17 @@ function StepWhere({ draft, set, refs, ctl, goStep }) {
                 <span style={t(13, 500)}>Up to {sel.cap}</span>
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>{sel.tags.map((x) => <Pill key={x}>{x}</Pill>)}</div>
-              {misses.length > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                  <span style={t(13, 400)}>This table is {misses.map((c) => RULES[c][1]).join(' and ')}.</span>
-                  {better && (
-                    <motion.button className="gl-solid" whileTap={{ scale: 0.95 }} onClick={() => set({ zone: better.zone, table: better.id })}
-                      style={{ height: 30, padding: '0 12px', borderRadius: 15, border: 0, ...t(13, 600) }}>Try table {better.id}</motion.button>
-                  )}
-                </div>
-              )}
+
             </motion.div>
           ) : (
             <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
               style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <VIcon name="chair" size={24} />
-              <span style={t(15, 500)}>{zoneFree ? `Tap a table to see what it's like` : `No free tables for ${guests} here. Try another area.`}</span>
+
             </motion.div>
           )}
         </AnimatePresence>
-        <AnimatePresence initial={false}>
-          {hint && (
-            <motion.p key={hint} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={GENTLE}
-              style={{ ...t(13, 400), overflow: 'hidden' }}>{hint}</motion.p>
-          )}
-        </AnimatePresence>
+
       </G>
 
       <Section title="Make it comfortable" note="Optional · pick any" gap={14}>

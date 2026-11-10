@@ -257,7 +257,7 @@ export function AISummary() {
         <span style={t(15, 600)}>Review summary</span>
       </div>
       <p style={t(15, 400, NAVY, { lineHeight: 1.4 })}>
-        People love the cozy, artsy feel, the back patio and garden pond, and the pastries. Kolaches and chai come up often. Many say it gets busy on weekends and seating and parking can be tight, so mornings are calmer.
+        People love the cozy, artsy feel, the back patio and garden pond, and the pastries — kolaches and chai come up often. Many say it gets busy on weekends and seating and parking can be tight, so mornings are calmer.
       </p>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {['Patio · 310', 'Kolache · 180', 'Chai · 150', 'Busy weekends · 120'].map((m) => <Pill key={m}>{m}</Pill>)}
