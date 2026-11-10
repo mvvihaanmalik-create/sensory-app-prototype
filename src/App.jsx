@@ -129,6 +129,7 @@ export default function App() {
   const sayNote = (m) => { setNote(m); clearTimeout(noteTimer.current); noteTimer.current = setTimeout(() => setNote(null), 2400); };
   const [exploreOpen, setExploreOpen] = useState(initial === 'explore-post');
   const [exploreLiked, setExploreLiked] = useState(false), [exploreSaved,setExploreSaved] = useState(false);
+  const [exploreFollow,setExploreFollow]=useState(false),[exploreReplies,setExploreReplies]=useState([]);
   const openExplore = () => { setExploreOpen(true); history.pushState({explore:true},'', '#explore-post'); };
   const closeExplore = () => { setExploreOpen(false); if(history.state?.explore) history.back(); else history.replaceState(null,'','#home'); };
   useEffect(()=>{ const back=()=>setExploreOpen(location.hash === '#explore-post'); window.addEventListener('popstate',back); return()=>window.removeEventListener('popstate',back); },[]);
@@ -263,7 +264,7 @@ export default function App() {
                 <motion.div className="abs" style={{ inset: 0, display: screen === 'search' ? 'block' : 'none' }} aria-hidden={screen !== 'search'} initial={false} animate={{ opacity: screen === 'search' ? 1 : 0 }} transition={GENTLE}>
                   <Search route={searchRoute} active={screen === 'search' && !venueOpen} onNavigate={navigateSearch} onBack={backSearch} onOpenVenue={openSearchVenue} hasSaved={decided.foxy === 'save'} activeMode={activeM} booking={booking} />
                 </motion.div>
-                {exploreOpen && <ExplorePost onBack={closeExplore} onOpenVenue={openVenue} liked={exploreLiked} setLiked={setExploreLiked} saved={exploreSaved} setSaved={setExploreSaved}/>}
+                {exploreOpen && <ExplorePost onBack={closeExplore} onOpenVenue={openVenue} liked={exploreLiked} setLiked={setExploreLiked} saved={exploreSaved} setSaved={setExploreSaved} follow={exploreFollow} setFollow={setExploreFollow} replies={exploreReplies} setReplies={setExploreReplies}/>}
                 <AnimatePresence>
                   {venueOpen && (
                     <motion.div key="venue" className="abs" style={{ inset: 0, zIndex: 42, boxShadow: '-12px 0 40px rgba(42,38,80,0.12)' }}
