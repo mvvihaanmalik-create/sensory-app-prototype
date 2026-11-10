@@ -82,7 +82,7 @@ export function Chip({ label, on, onClick, disabled }) {
 }
 
 // "+ Other" chip that turns into an inline text field, then into a selected chip.
-function OtherChip({ onAdd }) {
+export function OtherChip({ onAdd, color }) {
   const [editing, setEditing] = useState(false);
   const [val, setVal] = useState('');
   const ref = useRef(null);
@@ -103,8 +103,8 @@ function OtherChip({ onAdd }) {
   return (
     <G as="button" r={22} onClick={() => setEditing(true)} whileTap={{ scale: 0.95 }} transition={TAP}
       style={{ height: 44, padding: '0 16px 0 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
-      <VIcon name="plus" size={16} />
-      <span style={t(14, 500)}>Other</span>
+      <VIcon name="plus" size={16} {...(color ? { fill: color } : {})} />
+      <span style={t(14, 500, color)}>Other</span>
     </G>
   );
 }
@@ -136,7 +136,7 @@ export function ChipGroup({ options, value, onChange, single, other = true }) {
 
 // Glass / Primary button: a hugging pill (h63, r30, 36px side padding) centred at the bottom.
 // Its width springs between labels. Disabled = faded; tapping it then calls onBlocked.
-export function PrimaryCTA({ label, icon, enabled = true, onClick, onBlocked, busy, top = 865, inline }) {
+export function PrimaryCTA({ label, icon, enabled = true, onClick, onBlocked, busy, top = 865, inline, color }) {
   const btn = (
     <motion.button layout className="gl" onClick={() => (busy ? null : enabled ? onClick?.() : onBlocked?.())}
       whileTap={{ scale: 0.96 }} transition={{ layout: GENTLE, default: TAP }}
@@ -146,7 +146,7 @@ export function PrimaryCTA({ label, icon, enabled = true, onClick, onBlocked, bu
         <motion.span layout="position" key={busy ? 'busy' : label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}
           initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }} animate={{ opacity: enabled || busy ? 1 : 0.42, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }} transition={{ duration: 0.22 }}>
           {busy ? <Spinner /> : icon && <VIcon name={icon} />}
-          <span className="nowrap" style={t(17, 600)}>{busy || label}</span>
+          <span className="nowrap" style={t(17, 600, color)}>{busy || label}</span>
         </motion.span>
       </AnimatePresence>
     </motion.button>
