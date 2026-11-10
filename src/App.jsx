@@ -9,17 +9,19 @@ import BookTable, { BookingConfirmed, emptyDraft, slotsFor, DATES } from './Book
 import WriteReview from './WriteReview.jsx';
 import SenseReviews from './SenseReviews.jsx';
 import ListPage, { SortSheet } from './Lists.jsx';
+import Search from './Search.jsx';
 import { ModesSheet, EditMode, INITIAL_MODES, modeLabel } from './Modes.jsx';
 import { PAGE_IDS } from './listData.js';
 import { Toast } from './flow.jsx';
 import { ScaleCtx, StatusBar, TabBar } from './ui.jsx';
 
 const DEVICE_W = 468, DEVICE_H = 984;
-const TAB_TOP = { home: 852, map: 862, profile: 852 };
+const TAB_TOP = { home: 852, search: 862, map: 862, profile: 852 };
 const SCREEN_IN = {
   home: { initial: { opacity: 0, scale: 0.985 }, animate: { opacity: 1, scale: 1 } },
   map: { initial: { opacity: 0, scale: 1.04 }, animate: { opacity: 1, scale: 1 } },
   profile: { initial: { opacity: 0, x: 24 }, animate: { opacity: 1, x: 0 } },
+  search: { initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 } },
 };
 const EASE = { duration: 0.42, ease: [0.22, 1, 0.36, 1] };
 
@@ -39,6 +41,7 @@ const VIEWS = [
   { id: 'map-half', label: 'Map' },
   { id: 'map-full', label: 'Map · sheet up' },
   { id: 'map-hidden', label: 'Map · sheet away' },
+  { id: 'search', label: 'Search' },
   { id: 'profile', label: 'Profile' },
   { id: 'venue', label: 'Venue' },
   { id: 'venue-reviews', label: 'Venue · reviews' },
@@ -107,7 +110,6 @@ export default function App() {
   const showPassed = () => setDecided((m) => Object.fromEntries(Object.entries(m).filter(([, v]) => v === 'save')));
 
   const nav = (to) => {
-    if (to === 'search') return; // no Search screen designed yet
     if (discoverOpen) closeDiscover();
     if (page) setPage(null);
     if (to !== screen) { setScreen(to); setHomeScroll(0); setSheetCmd(null); }
@@ -180,6 +182,7 @@ export default function App() {
                       onDecide={(id, d) => setDecided((m) => ({ ...m, [id]: d }))} onShowPassed={showPassed} onOpenVenue={openVenue} blocked={venueOpen || !!sense || !!flow} />}
                     {screen === 'home' && <Home pull={pull} pullOn={!discoverOpen} onDiscover={() => setDiscoverOpen(true)} onOpenMap={() => nav('map')} onOpenVenue={openVenue} onOpenPage={setPage} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} reduceMotion={reduceMotion} />}
                     {screen === 'map' && <MapScreen command={sheetCmd} onOpenVenue={openVenue} />}
+                    {screen === 'search' && <Search onOpenPage={setPage} onNote={sayNote} onScroll={setHomeScroll} />}
                     {screen === 'profile' && <Profile onScroll={setHomeScroll} savedCount={savedCount} decided={decided} modes={modes} activeId={activeMode}
                       onPickMode={setActiveMode} onEditMode={(id) => { setEditFrom('profile'); setEditing(id); }} onAddMode={() => { setEditFrom('profile'); setEditing('new'); }}
                       onOpenVenue={openVenue} onNote={sayNote} />}
