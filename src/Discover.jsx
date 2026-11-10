@@ -1,11 +1,10 @@
 // Hidden Discovery Mode: the layer under Home. Pull the Home sheet down from the top to reveal it,
 // then swipe cards (right saves, left passes, tap opens the place).
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, animate, motion, useMotionValue, useMotionValueEvent, useTransform } from 'motion/react';
+import { animate, motion, useMotionValue, useTransform } from 'motion/react';
 import { Glass, GENTLE, INK, INK2, NAVY, MUTED, useScale } from './ui.jsx';
 import { TAP } from './flow.jsx';
 import { VIcon } from './venueIcons.jsx';
-import { DarkCTA, TextBtn } from './sheets.jsx';
 import { PAGES } from './listData.js';
 import { SENSE_VALUES } from './Venue.jsx';
 import { discoverAssets as A } from './discoverAssets.js';
@@ -99,32 +98,6 @@ export function usePullDown({ el, pull, enabled, onCommit }) {
   }, [el, pull, enabled]);
 }
 
-/* ---------- "Keep pulling to discover" ---------- */
-function PullHint({ pull }) {
-  const [ready, setReady] = useState(false);
-  useMotionValueEvent(pull, 'change', (v) => { const r = v >= THRESH; setReady((p) => (p === r ? p : r)); });
-  // rides just above the sheet edge, below the status bar and the island, so it only shows once the strip is tall enough
-  const opacity = useTransform(pull, [118, 146, 330, 480], [0, 1, 1, 0]);
-  const top = 108;
-  return (
-    <motion.div className="abs" style={{ left: 0, width: 440, top, opacity, display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: 8, height: 24 }}>
-        <motion.span animate={{ scale: ready ? 1.25 : 1, rotate: ready ? 90 : 0 }} transition={{ type: 'spring', stiffness: 420, damping: 16 }} style={{ display: 'flex' }}>
-          <VIcon name="sparkle" size={18} fill={NAVY} />
-        </motion.span>
-        <span style={{ position: 'relative', display: 'inline-block', fontSize: 14, fontWeight: 600, color: NAVY, lineHeight: '24px' }}>
-          <AnimatePresence mode="popLayout" initial={false}>
-            <motion.span key={ready ? 'r' : 'k'} className="nowrap" style={{ display: 'inline-block' }}
-              initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.16 }}>
-              {ready ? 'Release to discover' : 'Keep pulling to discover'}
-            </motion.span>
-          </AnimatePresence>
-        </span>
-      </span>
-    </motion.div>
-  );
-}
-
 /* ---------- Figma 1002:8169: background, card, and five sense tiles ---------- */
 function Backdrop() {
   return <div className="abs" style={{ inset: 0, background: '#f7f5f1', overflow: 'hidden', pointerEvents: 'none' }}>
@@ -139,13 +112,13 @@ function senseValues(p) {
   const canonical = Object.values(PAGES).flatMap(page => page.rows).find(row => row.id === p.id);
   const seat = p.seat || canonical?.seat;
   return {
-    sound: SOUND_W[p.s] || 'Unknown', light: LIGHT_W[p.l] || 'Unknown', crowd: CROWD_W[p.c] || 'Unknown',
-    temp: canonical?.t == null ? 'Unknown' : canonical.t <= 2 ? 'Cool' : canonical.t >= 4 ? 'Warm' : 'Mild',
-    seating: seat?.includes('outdoor') ? 'Patio' : seat?.includes('booth') ? 'Booths' : seat?.includes('indoor') ? 'Indoor' : 'Unknown',
+    sound: (SOUND_W[p.s] === 'Very quiet' ? 'Quiet' : SOUND_W[p.s]) || '', light: (LIGHT_W[p.l] === 'Very dim' ? 'Dim' : LIGHT_W[p.l]) || '', crowd: (['Very calm', 'Calm'].includes(CROWD_W[p.c]) ? 'Relaxed' : CROWD_W[p.c]) || '',
+    temp: canonical?.t == null ? '' : canonical.t <= 2 ? 'Cool' : canonical.t >= 4 ? 'Warm' : 'Mild',
+    seating: seat?.includes('outdoor') ? 'Patio' : seat?.includes('booth') ? 'Booths' : seat?.includes('indoor') ? 'Indoor' : '',
   };
 }
 const SENSE_TILES = [['sound', 'Sound', 'imgPhosphorSpeakerHigh'], ['light', 'Light', 'imgPhosphorSun'], ['crowd', 'Crowd', 'imgPhosphorUsers'], ['temp', 'Temperature', 'imgPhosphorThermometer'], ['seating', 'Seating', 'imgPhosphorChair']];
-function CardFace({ p, stamps }) {
+function CardFace({ p }) {
   const senses = senseValues(p);
   return <div className="abs" data-discover-face={p.id} style={{ inset: 0, borderRadius: 48.32, overflow: 'hidden', background: 'rgba(255,255,255,.85)', border: '1.51px solid rgba(20,24,31,.08)', boxShadow: '0 18.12px 48.32px rgba(27,42,68,.06)', userSelect: 'none' }}>
     <div className="abs" style={{ left: -1.51, top: 434.49, width: 393, height: 192, borderRadius: 25, background: 'rgba(20,24,31,.06)' }} />
@@ -162,13 +135,10 @@ function CardFace({ p, stamps }) {
     <div className="abs" style={{ left: 16.49, top: 523.49, width: 355, height: 85, display: 'flex', gap: 10 }}>
       {SENSE_TILES.map(([key, label, icon]) => <Glass key={key} radius={24} angle="126.545deg" style={{ position: 'relative', flex: '1 0 0', minWidth: 0, height: 85 }} contentStyle={{ flexDirection: 'column', gap: 8, padding: '14.5px 2.5px' }}>
         <img src={A[icon]} alt="" width="24" height="24" draggable={false} />
-        <span className="nowrap" aria-label={`${label}: ${senses[key]}`} style={{ fontSize: 15, fontWeight: 500, lineHeight: 'normal', color: MUTED }}>{senses[key]}</span>
+        <span className="nowrap" aria-label={`${label}: ${senses[key]}`} style={{ maxWidth: '100%', whiteSpace: 'nowrap', fontSize: senses[key].length > 7 ? 12 : 15, fontWeight: 500, lineHeight: '18px', color: MUTED }}>{senses[key]}</span>
       </Glass>)}
     </div>
-    {stamps && <>
-      <motion.div className="abs" style={{ left: 18, top: 70, opacity: stamps.save, rotate: -12, padding: '4px 14px', border: '3px solid #2f62c9', borderRadius: 12, background: 'rgba(255,255,255,.88)', color: '#2f62c9', fontSize: 24, fontWeight: 800, letterSpacing: 2, pointerEvents: 'none' }}>SAVE</motion.div>
-      <motion.div className="abs" style={{ right: 18, top: 70, opacity: stamps.pass, rotate: 12, padding: '4px 14px', border: `3px solid ${INK2}`, borderRadius: 12, background: 'rgba(255,255,255,.88)', color: INK2, fontSize: 24, fontWeight: 800, letterSpacing: 2, pointerEvents: 'none' }}>PASS</motion.div>
-    </>}
+
   </div>;
 }
 function DiscoverAction({ label, icon, left, top, dark = false, onClick }) {
@@ -184,8 +154,6 @@ function StackCard({ p, depth, cmd, onDecide, onTap }) {
   const front = depth === 0;
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-240, 0, 240], [-13, 0, 13]);
-  const save = useTransform(x, [24, 120], [0, 1]);
-  const pass = useTransform(x, [-120, -24], [1, 0]);
   const done = useRef(false), dragged = useRef(false), seen = useRef(cmd.n);
 
   const fly = (dir, v = 0) => {
@@ -218,7 +186,7 @@ function StackCard({ p, depth, cmd, onDecide, onTap }) {
       drag={front ? 'x' : false} dragMomentum={false} dragElastic={1}
       onPointerDown={() => { dragged.current = false; }} onDragStart={() => { dragged.current = true; }} onDragEnd={end}
       onTap={() => { if (front && !dragged.current) onTap(p); }}>
-      <CardFace p={p} stamps={front ? { save, pass } : null} />
+      <CardFace p={p} />
     </motion.div>
   );
 }
@@ -226,24 +194,15 @@ function StackCard({ p, depth, cmd, onDecide, onTap }) {
 /* ---------- The layer ---------- */
 export default function DiscoverLayer({ pull, open, onClose, mode, decided, onDecide, onShowPassed, onOpenVenue, blocked }) {
   const deck = useMemo(() => rankPlaces(mode.prefs).filter((p) => !decided[p.id]), [mode, decided]);
-  const savedN = Object.values(decided).filter((v) => v === 'save').length;
-  const passedN = Object.values(decided).filter((v) => v === 'pass').length;
   const [cmd, setCmd] = useState({ n: 0, dir: 1 });
-  const [fb, setFb] = useState(null);
-  const fbTimer = useRef(0);
-  const say = (text, icon) => { setFb({ text, icon, n: Date.now() }); clearTimeout(fbTimer.current); fbTimer.current = setTimeout(() => setFb(null), 2000); };
-
   const visibility = useTransform(pull, (v) => (v > 0.5 ? 'visible' : 'hidden'));
   // Content rides just above the sheet edge while pulling, then settles at its resting place
   const lift = useTransform(pull, (v) => Math.min(0, v - 132));
   const fade = useTransform(pull, [40, 130], [0, 1]);
 
-  const decide = (id, d) => {
-    onDecide(id, d);
-    if (d === 'save') say(`Saved ${rankPlaces(mode.prefs).find((p) => p.id === id).name}`, 'heartFill');
-  };
+  const decide = onDecide;
   const fling = (dir) => { if (deck.length) setCmd((c) => ({ n: c.n + 1, dir })); };
-  const tapCard = (p) => (p.venue ? onOpenVenue() : say(p.event ? 'Event pages come later in the prototype' : 'Only Foxy Loxy Cafe has a full page so far', 'info'));
+  const tapCard = (p) => { if (p.venue) onOpenVenue(); };
 
   useEffect(() => {
     if (!open || blocked) return undefined;
@@ -260,7 +219,6 @@ export default function DiscoverLayer({ pull, open, onClose, mode, decided, onDe
   return (
     <motion.div className="abs" style={{ inset: 0, visibility, pointerEvents: open ? 'auto' : 'none', overflow: 'hidden' }}>
       <Backdrop />
-      <PullHint pull={pull} />
       <motion.div className="abs" style={{ inset: 0, y: lift, opacity: fade }}>
         <DiscoverAction label="Back to Home" icon="imgPhosphorCaretLeft" left={24} top={52} onClick={onClose} />
         <p className="abs nowrap" style={{ left: 84, top: 62, fontSize: 24, fontWeight: 700, color: INK, lineHeight: '29px', pointerEvents: 'none' }}>Discover</p>
@@ -269,37 +227,14 @@ export default function DiscoverLayer({ pull, open, onClose, mode, decided, onDe
           {deck.slice(0, 3).map((p, i) => ({ p, i })).reverse().map(({ p, i }) => (
             <StackCard key={p.id} p={p} depth={i} cmd={cmd} onDecide={decide} onTap={tapCard} />
           ))}
-          {!deck.length && (
-            <motion.div className="abs" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={GENTLE}
-              style={{ inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 12px', gap: 10 }}>
-              <VIcon name="sparkle" size={28} fill={NAVY} />
-              <p style={{ fontSize: 24, fontWeight: 700, color: INK, lineHeight: '29px' }}>You have seen everything nearby</p>
-              <p style={{ fontSize: 15, fontWeight: 500, color: INK2, lineHeight: '20px' }}>
-                {savedN ? `You saved ${savedN} ${savedN === 1 ? 'place' : 'places'}.` : 'You passed on all of them.'}
-                {passedN ? ' Passed places can come back.' : ''}
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, marginTop: 14 }}>
-                {passedN > 0 && <DarkCTA inline label="Show passed places" onClick={onShowPassed} />}
-                <TextBtn onClick={onClose} style={{ padding: '0 20px' }}>Back to home</TextBtn>
-              </div>
-            </motion.div>
-          )}
+
         </div>
 
         {deck.length > 0 && (
           <>
             <DiscoverAction label="Pass" icon="imgX" left={152} top={817} onClick={() => fling(-1)} />
             <DiscoverAction label="Save" icon="imgHeart" left={240} top={817} dark onClick={() => fling(1)} />
-            <div className="abs" style={{ left: 0, top: 884, width: 440, height: 24, display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
-              <AnimatePresence mode="wait" initial={false}>
-                {fb ? (
-                  <motion.span key={fb.n} className="nowrap" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.18 }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 700, color: INK }}>
-                    <VIcon name={fb.icon} size={16} fill={fb.icon === 'heartFill' ? '#2f62c9' : NAVY} />{fb.text}
-                  </motion.span>
-                ) : null}
-              </AnimatePresence>
-            </div>
+
           </>
         )}
       </motion.div>

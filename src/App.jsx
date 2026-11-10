@@ -285,13 +285,13 @@ export default function App() {
                           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}>
                           {flow === 'book' && <BookTable draft={draft} setDraft={setDraft} existing={!!booking} step={bookStep} setStep={setBookStep}
                             onClose={() => setFlow(booking ? 'confirmed' : null)}
-                            onCancelBooking={() => { setBooking(null); setDraft(emptyDraft()); setFlow(null); say('Booking cancelled'); }}
+                            onCancelBooking={() => { setBooking(null); setDraft(emptyDraft()); setFlow(null); }}
                             onBooked={(b) => { setBooking(b); setFlow('confirmed'); }} />}
                           {flow === 'confirmed' && booking && <BookingConfirmed booking={booking}
                             onClose={() => { setFlow(null); setSense(null); setVenueTab('overview'); }}
                             onChange={() => { setDraft({ ...booking }); setBookStep(3); setFlow('book'); }} />}
                           {flow === 'review' && <WriteReview mine={mine} onClose={() => setFlow(null)}
-                            onPosted={(r) => { setMine(r); setVenueTab('reviews'); setFlow(null); setTimeout(() => say(mine ? 'Review updated' : 'Thanks, your review is up'), 350); }} />}
+                            onPosted={(r) => { setMine(r); setVenueTab('reviews'); setFlow(null); }} />}
                         </motion.div>
                       </AnimatePresence>
                     </motion.div>

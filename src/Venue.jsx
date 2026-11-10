@@ -144,11 +144,7 @@ function Reviews({ onWrite, mine }) {
             </motion.div>
           ))}
         </AnimatePresence>
-        {list.length === 0 && (
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ ...t(14, 400, MUTED), textAlign: 'center', padding: '24px 0' }}>
-            No reviews mention {f.toLowerCase()} yet.
-          </motion.p>
-        )}
+
       </motion.div>
     </div>
   );
