@@ -27,7 +27,7 @@ export const ONBOARDING_STEPS = ['welcome', 'sound', 'light', 'crowd', 'temp', '
 
 /* ---------- Data ---------- */
 const SLIDERS = {
-  sound: { title: 'How loud do you like it?', name: 'Sound', icon: 'sound', steps: ['Very quiet', 'Easy to talk', 'Lively', 'Loud'], ends: ['Quiet', 'Loud'], def: 1,
+  sound: { title: 'How loud do you like it?', name: 'Sound', icon: 'sound', steps: ['Quiet', 'Easy to talk', 'Lively', 'Loud'], ends: ['Quiet', 'Loud'], def: 1,
     titleTop: 150, card: { top: 303, h: 481, hy: 173.5, sy: 233.5, sl: 385.5, ey: 445.5 }, art: { src: soundImg, left: 173, top: 177 } },
   light: { title: 'What light do you like?', name: 'Light', icon: 'light', steps: ['Dim', 'Warm & cozy', 'Natural', 'Bright'], ends: ['Dim', 'Bright'], def: 1,
     titleTop: 150, card: { top: 250, h: 515, hy: 21.5, sy: 81.5, sl: 233.5, ey: 293.5 }, art: { src: lightImg, left: 176, top: 591 } },
@@ -57,7 +57,7 @@ export function toMode(p) {
   const layout = ['Table with space', 'Communal table'].find((s) => p.seat.includes(s));
   const prefs = { sound, light, crowd, temp, seat: { pos: pos === 'Outdoor' ? 'Patio' : pos || null, layout: layout || null } };
   const any = sound || light.b || crowd || temp || prefs.seat.pos || prefs.seat.layout;
-  return any ? { id: 'mine', name: 'My comfort', desc: 'From your onboarding', custom: true, prefs } : null;
+  return any ? { id: 'mine', name: 'My comfort', desc: '', custom: true, prefs } : null;
 }
 
 /* ---------- Small pieces ---------- */
