@@ -17,7 +17,7 @@ import { Toast } from './flow.jsx';
 import { GENTLE, ScaleCtx, StatusBar, TabBar } from './ui.jsx';
 
 const DEVICE_W = 468, DEVICE_H = 984, SCREEN_W = 440;
-const TAB_TOP = { home: 852, search: 862, map: 862, profile: 852 };
+const TAB_TOP = { home: 852, search: 852, map: 852, profile: 852 };
 const SCREEN_IN = {
   home: { initial: { opacity: 0, scale: 0.985 }, animate: { opacity: 1, scale: 1 } },
   map: { initial: { opacity: 0, scale: 1.04 }, animate: { opacity: 1, scale: 1 } },
@@ -335,7 +335,7 @@ export default function App() {
                 </AnimatePresence>
                 <div className="abs" style={{ inset: 0, zIndex: 60, pointerEvents: 'none' }}><Toast text={note} icon={note && /Only|later/.test(note) ? 'info' : 'check'} /></div>
                 {!PHONE && <StatusBar shade={screen === 'search' && !venueOpen ? 0 : flow || sense ? 0 : venueOpen ? (venueScroll > 270 ? 1 : 0) : screen !== 'map' && homeScroll > 24 ? 1 : 0} />}
-                <TabBar active={screen} onNav={to => { nav(to); if (to === 'search') navigateSearch(searchRoute); }} top={venueOpen || modesOpen || editing || (screen === 'search' && ['search-filters','search-place'].includes(searchRoute)) ? 1000 : page ? 876 : TAB_TOP[screen]} yMV={screen === 'home' ? pull : undefined} />
+                <TabBar active={screen} onNav={to => { nav(to); if (to === 'search') navigateSearch(searchRoute); }} top={venueOpen || modesOpen || editing || (screen === 'search' && ['search-filters','search-place'].includes(searchRoute)) ? 1000 : page ? TAB_TOP.home : TAB_TOP[screen]} yMV={screen === 'home' ? pull : undefined} />
                 {!PHONE && <div className="abs" style={{ left: 150, top: editing || (screen === 'home' && discoverOpen) ? 935 : 943, width: 140, height: 5, borderRadius: 3, background: screen === 'home' && discoverOpen ? '#2a2650' : screen === 'map' ? 'rgba(20,24,31,0.85)' : '#14181f', zIndex: 55 }} />}
                 {!PHONE && <div className="island" />}
               </div>
