@@ -4,25 +4,25 @@ import { PLACES as DISCOVERY_PLACES, rankPlaces, SOUND_W, LIGHT_W, CROWD_W } fro
 // Search fixtures for interaction testing, not live hours or sensory measurements.
 export const SEARCH_GROUPS = [
   { name: 'Made for you', cards: [
-    ['Fits you tonight', 'FitsYouTonight', '#c7cedf', 'Fits you\ntonight'],
-    ['Like your saved places', 'LikeYourSavedPlaces', '#b6d6cf', 'Like your\nsaved\nplaces'],
-    ['New in Savannah', 'NewInSavannah', '#efcbc6', 'New in\nSavannah'],
+    ['Fits you tonight', 'FitsYouTonight', '#8d97bf', 'Fits you\ntonight'],
+    ['Like your saved places', 'LikeYourSavedPlaces', '#65a9a0', 'Like your\nsaved\nplaces'],
+    ['New in Savannah', 'NewInSavannah', '#d58c8e', 'New in\nSavannah'],
   ] },
   { name: 'Moods', cards: [
-    ['Cozy', 'Cozy', '#e7cfba'], ['Low-key', 'LowKey', '#cfd7bb'],
-    ['Buzzing', 'Buzzing', '#bedbe8'], ['Romantic', 'Romantic', '#e9c2cd'],
+    ['Cozy', 'Cozy', '#c89679'], ['Low-key', 'LowKey', '#99a675'],
+    ['Buzzing', 'Buzzing', '#6aa8c1'], ['Romantic', 'Romantic', '#ca84a2'],
   ] },
   { name: 'Activities', cards: [
-    ['Brunch', 'Brunch', '#eddbad'], ['Catchup', 'Catchup', '#c2ddd2'],
-    ['Study & work', 'StudyWork', '#c8d6e4', 'Study &\nwork'], ['Live music', 'LiveMusic', '#d8cae2'],
+    ['Brunch', 'Brunch', '#c2a15c'], ['Catchup', 'Catchup', '#73ad9a'],
+    ['Study & work', 'StudyWork', '#87a1c0', 'Study &\nwork'], ['Live music', 'LiveMusic', '#ac8ec4'],
   ] },
   { name: 'Sensory picks', cards: [
-    ['Quiet now', 'QuietNow', '#c4dcd5'], ['Natural light', 'NaturalLight', '#eee0ba', 'Natural\nlight'],
-    ['Outdoor seating', 'OutdoorSeating', '#ccddbe', 'Outdoor\nseating'], ['Booths & corners', 'BoothsCorners', '#e3cdbf', 'Booths &\ncorners'],
+    ['Quiet now', 'QuietNow', '#6cada7'], ['Natural light', 'NaturalLight', '#c0a569', 'Natural\nlight'],
+    ['Outdoor seating', 'OutdoorSeating', '#90ad7a', 'Outdoor\nseating'], ['Booths & corners', 'BoothsCorners', '#c19682', 'Booths &\ncorners'],
   ] },
   { name: 'Place types', cards: [
-    ['Cafés', 'Cafes', '#dccdbc'], ['Restaurants', 'Restaurants', '#eccbbf'],
-    ['Bakeries', 'Bakeries', '#ebd7b4'], ['Events', 'Events', '#d9cbe6'],
+    ['Cafés', 'Cafes', '#b2977e'], ['Restaurants', 'Restaurants', '#d18d79'],
+    ['Bakeries', 'Bakeries', '#c59e6d'], ['Events', 'Events', '#a78dc9'],
   ] },
 ];
 
