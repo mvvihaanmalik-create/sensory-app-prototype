@@ -46,8 +46,8 @@ function Hero({ reduce, pull }) {
             ))}
             {/* Motion · street lamp: warm halo, glow and lantern light swelling slowly on the same 6 s loop */}
             {[
-              { id: '1067:5930', size: 96, color: '#ff9a1f', blur: 12, t: lampHalo, rest: 0.55 },
-              { id: '1067:5931', size: 54, color: '#ffb82e', blur: 6, t: lampGlow, rest: 0.9 },
+              { id: '1067:5930', size: 96, color: '#ff9a1f', blur: 12, t: lampHalo, rest: 0.3 },
+              { id: '1067:5931', size: 54, color: '#ffb82e', blur: 6, t: lampGlow, rest: 0.45 },
             ].map((l) => (
               <motion.div key={l.id} className="abs" data-node-id={l.id}
                 style={{ left: LAMP.x - l.size / 2, top: LAMP.y - l.size / 2, width: l.size, height: l.size, borderRadius: '50%', background: l.color, filter: `blur(${l.blur}px)`, pointerEvents: 'none' }}
@@ -56,8 +56,8 @@ function Hero({ reduce, pull }) {
                 transition={{ opacity: toTransition(l.t.opacity), scale: toTransition(l.t.scale) }} />
             ))}
             <motion.div className="abs" data-node-id="1067:5932"
-              style={{ left: LAMP.x - 6, top: LAMP.y - 8.5, width: 12, height: 17, borderRadius: 5, background: '#ffdb73', filter: 'blur(0.75px)', pointerEvents: 'none' }}
-              initial={{ opacity: 1 }}
+              style={{ left: LAMP.x - 5, top: LAMP.y - 7, width: 10, height: 14, borderRadius: 5, background: '#ffd17a', filter: 'blur(2px)', pointerEvents: 'none' }}
+              initial={{ opacity: 0.6 }}
               animate={{ opacity: lampCore.opacity.values }}
               transition={{ opacity: toTransition(lampCore.opacity) }} />
           </div>

@@ -13,13 +13,13 @@ const toTrack = (pts, ease = 'linear') => ({
 export const LAMP = { x: 242, y: 214 };
 
 export const lampCore = {
-  opacity: toTrack([[0,1],[1.5,0.82],[3,1],[4.5,0.88],[6,1]], 'easeInOut'),
+  opacity: toTrack([[0,0.6],[1.5,0.46],[3,0.62],[4.5,0.5],[6,0.6]], 'easeInOut'),
 };
 export const lampGlow = {
-  opacity: toTrack([[0,0.9],[1.5,0.68],[3,0.92],[4.5,0.76],[6,0.9]], 'easeInOut'),
+  opacity: toTrack([[0,0.45],[1.5,0.33],[3,0.47],[4.5,0.38],[6,0.45]], 'easeInOut'),
   scale: toTrack([[0,1],[1.5,0.96],[3,1.03],[4.5,0.98],[6,1]], 'easeInOut'),
 };
 export const lampHalo = {
-  opacity: toTrack([[0,0.55],[1.5,0.38],[3,0.58],[4.5,0.45],[6,0.55]], 'easeInOut'),
+  opacity: toTrack([[0,0.3],[1.5,0.2],[3,0.32],[4.5,0.24],[6,0.3]], 'easeInOut'),
   scale: toTrack([[0,1],[1.5,0.94],[3,1.05],[4.5,0.97],[6,1]], 'easeInOut'),
 };
