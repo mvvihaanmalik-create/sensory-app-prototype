@@ -8,7 +8,7 @@ import { SavedPlaceList } from './Lists.jsx';
 import { profileAssets as A } from './profileAssets.js';
 import './profile.css';
 
-const rise = i => ({ initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { ...GENTLE, delay: .05 + i * .05 } });
+const rise = () => ({ initial: false });
 function SettingsRow({ icon, label, i, angle = '171.1096deg' }) {
   return <motion.button {...rise(i)} whileTap={{ scale: .98 }} transition={GENTLE} style={{ position: 'relative', width: 392, height: 56, textAlign: 'left' }}>
     <Glass radius={28} angle={angle} style={{ inset: 0 }} contentStyle={{ gap: 12, padding: '0 16.5px 0 18.5px' }}>

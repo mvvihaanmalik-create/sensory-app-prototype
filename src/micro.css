@@ -3,7 +3,7 @@
 :root{--m-ease:cubic-bezier(.3,.7,.4,1);--m-out:cubic-bezier(.22,1,.36,1)}
 
 button,[role=button],.tap,input,textarea{
-  transition:translate .22s var(--m-out),scale .18s var(--m-ease),filter .22s ease,box-shadow .25s ease,background-color .22s ease,color .22s ease,border-color .22s ease,opacity .2s ease;
+  transition:translate .22s var(--m-out),scale .18s var(--m-ease),filter .22s ease,box-shadow .25s ease,background-color .22s ease,color .22s ease,border-color .22s ease;
 }
 button:not(:disabled):not([aria-disabled=true]):active,[role=button]:active,.tap:active{scale:.98;filter:brightness(.97);transition-duration:.08s}
 

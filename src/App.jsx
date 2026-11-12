@@ -21,9 +21,9 @@ import { GENTLE, ScaleCtx, StatusBar, TabBar } from './ui.jsx';
 const DEVICE_W = 468, DEVICE_H = 984, SCREEN_W = 440;
 const TAB_TOP = { home: 852, search: 852, map: 852, profile: 852 };
 const SCREEN_IN = {
-  home: { initial: { opacity: 0, scale: 0.985 }, animate: { opacity: 1, scale: 1 } },
-  map: { initial: { opacity: 0, scale: 1.04 }, animate: { opacity: 1, scale: 1 } },
-  profile: { initial: { opacity: 0, x: 24 }, animate: { opacity: 1, x: 0 } },
+  home: { initial: false, animate: { opacity: 1 } },
+  map: { initial: false, animate: { opacity: 1 } },
+  profile: { initial: false, animate: { opacity: 1 } },
 };
 const EASE = { duration: 0.42, ease: [0.22, 1, 0.36, 1] };
 
@@ -101,7 +101,7 @@ const onbStep = (id) => Math.max(0, ONBOARDING_STEPS.indexOf(id.replace('onboard
 const SEARCH_ROUTES = ['search', 'search-results', 'search-filters', 'search-place'];
 function ScreenLayer({ screen, children }) {
   const present = useIsPresent();
-  return <motion.div className="abs" aria-hidden={!present || undefined} style={{ inset: 0, pointerEvents: present ? 'auto' : 'none' }} initial={SCREEN_IN[screen].initial} animate={SCREEN_IN[screen].animate} exit={{ opacity: 0, transition: { duration: .28 } }} transition={EASE}>{children}</motion.div>;
+  return <motion.div className="abs" aria-hidden={!present || undefined} style={{ inset: 0, pointerEvents: present ? 'auto' : 'none' }} initial={SCREEN_IN[screen].initial} animate={SCREEN_IN[screen].animate} exit={{ opacity: 0, transition: { duration: 0 } }} transition={{ duration: 0 }}>{children}</motion.div>;
 }
 const MODE_VIEWS = ['modes', 'edit-study', 'edit-party', 'add-mode'];
 const HOME_VIEWS = [...PAGE_IDS, ...MODE_VIEWS, 'sort-sound', 'discover', 'explore-post', ...ONB_VIEWS];
