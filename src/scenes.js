@@ -159,34 +159,69 @@ const FLAKES = [[116.47, 112, 2.32, 0.046, 2.91, 5.9137], [406.54, 75, 2.05, 0, 
   [251.18, 76, 3.72, 1.223, 2.91, 5.589], [21.73, 109, 4.48, 0, 5.82, 4.4608], [331.34, 72, 2.46, 0.245, 2.91, 4.0238],
   [372.08, 105, 3.91, 0, 5.82, 8.7671]];
 
+// Secondary glows: soft blurred ellipses (Figma blur radius R = CSS blur R/2) that breathe on the 6 s loop
+const pulse = (vals) => track(vals.map((v, i) => [i * 1.5, v, 'i']));
+const glow = (x, y, w, h, bg, R, op, sc) => ({
+  x, y, w, h, round: true, bg, blur: R / 2,
+  t: { opacity: pulse(op), ...(sc ? { scale: pulse(sc) } : {}) },
+});
+const OP1 = [1, 0.7, 1.06, 0.82, 1], OP2 = [0.82, 1.06, 0.7, 1, 0.82];
+const SC1 = [1, 0.95, 1.04, 0.98, 1], SC2 = [0.98, 1.04, 0.95, 1, 0.98];
+const by = (b, k) => k.map((v) => +(b * v).toFixed(3));
+// Street lamp glow trio (same values as the Morning lamp); k scales the sizes
+const lamp = (cx, cy, k = 1) => [
+  glow(cx - 48 * k, cy - 48 * k, 96 * k, 96 * k, '#ff9a1f', 24, [0.3, 0.2, 0.32, 0.24, 0.3], [1, 0.94, 1.05, 0.97, 1]),
+  glow(cx - 27 * k, cy - 27 * k, 54 * k, 54 * k, '#ffb82e', 12, [0.45, 0.33, 0.47, 0.38, 0.45], [1, 0.96, 1.03, 0.98, 1]),
+  glow(cx - 5 * k, cy - 7 * k, 10 * k, 14 * k, '#ffd17a', 4, [0.6, 0.46, 0.62, 0.5, 0.6]),
+];
+// St. Patrick's sparkles: a white dot blinks once per loop
+const sparkle = (x, y, t0) => ({
+  x, y, w: 4, h: 4, round: true, bg: '#fff', blur: 1,
+  t: { opacity: track([[t0, 0], [+(t0 + 0.5).toFixed(3), 0.9, 'i'], [Math.min(+(t0 + 1.2).toFixed(3), LOOP), 0, 'i']]) },
+});
+const SPARKLES = [[178, 400, 0.2], [260, 394, 1.3], [216, 374, 2.4], [148, 446, 3.2], [298, 438, 4.1], [234, 428, 5]];
+// Halloween mist drifts sideways 24 px while breathing
+const mist = (x, y, w, h, b, k, from) => ({
+  x, y, w, h, round: true, bg: '#e6e1f4', blur: 15,
+  t: { opacity: pulse(by(b, k)), x: pulse([from, -from, from, -from, from]) },
+});
+
 const LIGHT = '255,252,247', DARK = '8,8,20';
 
 // Morning keeps its own fountain and street lamp (fountain.js, lamp.js)
 const MORNING = { id: 'morning', label: 'Morning', art: sceneMorning, off: 130, scrim: LIGHT, dark: false, ph: '#000', greeting: 'Good morning', sub: null };
 
 const others = () => [
-  { id: 'afternoon', label: 'Afternoon', art: afternoon, off: 95, scrim: LIGHT, dark: false, ph: '#4b5462', greeting: 'Good afternoon', sub: 'Calm spots for a slow lunch',
-    layers: fountain({ color: '#f4fbff', A: { x: 215.45, y: 282.7, dx: [-4.5, -1.5, 1.5, 4.5], up: -14, down: 2 },
+  { id: 'afternoon', label: 'Afternoon', art: afternoon, off: 100, scrim: LIGHT, dark: false, ph: '#4b5462', greeting: 'Good afternoon', sub: 'Calm spots for a slow lunch',
+    layers: [...fountain({ color: '#f4fbff', A: { x: 215.45, y: 282.7, dx: [-4.5, -1.5, 1.5, 4.5], up: -14, down: 2 },
       B: { P: 1.5, xl: 208.4, xr: 226.4, y: 340.4, dx: 74, up: -12, down: 44, delays: seq(6, 0.25) },
       C: { P: 1.3, xl: 210.4, xr: 224.4, y: 340.4, dx: 40, up: -8, down: 36, delays: seq(4, 0.325) },
-      rip: { x: 174, y: 386, w: 90, h: 12 } }) },
-  { id: 'evening', label: 'Evening', art: evening, off: 95, scrim: DARK, dark: true, ph: '#4b5462', greeting: 'Good evening', sub: 'Low-key dinners nearby',
-    layers: SHIMMER.map((a) => shimmer(...a)) },
+      rip: { x: 174, y: 386, w: 90, h: 12 } }),
+      glow(147, 300, 170, 90, '#fffbe6', 28, by(0.22, OP1), SC1)] },
+  { id: 'evening', label: 'Evening', art: evening, off: 83, scrim: DARK, dark: true, ph: '#4b5462', greeting: 'Good evening', sub: 'Low-key dinners nearby',
+    layers: [...SHIMMER.map((a) => shimmer(...a)),
+      glow(232, 294, 150, 84, '#ff9d5c', 36, by(0.38, OP1), SC1), glow(275, 320, 64, 32, '#ffd08a', 16, by(0.45, OP2), SC2)] },
   { id: 'night', label: 'Night', art: night, off: 105, scrim: DARK, dark: true, ph: '#4b5462', greeting: 'Good night', sub: 'Late and quiet, near you',
-    layers: FIREFLIES.map((a) => firefly(...a)) },
-  { id: 'stpatricks', label: 'St. Patrick’s', art: stpatricks, off: 140, scrim: LIGHT, dark: false, ph: '#4b5462', greeting: 'Happy St. Patrick’s', sub: 'Parade day, the calm way',
-    layers: fountain({ color: '#8fe3b3', A: { x: 213.45, y: 338.7, dx: [-4.5, -1.5, 1.5, 4.5], up: -10, down: 2 },
+    layers: [...FIREFLIES.map((a) => firefly(...a)), ...lamp(203, 375)] },
+  { id: 'stpatricks', label: 'St. Patrick’s', art: stpatricks, off: 170, scrim: LIGHT, dark: false, ph: '#4b5462', greeting: 'Happy St. Patrick’s', sub: 'Parade day, the calm way',
+    layers: [...fountain({ color: '#8fe3b3', A: { x: 213.45, y: 338.7, dx: [-4.5, -1.5, 1.5, 4.5], up: -10, down: 2 },
       B: { P: 1.2, xl: 209.4, xr: 221.4, y: 354.4, dx: 30, up: -6, down: 32, delays: seq(4, 0.3) },
       C: { P: 1.4, xl: 206.4, xr: 224.4, y: 392.4, dx: 48, up: -6, down: 46, delays: seq(5, 0.28) },
-      rip: { x: 162, y: 440, w: 110, h: 12 } }) },
-  { id: 'music', label: 'Music Festival', art: music, off: 90, scrim: DARK, dark: true, ph: '#4b5462', greeting: 'Jazz Fest, gently', sub: 'Seated, lower-volume sets this week',
-    layers: [note(182, 6, 0, -1, true), note(198, 8, 0.75, 1), note(182, 6, 1.5, -1), note(198, 8, 2.25, 1)] },
-  { id: 'holiday', label: 'Holiday Lights', art: holiday, off: 115, scrim: DARK, dark: true, ph: '#4b5462', greeting: 'Lights, minus the rush', sub: 'Best quiet hours to see the squares',
-    layers: TWINKLE.map((a) => twinkle(...a)) },
+      rip: { x: 162, y: 440, w: 110, h: 12 } }),
+      ...SPARKLES.map((a) => sparkle(...a))] },
+  { id: 'music', label: 'Music Festival', art: music, off: 125, scrim: DARK, dark: true, ph: '#4b5462', greeting: 'Jazz Fest, gently', sub: 'Seated, lower-volume sets this week',
+    layers: [note(182, 6, 0, -1, true), note(198, 8, 0.75, 1), note(182, 6, 1.5, -1), note(198, 8, 2.25, 1),
+      glow(89, 315, 96, 96, '#ffb347', 24, by(0.28, OP1), SC1), glow(109, 335, 56, 56, '#ffd27a', 12, by(0.4, OP1), SC1),
+      glow(252, 315, 96, 96, '#ffb347', 24, by(0.23, OP2), SC2), glow(272, 335, 56, 56, '#ffd27a', 12, by(0.33, OP2), SC2)] },
+  { id: 'holiday', label: 'Holiday Lights', art: holiday, off: 105, scrim: DARK, dark: true, ph: '#4b5462', greeting: 'Lights, minus the rush', sub: 'Best quiet hours to see the squares',
+    layers: [...TWINKLE.map((a) => twinkle(...a)), ...lamp(358, 341, 0.85)] },
   { id: 'halloween', label: 'Halloween', art: halloween, off: 160, scrim: DARK, dark: true, ph: '#4b5462', greeting: 'Halloween, your pace', sub: 'Low-scare, low-noise spots tonight',
-    layers: [candle(153, 374, 46, 0), candle(109, 405, 40, -0.162), candle(185, 430, 42, -0.341), candle(165, 264, 30, -0.147)] },
-  { id: 'christmas', label: 'Christmas', art: christmas, off: 120, scrim: LIGHT, dark: false, ph: '#4b5462', greeting: 'Merry & calm', sub: 'Quiet spots for holiday plans',
-    layers: FLAKES.map((a) => flake(...a)) },
+    layers: [candle(153, 374, 46, 0), candle(109, 405, 40, -0.162), candle(185, 430, 42, -0.341), candle(165, 264, 30, -0.147),
+      mist(-30, 440, 220, 44, 0.16, OP1, -12), mist(120, 450, 260, 48, 0.16, OP2, 12), mist(60, 422, 180, 36, 0.16, OP2, 12)] },
+  { id: 'christmas', label: 'Christmas', art: christmas, off: 178, scrim: LIGHT, dark: false, ph: '#4b5462', greeting: 'Merry & calm', sub: 'Quiet spots for holiday plans',
+    layers: [...FLAKES.map((a) => flake(...a)),
+      glow(95, 340, 200, 140, '#ffc46b', 44, by(0.22, OP1), SC1), glow(137, 343, 28, 28, '#ffd98a', 12, by(0.5, OP1), SC1),
+      glow(181, 343, 28, 28, '#ffd98a', 12, by(0.5, OP2), SC2), glow(226, 343, 28, 28, '#ffd98a', 12, by(0.5, OP1), SC1)] },
 ];
 
 // The phone build only ever shows Morning, so the other scenes (and their art) are left out of it

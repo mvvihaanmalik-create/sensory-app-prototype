@@ -25,7 +25,7 @@ function Layer({ l }) {
   }
   return (
     <motion.div className="abs" initial={initial} animate={animate} transition={transition}
-      style={{ left: l.x, top: l.y, width: l.w, height: l.h, borderRadius: l.round ? '50%' : l.cr, background: l.bg, border: l.border, boxShadow: l.glow, rotate: l.rot, transformOrigin: l.rot ? '0 0' : '50% 50%', pointerEvents: 'none' }}>
+      style={{ left: l.x, top: l.y, width: l.w, height: l.h, borderRadius: l.round ? '50%' : l.cr, background: l.bg, border: l.border, boxShadow: l.glow, rotate: l.rot, filter: l.blur ? `blur(${l.blur}px)` : undefined, transformOrigin: l.rot ? '0 0' : '50% 50%', pointerEvents: 'none' }}>
       {l.k?.map((c, i) => <Layer key={i} l={c} />)}
     </motion.div>
   );
