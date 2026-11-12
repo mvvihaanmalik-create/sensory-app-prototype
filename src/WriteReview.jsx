@@ -215,7 +215,7 @@ export default function WriteReview({ onClose, onPosted, mine }) {
 
         </div>
       </div>
-      <PrimaryCTA label={mine ? 'Update review' : 'Post review'} enabled={rating > 0} onClick={post} onBlocked={blocked} busy={busy ? 'Posting…' : null} />
+      <PrimaryCTA label={'Post review'} enabled={rating > 0} onClick={post} onBlocked={blocked} busy={busy ? 'Post review' : null} />
     </div>
   );
 }

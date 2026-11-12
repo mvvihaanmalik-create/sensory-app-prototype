@@ -15,45 +15,28 @@ export const VENUE = {
 // Typical crowd by hour, 6a to 11p (18 bars). Sunday matches the Figma frame.
 export const CROWD_SUN = [8, 15, 23, 31, 37, 44, 42, 52, 50, 64, 73, 85, 94, 87, 75, 67, 52, 37];
 export const CROWD_WEEK = weekFrom(CROWD_SUN);
-export const crowdWord = (v) => (v < 25 ? 'Usually quiet' : v < 50 ? 'Usually not too busy' : v < 75 ? 'Usually a little busy' : 'Usually busy');
+export const crowdWord = (v) => (v < 25 ? 'Usually calm and comfortable' : v < 50 ? 'Usually not too busy' : v < 75 ? 'Busy' : 'Packed');
 export function CrowdCard() {
   return (
     <DayChart icon={<Icon d={paths.users} size={24} fill={NAVY} />} title="Crowd" week={CROWD_WEEK} liveText="Live · Busier than usual" describe={crowdWord}
-      info="Based on visits over the past few weeks. Live shows how busy it is right now compared with a usual Sunday." />
+      info="Tap a bar for details" />
   );
 }
 
 export const SENSE_VALUES = { sound: 'Lively', light: 'Natural', crowd: 'Busy', temp: 'Mild', seating: 'Patio' };
 
-const HOURS = [['Sun', '8 AM – 9 PM'], ['Mon', '7 AM – 9 PM'], ['Tue', '7 AM – 9 PM'], ['Wed', '7 AM – 9 PM'], ['Thu', '7 AM – 9 PM'], ['Fri', '7 AM – 10 PM'], ['Sat', '8 AM – 10 PM']];
 
 function Overview({ onReviews, firstReview }) {
-  const [hours, setHours] = useState(false);
   const rows = [
     { icon: 'storefront', text: 'Dine-in · Takeout · Delivery' },
     { icon: 'mapPin', text: VENUE.address },
     {
       render: (
         <div style={{ width: '100%' }}>
-          <button onClick={() => setHours((h) => !h)} style={{ width: '100%', height: 52, padding: '0 18px 0 20px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}>
+          <button style={{ width: '100%', height: 52, padding: '0 18px 0 20px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}>
             <VIcon name="clock" />
             <span style={{ ...t(15, 500), flex: '1 0 0' }}>Open · Closes 9 PM</span>
-            <motion.span animate={{ rotate: hours ? 180 : 0 }} transition={GENTLE}><VIcon name="caretDown" /></motion.span>
           </button>
-          <AnimatePresence initial={false}>
-            {hours && (
-              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={GENTLE} style={{ overflow: 'hidden' }}>
-                <div style={{ padding: '0 18px 12px 56px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {HOURS.map(([d, h]) => (
-                    <div key={d} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={t(14, d === 'Sun' ? 600 : 400, d === 'Sun' ? NAVY : MUTED)}>{d === 'Sun' ? 'Sunday · Today' : d}</span>
-                      <span style={t(14, d === 'Sun' ? 600 : 400, d === 'Sun' ? NAVY : MUTED)}>{h}</span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       ),
     },
@@ -76,7 +59,7 @@ function Overview({ onReviews, firstReview }) {
   );
 }
 
-const DISHES = [['Breakfast taco', 'Tex-Mex'], ['Kolache', 'Bakery'], ['Horchata latte', 'Coffee'], ['Chai', 'Tea']];
+const DISHES = [['Breakfast taco', 'Tex-Mex'], ['Kolache', 'Bakery'], ['Horchata latte', 'Coffee'], ['Chai', 'Coffee']];
 function Menu() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -125,7 +108,7 @@ function Reviews({ onWrite, mine }) {
       <G as="button" r={26} onClick={onWrite} whileTap={{ scale: 0.98 }} transition={TAP}
         style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
         <VIcon name="pencil" />
-        <span style={t(15, 600)}>{mine ? 'Edit your review' : 'Write a review'}</span>
+        <span style={t(15, 600)}>Write a review</span>
       </G>
       <div className="hscroll" style={{ margin: '0 -24px -24px', padding: '4px 24px 40px', display: 'flex', gap: 8 }}>
         {FILTERS.map((c) => <Chip key={c} label={c} on={f === c} onClick={() => setF(c)} />)}

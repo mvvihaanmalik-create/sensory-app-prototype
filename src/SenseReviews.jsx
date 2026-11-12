@@ -17,11 +17,11 @@ export const SENSE_DATA = {
     note: 'Summarized by AI from reviews that mention sound',
     chart: {
       title: 'Noise', sun: [11, 28, 52, 75, 85, 71, 47, 38, 42, 47, 56, 66, 80, 89, 85, 66, 47, 33], live: 'Live · Louder than usual',
-      describe: (v) => (v < 30 ? 'Usually quiet' : v < 55 ? 'Usually easy to talk' : v < 80 ? 'Usually lively' : 'Usually loud'),
-      info: 'Noise is measured from visitor reports and the live sound level near the counter.',
+      describe: (v) => (v < 30 ? 'Quiet' : v < 55 ? 'Easy to talk' : v < 80 ? 'Lively' : 'Loud'),
+      info: 'Tap a bar for details',
     },
     photos: [
-      [[240, 'Lively', 'Buzzy inside, calm out back by the pond.', 'Local guide · 1 wk ago', 7], [180, 'Loud', 'Weekend brunch was loud, but the patio was perfect.', 'First visit · 3 wks ago', 21], [210, 'Easy to talk', 'Easy to chat over coffee in the afternoon.', 'Visitor · 1 mo ago', 30]],
+      [[240, 'Lively', 'Buzzy inside, calm out back by the pond.', 'Local guide · 1 wk ago', 7], [180, 'Loud', 'Weekend brunch was loud — patio was perfect.', 'First visit · 3 wks ago', 21], [210, 'Easy to talk', 'Easy to chat over coffee in the afternoon.', 'Visitor · 1 mo ago', 30]],
       [[180, 'Easy to talk', 'Music on, but we could still talk easily.', 'Weekend regular · 2 wks ago', 14], [250, 'Lively', 'Acoustic night, cozy and not too loud.', 'Student · 1 mo ago', 31], [170, 'Lively', 'Lots of chatter at the counter at 10am.', 'Neighbor · 2 mo ago', 60]],
     ],
   },
@@ -40,7 +40,7 @@ export const SENSE_DATA = {
     dist: [['Almost empty', 3], ['Relaxed', 18], ['Buzzing', 27], ['Busy', 38], ['Packed', 14]],
     summary: 'Busy on weekend mornings, with a line at the counter. Calmer after 2 PM on weekdays.',
     note: 'Summarized by AI from reviews that mention crowd',
-    chart: { title: 'Crowd', sun: CROWD_SUN, live: 'Live · Busier than usual', describe: crowdWord, info: 'Based on visits over the past few weeks. Live shows how busy it is right now compared with a usual Sunday.' },
+    chart: { title: 'Crowd', sun: CROWD_SUN, live: 'Live · Busier than usual', describe: crowdWord, info: 'Tap a bar for details' },
     photos: [
       [[240, 'Packed', 'Line out the door Saturday at 10.', 'Local guide · 1 wk ago', 7], [180, 'Busy', 'Packed for brunch, worth the wait.', 'First visit · 3 wks ago', 21], [210, 'Buzzing', 'Buzzing but we grabbed a patio spot.', 'Visitor · 1 mo ago', 30]],
       [[180, 'Relaxed', 'Found a table easily on a Tuesday.', 'Weekend regular · 2 wks ago', 14], [250, 'Relaxed', 'Relaxed afternoon, plenty of seats.', 'Student · 1 mo ago', 31], [170, 'Almost empty', 'Quiet first thing at 8am.', 'Neighbor · 2 mo ago', 60]],
@@ -53,8 +53,8 @@ export const SENSE_DATA = {
     note: 'Summarized by AI from reviews that mention temperature or AC',
     chart: {
       title: 'Temperature', sun: [28, 30, 36, 42, 52, 61, 71, 80, 86, 89, 85, 75, 61, 52, 45, 39, 36, 33], live: 'Indoors · AC on · Patio warming up',
-      describe: (v) => (v < 45 ? 'Patio usually cool' : v < 75 ? 'Patio usually mild' : 'Patio usually warm'),
-      info: 'Indoor temperature is set by the AC. The bars show how warm the patio usually feels.',
+      describe: (v) => (v < 45 ? 'Cool' : v < 75 ? 'Mild' : 'Warm'),
+      info: 'Inside stays cool all day with AC. Bars show how warm the patio feels.',
       foot: 'Inside stays cool all day with AC. Bars show how warm the patio feels.',
     },
     photos: [
@@ -150,7 +150,7 @@ function PhotoReview({ p }) {
   );
 }
 
-const EXTRA_META = ['Regular · 2 mo ago', 'Visitor · 3 mo ago', 'Local guide · 3 mo ago', 'Student · 4 mo ago'];
+const EXTRA_META = ['Neighbor · 2 mo ago', 'Visitor · 1 mo ago', 'Weekend regular · 2 wks ago', 'Student · 1 mo ago'];
 
 function SenseBody({ sense }) {
   const d = SENSE_DATA[sense];
