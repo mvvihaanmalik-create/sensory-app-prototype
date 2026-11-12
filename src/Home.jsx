@@ -167,18 +167,22 @@ function VenueCard({ v }) {
   return (
     <>
       <img src={v.photo} alt="" className="abs" style={{inset:0,width:260,height:350,objectFit:'cover'}} />
-      <div className="abs" style={{ left: 10, top: 10, display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 999,
-        background: '#f7f5f1', boxShadow: '0 4px 14px rgba(27,42,68,0.05)' }}>
+      <div className="abs" style={{ left: 0, right: 0, top: 171, bottom: 0, WebkitBackdropFilter: 'blur(14px)', backdropFilter: 'blur(14px)',
+        WebkitMaskImage: 'linear-gradient(180deg, transparent 0%, #000 62%)', maskImage: 'linear-gradient(180deg, transparent 0%, #000 62%)' }} />
+      <div className="abs" style={{ inset: 0, background: 'linear-gradient(180deg, rgba(6,6,6,0) 49%, rgba(6,6,6,0.18) 64%, rgba(6,6,6,0.37) 78%, rgba(6,6,6,0.61) 100%)' }} />
+      <div className="abs" style={{ left: 12, top: 12, height: 36, display: 'flex', alignItems: 'center', gap: 4, padding: '0 14px 0 8px', borderRadius: 999,
+        border: '1.5px solid rgba(255,255,255,0.95)', boxShadow: '0 8px 20px rgba(42,38,80,0.14), inset 0 1px 0 rgba(255,255,255,0.9)',
+        WebkitBackdropFilter: 'blur(24px)', backdropFilter: 'blur(24px)',
+        backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.55) 14%, rgba(255,255,255,0.08) 86%), linear-gradient(90deg, rgba(255,255,255,0.55), rgba(255,255,255,0.55))' }}>
         <img src={uri('rippleCard')} alt="" style={{ width: 28, height: 28, display: 'block' }} />
-        <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: INK }}>{v.level}</span>
+        <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: '#2a2650' }}>{v.level}</span>
       </div>
-      <div className="abs" style={{ left: 10, top: 224, width: 236, height: 112, borderRadius: 20, border: '1px solid rgba(20,24,31,0.08)',
-        background:'rgba(255,255,255,0.8)', WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)', padding: 16, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
-        <p className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: INK }}>{v.name}</p>
-        <p className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: INK2 }}>{v.meta}</p>
+      <div className="abs" style={{ left: 12, top: 226, width: 236, height: 112, padding: 17, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+        <p className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: '#fff' }}>{v.name}</p>
+        <p className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.86)' }}>{v.meta}</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '2px 0' }}>
-          <img src={uri('dot')} alt="" style={{ width: 8, height: 8, display: 'block' }} />
-          <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: INK }}>Good fit</span>
+          <span style={{ width: 8, height: 8, borderRadius: 4, background: '#fff', display: 'block' }} />
+          <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Good fit</span>
         </div>
       </div>
     </>
