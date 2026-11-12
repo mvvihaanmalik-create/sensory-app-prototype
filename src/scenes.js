@@ -224,5 +224,4 @@ const others = () => [
       glow(181, 343, 28, 28, '#ffd98a', 12, by(0.5, OP2), SC2), glow(226, 343, 28, 28, '#ffd98a', 12, by(0.5, OP1), SC1)] },
 ];
 
-// The phone build only ever shows Morning, so the other scenes (and their art) are left out of it
-export const SCENES = import.meta.env.MODE === 'phone' ? [MORNING] : [MORNING, ...others()];
+export const SCENES = [MORNING, ...others()];

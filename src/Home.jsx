@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { motion, useTransform } from 'motion/react';
+import { useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion, useTransform } from 'motion/react';
 import { uri } from './svgs.js';
 import { drops, ripples, toTransition, LOOP } from './fountain.js';
 import { LAMP, lampCore, lampGlow, lampHalo } from './lamp.js';
@@ -77,8 +77,10 @@ function Hero({ reduce, pull, scene }) {
   const { off } = scene;
   return (
     <motion.div className="abs" style={{ left: 0, top: 0, width: 440, height: 314, overflow: 'hidden', borderRadius: '0 0 32px 32px', boxShadow: '0 8px 12px rgba(13,15,26,0.12)', opacity: fade }}>
+      <AnimatePresence initial={false}>
+      <motion.div key={scene.id} className="abs" style={{ inset: 0 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 1, transition: { duration: 0.35 } }} transition={{ duration: 0.3 }}>
       {/* Scene art + its Motion layer share one 440x550 frame at y -off, pulsing about its centre */}
-      <motion.div key={scene.id} className="abs" style={{ left: 0, top: -off, width: 440, height: 550, transformOrigin: '50% 50%' }} {...pulse}>
+      <motion.div className="abs" style={{ left: 0, top: -off, width: 440, height: 550, transformOrigin: '50% 50%' }} {...pulse}>
         <img src={scene.art} alt="" className="abs" style={{ left: 0, top: off, width: 440, height: 314, display: 'block' }} />
         {!reduce && (scene.layers
           ? <div className="abs" style={{ left: 0, top: 0, width: 440, height: 550 }}>{scene.layers.map((l, i) => <Layer key={i} l={l} />)}</div>
@@ -89,8 +91,41 @@ function Hero({ reduce, pull, scene }) {
           ))}
       </motion.div>
       <div className="abs" style={{ left: 0, top: 0, width: 440, height: 240, background: `linear-gradient(180deg, rgba(${scene.scrim},0.85) 0%, rgba(${scene.scrim},0.62) 60%, rgba(${scene.scrim},0) 100%)` }} />
+      </motion.div>
+      </AnimatePresence>
     </motion.div>
   );
+}
+
+// Swipe on the hero: right to left goes to the next scene, left to right to the previous one
+function useHeroSwipe(el, onStep) {
+  const scale = useScale();
+  const sc = useRef(scale); sc.current = scale;
+  const cb = useRef(onStep); cb.current = onStep;
+  useEffect(() => {
+    const node = el.current;
+    if (!node) return undefined;
+    let g = null;
+    const ts = (e) => {
+      if (e.touches.length !== 1) { g = null; return; }
+      const t = e.touches[0], r = node.getBoundingClientRect();
+      g = (t.clientY - r.top) / sc.current + node.scrollTop < 314 ? { x: t.clientX, y: t.clientY } : null;
+    };
+    const tm = (e) => { if (g && e.touches.length) { g.lx = e.touches[0].clientX; g.ly = e.touches[0].clientY; } };
+    const te = (e) => {
+      if (!g) return;
+      const t = e.changedTouches[0] || { clientX: g.lx ?? g.x, clientY: g.ly ?? g.y };
+      const dx = (t.clientX - g.x) / sc.current, dy = (t.clientY - g.y) / sc.current;
+      g = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) cb.current?.(dx < 0 ? 1 : -1);
+    };
+    const tc = () => { g = null; };
+    node.addEventListener('touchstart', ts, { passive: true });
+    node.addEventListener('touchmove', tm, { passive: true });
+    node.addEventListener('touchend', te, { passive: true });
+    node.addEventListener('touchcancel', tc, { passive: true });
+    return () => { node.removeEventListener('touchstart', ts); node.removeEventListener('touchmove', tm); node.removeEventListener('touchend', te); node.removeEventListener('touchcancel', tc); };
+  }, [el]);
 }
 
 const CATS = [
@@ -227,11 +262,12 @@ function RankingRow({ top, n, name, meta, level, onClick, photo, wordmark }) {
   );
 }
 
-export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, reduceMotion, pull, onDiscover, pullOn = true, onOpenExplore, exploreLiked, scene = 'morning' }) {
+export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, reduceMotion, pull, onDiscover, pullOn = true, onOpenExplore, exploreLiked, scene = 'morning', onStepScene }) {
   const sc = SCENES.find((x) => x.id === scene) || SCENES[0];
   const sub = sc.sub, left = sub ? 24 : 23;
   const scrollRef = useRef(null);
   usePullDown({ el: scrollRef, pull, enabled: pullOn, onCommit: onDiscover });
+  useHeroSwipe(scrollRef, onStepScene);
   const r = useTransform(pull, [0, 24], [0, 32]);
   const sh = useTransform(pull, [0, 24], ['0 -10px 28px rgba(42,38,80,0)', '0 -10px 28px rgba(42,38,80,0.12)']);
   return (
