@@ -44,7 +44,7 @@ function Hero({ reduce, pull }) {
                 animate={{ scale: r.t.scale.values, opacity: r.t.opacity.values }}
                 transition={{ scale: toTransition(r.t.scale), opacity: toTransition(r.t.opacity) }} />
             ))}
-            {/* Motion · street lamp: warm halo, glow and lantern light flickering on the same 6 s loop */}
+            {/* Motion · street lamp: warm halo, glow and lantern light swelling slowly on the same 6 s loop */}
             {[
               { id: '1067:5930', size: 96, color: '#ff9a1f', blur: 12, t: lampHalo, rest: 0.55 },
               { id: '1067:5931', size: 54, color: '#ffb82e', blur: 6, t: lampGlow, rest: 0.9 },
