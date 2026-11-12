@@ -45,6 +45,19 @@ export function VIcon({ name, size, fill, style }) {
   );
 }
 
+// Speaker with animated sound waves (cone + two wave arcs split from speakerHigh)
+export function SpeakerWaves({ size = 26 }) {
+  const d = vi.speakerHigh[1];
+  const cone = d.slice(0, 937), w1 = d.slice(937, 1713), w2 = d.slice(1713);
+  return (
+    <svg width={size} height={size} viewBox="0 0 26 26" fill="none" style={{ display: 'block', flex: 'none' }}>
+      <path d={cone} fill="#5E5A7E" />
+      <path className="spk-wave spk-w1" d={w1} fill="#5E5A7E" />
+      <path className="spk-wave spk-w2" d={w2} fill="#5E5A7E" />
+    </svg>
+  );
+}
+
 // Booking-flow icons (vector paths with their offsets inside the icon frame)
 const P = (vb, x, y, d) => [vb, d, '#5E5A7E', `translate(${x} ${y})`];
 Object.assign(vi, {

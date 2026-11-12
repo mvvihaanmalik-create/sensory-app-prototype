@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useAnimationControls } from 'motion/react';
 import { GENTLE, Icon } from './ui.jsx';
 import { paths } from './svgs.js';
-import { VIcon } from './venueIcons.jsx';
+import { VIcon, SpeakerWaves } from './venueIcons.jsx';
 import { G, CircleBtn, TopBar, Section, Chip, ChipGroup, PrimaryCTA, InfoList, Pill, NAVY, DIV, TAP, t } from './flow.jsx';
 import { VENUE } from './Venue.jsx';
 
@@ -315,7 +315,7 @@ function Mark({ m, onGo }) {
     return (
       <div className="abs" style={{ left: m.x, top: m.y, width: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
         <div style={{ width: 48, height: 48, borderRadius: 24, background: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <VIcon name={m.icon} size={m.icon === 'arrowUpRight' ? 22 : 26} />
+          {m.icon === 'speakerHigh' ? <SpeakerWaves size={26} /> : <VIcon name={m.icon} size={m.icon === 'arrowUpRight' ? 22 : 26} />}
         </div>
         <span className="nowrap" style={t(12, 500)}>{m.label}</span>
       </div>

@@ -31,3 +31,9 @@ input:focus,textarea:focus{box-shadow:0 0 0 3px rgba(94,90,126,.14)}
   *{transition-duration:.01ms!important;animation-duration:.01ms!important;scroll-behavior:auto!important}
   button:hover,[role=button]:hover,.tap:hover,button:active{translate:none!important;scale:none!important}
 }
+
+/* Speaker icon: sound waves pulse outward */
+@keyframes spk-pulse { 0%, 100% { opacity: .15; } 35%, 60% { opacity: 1; } }
+.spk-wave { opacity: .15; animation: spk-pulse 1.6s ease-in-out infinite; }
+.spk-w2 { animation-delay: .35s; }
+@media (prefers-reduced-motion: reduce) { .spk-wave { animation: none; opacity: 1; } }
