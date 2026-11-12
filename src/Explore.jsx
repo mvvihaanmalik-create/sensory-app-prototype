@@ -1,12 +1,13 @@
+import { VP } from './venuePhotos.js';
 import { useRef, useState } from 'react';
 import { Glass, INK, MUTED } from './ui.jsx';
 import { H } from './homeUpdateAssets.js';
 import './explore.css';
 
 export const POSTS = [
- {id:'foxy',photo:H.himgPhotoSlot5,avatar:H.himgEllipse15,user:'maya.sav',text:'My favorite courtyard reset. Coffee, shade, and room to breathe.',likes:128,height:321},
- {id:'dinner',photo:H.himgImagePlaceholder,avatar:H.himgEllipse16,user:'eli.explores',text:'Dinner with a cozy corner booth.',likes:76,height:241},
- {id:'sunny',photo:H.himgImagePlaceholder1,avatar:H.himgEllipse17,user:'jules.jpg',text:'A sunny seat for a slow morning.',likes:94,height:241},
+ {id:'foxy',photo:VP.garden,avatar:H.himgEllipse15,user:'maya.sav',text:'My favorite courtyard reset. Coffee, shade, and room to breathe.',likes:128,height:321},
+ {id:'dinner',photo:VP.hero,avatar:H.himgEllipse16,user:'eli.explores',text:'Dinner with a cozy corner booth.',likes:76,height:241},
+ {id:'sunny',photo:VP.indoor,avatar:H.himgEllipse17,user:'jules.jpg',text:'A sunny seat for a slow morning.',likes:94,height:241},
  {id:'clay',photo:H.himgImagePlaceholder2,avatar:H.himgEllipse18,user:'nina.makes',text:'An afternoon of clay, color, and a little creative reset.',likes:53,height:240},
 ];
 export function ExploreFeed({onOpen,liked}) {
@@ -19,11 +20,11 @@ export default function ExplorePost({onBack,onOpenVenue,liked,setLiked,saved,set
  return <div className="abs explore-post" style={{inset:0,background:'#f7f5f1',zIndex:41}}><div className="scroll hide-sb"><main>
  <nav><button aria-label="Back to Explore" onClick={onBack}><Pic src={H.pimgBackToExplore} size={24}/></button><h1>Explore</h1><button aria-label="More options"><Pic src={H.pimgMoreOptions}/></button></nav>
  <div className="explore-author"><Pic src={H.pimgMayaAvatar} size={42} style={{borderRadius:21}}/><div><strong>maya.sav</strong><p>Savannah, GA · 1h ago</p></div><button className="explore-tint" aria-pressed={follow} onClick={()=>setFollow(!follow)} style={{marginLeft:'auto',width:82,fontWeight:600,boxShadow:follow?'inset 0 0 0 1px #267f70':undefined}}>Follow</button></div>
- <img src={H.pimgFoxyLoxyCourtyardOfficialPhoto} alt="" className="explore-hero"/>
+ <img src={VP.garden} alt="" className="explore-hero"/>
  <div className="explore-caption"><h2>A little courtyard reset</h2><p>Coffee, shade, and room to breathe. I took a break from my laptop and found a sunny table out back at Foxy Loxy. The courtyard was just what I needed for a slower morning.</p></div>
  <div className="explore-tags">{['Low chatter','Natural light','Outdoor seating'].map(t=><span className="explore-tint" key={t}>{t}</span>)}</div>
  <div className="explore-actions"><button aria-label="Like post" aria-pressed={liked} onClick={()=>setLiked(!liked)}><Pic src={H.pimgLikePost} style={{opacity:liked?.5:1}}/></button><span style={{width:42}}>{128+(liked?1:0)}</span><button aria-label="Comments" onClick={()=>input.current?.focus()}><Pic src={H.pimgComments}/></button><span style={{width:38}}>{12+replies.length}</span><button aria-label="Save post" aria-pressed={saved} onClick={()=>setSaved(!saved)}><Pic src={H.pimgSavePost} style={{opacity:saved?.5:1}}/></button><span style={{width:52}}>{38+(saved?1:0)}</span><button className="explore-share" onClick={()=>{if(navigator.share)navigator.share({title:'A little courtyard reset',url:location.href}).catch(()=>{});}}><Pic src={H.pimgSharePost}/><span>Share</span></button></div>
- <hr/><section className="explore-place"><h3>In this post</h3><button onClick={onOpenVenue} className="explore-place-card"><img src={H.pimgFoxyLoxyCourtyardOfficialPhoto} alt="" style={{width:392,height:176,objectFit:'cover'}}/><div><h2>Foxy Loxy Café</h2><p>Level 2 · 0.5 mi · Updated 1h ago</p><p>Good fit · Quiet · natural light</p><span>View place <Pic src={H.pimgViewPlaceArrow} size={18}/></span></div></button></section>
+ <hr/><section className="explore-place"><h3>In this post</h3><button onClick={onOpenVenue} className="explore-place-card"><img src={VP.garden} alt="" style={{width:392,height:176,objectFit:'cover'}}/><div><h2>Foxy Loxy Café</h2><p>Level 2 · 0.5 mi · Updated 1h ago</p><p>Good fit · Quiet · natural light</p><span>View place <Pic src={H.pimgViewPlaceArrow} size={18}/></span></div></button></section>
  <hr/><section className="explore-replies"><header><h2>Replies · {12+replies.length}</h2><span>Most relevant</span></header><div className="explore-reply"><Pic src={H.pimgJulesJpgAvatar} size={32}/><div><strong>jules.jpg</strong><p>This looks so lovely! Is there much music outside?</p><small>28m　 Reply　 ♡ 8</small><div className="explore-reply" style={{marginTop:5}}><Pic src={H.pimgMayaAvatar} size={32}/><div><strong>maya.sav · Author</strong><p>It was pretty mellow when I went. I’d try a weekday morning!</p><small>20m　 Reply　 ♡ 3</small></div></div></div></div><div className="explore-reply"><Pic src={H.pimgEliExploresAvatar} size={32}/><div><strong>eli.explores</strong><p>Saving this for my next coffee break. Love a little outdoor space.</p><small>15m　 Reply　 ♡ 4</small></div></div>{replies.map((r,i)=><div key={i} className="explore-reply"><Pic src={H.pimgYourAvatar} size={32}/><p>{r}</p></div>)}<p className="explore-all-replies">View all {12+replies.length} replies</p></section><hr/>
  <form onSubmit={send} className="explore-reply-form"><Pic src={H.pimgYourAvatar} size={32}/><div><input ref={input} aria-label="Add a reply" placeholder="Add a reply…" value={reply} onChange={e=>setReply(e.target.value)}/><button type="submit" aria-label="Send reply"><Pic src={H.pimgSendReply} size={18}/></button></div></form>
  </main></div></div>;

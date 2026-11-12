@@ -36,4 +36,3 @@ input:focus,textarea:focus{box-shadow:0 0 0 3px rgba(94,90,126,.14)}
 @keyframes spk-pulse { 0%, 100% { opacity: .15; } 35%, 60% { opacity: 1; } }
 .spk-wave { opacity: .15; animation: spk-pulse 1.6s ease-in-out infinite; }
 .spk-w2 { animation-delay: .35s; }
-@media (prefers-reduced-motion: reduce) { .spk-wave { animation: none; opacity: 1; } }

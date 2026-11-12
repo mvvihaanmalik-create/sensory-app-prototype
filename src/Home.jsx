@@ -7,6 +7,8 @@ import { GENTLE, INK, INK2, useScale } from './ui.jsx';
 import { SCENES } from './scenes.js';
 import { usePullDown } from './Discover.jsx';
 import { H } from './homeUpdateAssets.js';
+import { RippleIcon } from './venueIcons.jsx';
+import { VP } from './venuePhotos.js';
 import { ExploreFeed } from './Explore.jsx';
 
 const lightGlass = {
@@ -150,9 +152,9 @@ function SectionHeader({ top, title, onSeeAll }) {
 
 /* ---------- For you stack (component 685:328, variants Front=A/B/C) ---------- */
 const VENUES = {
-  A: { name: 'Foxy Loxy Café', meta: 'Café · 0.5 mi', level: 'Level 2', photo: H.himgFoxyForYou },
-  B: { name: 'Gallery Espresso', meta: 'Café · 1.1 mi', level: 'Level 1', photo: H.himgPhotoSlot4 },
-  C: { name: 'The Sentient', meta: 'Café · 0.8 mi', level: 'Level 2' , photo: H.himgPhotoSlot3 },
+  A: { name: 'Foxy Loxy Café', meta: 'Café · 0.5 mi', level: 'Level 2', photo: VP.garden },
+  B: { name: 'Gallery Espresso', meta: 'Café · 1.1 mi', level: 'Level 1', photo: VP.indoor },
+  C: { name: 'The Sentient', meta: 'Café · 0.8 mi', level: 'Level 2' , photo: VP.bar },
 };
 const KEYS = ['A', 'B', 'C'];
 const ROLE = {
@@ -167,14 +169,14 @@ function VenueCard({ v }) {
   return (
     <>
       <img src={v.photo} alt="" className="abs" style={{inset:0,width:260,height:350,objectFit:'cover'}} />
-      <div className="abs" style={{ left: 0, right: 0, top: 171, bottom: 0, WebkitBackdropFilter: 'blur(14px)', backdropFilter: 'blur(14px)',
+      <div className="abs" style={{ left: 0, right: 0, top: 171, bottom: 0, borderRadius: '0 0 32px 32px', WebkitBackdropFilter: 'blur(14px)', backdropFilter: 'blur(14px)',
         WebkitMaskImage: 'linear-gradient(180deg, transparent 0%, #000 62%)', maskImage: 'linear-gradient(180deg, transparent 0%, #000 62%)' }} />
       <div className="abs" style={{ inset: 0, background: 'linear-gradient(180deg, rgba(6,6,6,0) 49%, rgba(6,6,6,0.18) 64%, rgba(6,6,6,0.37) 78%, rgba(6,6,6,0.61) 100%)' }} />
       <div className="abs" style={{ left: 12, top: 12, height: 36, display: 'flex', alignItems: 'center', gap: 4, padding: '0 14px 0 8px', borderRadius: 999,
         border: '1.5px solid rgba(255,255,255,0.95)', boxShadow: '0 8px 20px rgba(42,38,80,0.14), inset 0 1px 0 rgba(255,255,255,0.9)',
         WebkitBackdropFilter: 'blur(24px)', backdropFilter: 'blur(24px)',
         backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.55) 14%, rgba(255,255,255,0.08) 86%), linear-gradient(90deg, rgba(255,255,255,0.55), rgba(255,255,255,0.55))' }}>
-        <img src={uri('rippleCard')} alt="" style={{ width: 28, height: 28, display: 'block' }} />
+        <RippleIcon k="rippleCard" size={28} />
         <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: '#2a2650' }}>{v.level}</span>
       </div>
       <div className="abs" style={{ left: 12, top: 226, width: 236, height: 112, padding: 17, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
@@ -231,7 +233,8 @@ function ForYouStack({ onOpenVenue }) {
             onPointerUp={isFront ? onUp : undefined} onPointerCancel={isFront ? onUp : undefined}
             whileTap={!isFront ? { scale: 0.78 } : undefined}>
             <div className="abs" style={{ inset: 0, borderRadius: 32, overflow: 'hidden', background: 'rgba(255,255,255,0.85)',
-              border: '1px solid rgba(20,24,31,0.08)', boxShadow: '0 12px 32px rgba(27,42,68,0.06)' }}>
+              border: '1px solid rgba(20,24,31,0.08)', boxShadow: '0 12px 32px rgba(27,42,68,0.06)',
+              isolation: 'isolate', transform: 'translateZ(0)', WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
               <VenueCard v={VENUES[k]} />
             </div>
           </motion.div>
@@ -259,7 +262,7 @@ function RankingRow({ top, n, name, meta, level, onClick, photo, wordmark }) {
         <span className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: INK2 }}>{meta}</span>
       </span>
       <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <img src={uri(level === 1 ? 'ripple1' : 'ripple2')} alt="" style={{ width: 36, height: 36, display: 'block' }} />
+        <RippleIcon k={level === 1 ? 'ripple1' : 'ripple2'} size={36} />
         <span style={{ fontSize: 17, fontWeight: 700, color: INK }}>{level}</span>
       </span>
     </motion.button>

@@ -1,3 +1,4 @@
+import { svgSrc } from './svgs.js';
 // Phosphor icon paths exported from the Venue page frames (Figma section 789:3120).
 // Each entry: [viewBox size, path d, default fill]
 export const vi = {
@@ -44,6 +45,15 @@ export function VIcon({ name, size, fill, style }) {
       <path d={d} fill={fill || f} transform={transform} />
     </svg>
   );
+}
+
+// Sound-level icon (dot + arcs) with the arcs pulsing outward on a loop
+export function RippleIcon({ k, size }) {
+  let n = 0;
+  const html = svgSrc(k)
+    .replace(/width="\d+" height="\d+"/, `width="${size}" height="${size}" style="display:block"`)
+    .replace(/<path (d="[^"]*") stroke=/g, (m, d) => `<path class="spk-wave spk-w${++n}" ${d} stroke=`);
+  return <span style={{ display: 'block', width: size, height: size, flex: 'none' }} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
 // Speaker with animated sound waves (cone + two wave arcs split from speakerHigh)
