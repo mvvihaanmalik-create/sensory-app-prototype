@@ -36,6 +36,7 @@ import { profileIcons } from './svgs.js';
 vi.bell = [22, profileIcons.bell, '#5E5A7E'];
 
 export function VIcon({ name, size, fill, style }) {
+  if (name === 'speakerHigh') return <SpeakerWaves size={size || 26} fill={fill} style={style} />;
   const [vb, d, f, transform] = vi[name];
   const s = size || vb;
   return (
@@ -46,14 +47,15 @@ export function VIcon({ name, size, fill, style }) {
 }
 
 // Speaker with animated sound waves (cone + two wave arcs split from speakerHigh)
-export function SpeakerWaves({ size = 26 }) {
+export function SpeakerWaves({ size = 26, fill, style }) {
+  const c = fill || '#5E5A7E';
   const d = vi.speakerHigh[1];
   const cone = d.slice(0, 937), w1 = d.slice(937, 1713), w2 = d.slice(1713);
   return (
-    <svg width={size} height={size} viewBox="0 0 26 26" fill="none" style={{ display: 'block', flex: 'none' }}>
-      <path d={cone} fill="#5E5A7E" />
-      <path className="spk-wave spk-w1" d={w1} fill="#5E5A7E" />
-      <path className="spk-wave spk-w2" d={w2} fill="#5E5A7E" />
+    <svg width={size} height={size} viewBox="0 0 26 26" fill="none" style={{ display: 'block', flex: 'none', ...style }}>
+      <path d={cone} fill={c} />
+      <path className="spk-wave spk-w1" d={w1} fill={c} />
+      <path className="spk-wave spk-w2" d={w2} fill={c} />
     </svg>
   );
 }
