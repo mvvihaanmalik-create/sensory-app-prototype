@@ -6,6 +6,7 @@ import { GENTLE } from './ui.jsx';
 import { VIcon } from './venueIcons.jsx';
 import { G, TopBar, PrimaryCTA, DayChart, weekFrom, SENSES, NAVY, DIV, TAP, t } from './flow.jsx';
 import { CROWD_SUN, crowdWord } from './Venue.jsx';
+import { REVIEW_PICS } from './venuePhotos.js';
 
 const ICON = Object.fromEntries(SENSES.map((s) => [s.k, s.icon]));
 
@@ -135,10 +136,11 @@ function MostSay({ sense, d, filter, setFilter }) {
 
 function PhotoReview({ p }) {
   const [h, tag, text, meta] = p;
+  const pic = REVIEW_PICS[[...text].reduce((a, c) => a + c.charCodeAt(0), 0) % REVIEW_PICS.length];
   return (
     <motion.div layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }} transition={GENTLE}>
       <G r={24} whileTap={{ scale: 0.98 }} style={{ padding: '6px 6px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <div style={{ position: 'relative', height: h, borderRadius: 18, background: '#dbdbde' }}>
+        <div style={{ position: 'relative', height: h, borderRadius: 18, background: `#dbdbde url(${pic}) center / cover` }}>
           <span className="abs nowrap" style={{ left: 8, bottom: 10, height: 24, padding: '0 10px', borderRadius: 13, background: 'rgba(255,255,255,0.92)', display: 'flex', alignItems: 'center', ...t(12, 600) }}>{tag}</span>
         </div>
         <div style={{ padding: '0 6px', display: 'flex', flexDirection: 'column', gap: 4 }}>
