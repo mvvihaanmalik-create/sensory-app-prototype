@@ -14,6 +14,7 @@ import SenseReviews from './SenseReviews.jsx';
 import ListPage, { SortSheet } from './Lists.jsx';
 import { ModesSheet, EditMode, INITIAL_MODES, modeLabel } from './Modes.jsx';
 import { PAGE_IDS, PAGES } from './listData.js';
+import { SCENES } from './scenes.js';
 import { Toast } from './flow.jsx';
 import { GENTLE, ScaleCtx, StatusBar, TabBar } from './ui.jsx';
 
@@ -152,6 +153,7 @@ export default function App() {
   const [sheetCmd, setSheetCmd] = useState(initial.startsWith('map-') && initial !== 'map-half' ? { state: initial.slice(4), n: 0 } : null);
   const [homeScroll, setHomeScroll] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [scene, setScene] = useState('morning');
   // Hidden Discovery Mode: Home slides down by `pull`, Discover sits underneath it
   const [discoverOpen, setDiscoverOpen] = useState(initial === 'discover');
   const pull = useMotionValue(initial === 'discover' ? SCREEN_H : 0);
@@ -239,6 +241,10 @@ export default function App() {
               <div className="label">UXDG 370 · Final flow</div>
               <h1>Calm places,<br />Savannah</h1>
             </div>
+            <div>
+              <div className="label">Home hero</div>
+              <div className="jump">{SCENES.map((x) => <button key={x.id} className={x.id === scene ? 'on' : ''} onClick={() => { setScene(x.id); jump('home'); }}>{x.label}</button>)}</div>
+            </div>
             <div className="tools"><button onClick={() => { nav('search'); navigateSearch('search'); }}>Search</button>
               <button onClick={() => { try { history.replaceState(null, '', location.pathname); } catch (_) {} location.reload(); }}>Restart</button>
               <button onClick={() => startOnboarding(0)}>Replay onboarding</button>
@@ -255,7 +261,7 @@ export default function App() {
                 <div className="abs" style={{ inset: 0, display: screen === 'home' ? 'block' : 'none' }} aria-hidden={screen !== 'home'}>
                     {<DiscoverLayer pull={pull} open={discoverOpen} onClose={closeDiscover} mode={activeM} decided={decided}
                       onDecide={(id, d) => setDecided((m) => ({ ...m, [id]: d }))} onShowPassed={showPassed} onOpenVenue={openVenue} blocked={venueOpen || !!sense || !!flow} />}
-                    {<Home pull={pull} onOpenExplore={openExplore} exploreLiked={exploreLiked} pullOn={screen === 'home' && !discoverOpen && !exploreOpen} onDiscover={() => setDiscoverOpen(true)} onOpenMap={() => nav('map')} onOpenSearch={() => { nav('search'); navigateSearch(searchRoute); }} onOpenVenue={openVenue} onOpenPage={setPage} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} reduceMotion={reduceMotion} />}
+                    {<Home pull={pull} onOpenExplore={openExplore} exploreLiked={exploreLiked} pullOn={screen === 'home' && !discoverOpen && !exploreOpen} onDiscover={() => setDiscoverOpen(true)} onOpenMap={() => nav('map')} onOpenSearch={() => { nav('search'); navigateSearch(searchRoute); }} onOpenVenue={openVenue} onOpenPage={setPage} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} reduceMotion={reduceMotion} scene={scene} />}
                 </div>
                 <AnimatePresence>{!['home', 'search'].includes(screen) && <ScreenLayer key={screen} screen={screen}>
                   {screen === 'map' && <MapScreen command={sheetCmd} onOpenVenue={openVenue} onOpenSearch={() => { nav('search'); navigateSearch(searchRoute); }} savedIds={Object.keys(decided).filter(id => decided[id] === 'save')} onToggleSaved={toggleSaved} />}
@@ -345,7 +351,7 @@ export default function App() {
                   )}
                 </AnimatePresence>
                 <div className="abs" style={{ inset: 0, zIndex: 60, pointerEvents: 'none' }}><Toast text={note} icon={note && /Only|later/.test(note) ? 'info' : 'check'} /></div>
-                {!PHONE && <StatusBar shade={screen === 'search' && !venueOpen ? 0 : flow || sense ? 0 : venueOpen ? (venueScroll > 270 ? 1 : 0) : screen !== 'map' && homeScroll > 24 ? 1 : 0} />}
+                {!PHONE && <StatusBar pull={pull} light={screen === 'home' && SCENES.find((x) => x.id === scene)?.dark && homeScroll <= 24 && !(venueOpen || exploreOpen || modesOpen || editing || flow || sense || page || onboarding)} shade={screen === 'search' && !venueOpen ? 0 : flow || sense ? 0 : venueOpen ? (venueScroll > 270 ? 1 : 0) : screen !== 'map' && homeScroll > 24 ? 1 : 0} />}
                 <TabBar active={screen} onNav={to => { nav(to); if (to === 'search') navigateSearch(searchRoute); }} top={exploreOpen || venueOpen || modesOpen || editing || (screen === 'search' && ['search-filters','search-place'].includes(searchRoute)) ? 1000 : page ? TAB_TOP.home : TAB_TOP[screen]} yMV={screen === 'home' ? pull : undefined} />
                 {!PHONE && <div className="abs" style={{ left: 150, top: editing || (screen === 'home' && discoverOpen) ? 935 : 943, width: 140, height: 5, borderRadius: 3, background: screen === 'home' && discoverOpen ? '#2a2650' : screen === 'map' ? 'rgba(20,24,31,0.85)' : '#14181f', zIndex: 55 }} />}
                 {!PHONE && <div className="island" />}

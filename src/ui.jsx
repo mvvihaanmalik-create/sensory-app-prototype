@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { motion } from 'motion/react';
+import { motion, useMotionValue, useTransform } from 'motion/react';
 import { paths } from './svgs.js';
 
 export const ScaleCtx = createContext(1);
@@ -63,13 +63,17 @@ export function TabBar({ active, onNav, top, yMV }) {
   );
 }
 
-export function StatusBar({ shade = 0 }) {
+export function StatusBar({ shade = 0, light = false, pull }) {
+  // On dark hero scenes the clock and battery are white; they return to ink as Home is pulled down
+  const zero = useMotionValue(0);
+  const c = useTransform(pull || zero, [0, 40], [light ? '#ffffff' : INK, INK]);
+  const fade = { transition: 'color 0.25s, border-color 0.25s' };
   return (
     <div className="abs" style={{ inset: '0 0 auto 0', height: 54, zIndex: 50, pointerEvents: 'none' }}>
       <motion.div className="abs" style={{ inset: 0, background: 'rgba(247,245,241,0.82)', WebkitBackdropFilter: 'blur(14px)', backdropFilter: 'blur(14px)' }}
         animate={{ opacity: shade }} transition={{ duration: 0.25 }} />
-      <p className="abs nowrap" style={{ left: 40, top: 18, fontSize: 17, fontWeight: 700, color: INK, lineHeight: '20px' }}>9:41</p>
-      <div className="abs" style={{ left: 374, top: 24, width: 26, height: 12, border: `1.5px solid ${INK}`, borderRadius: 4 }} />
+      <motion.p className="abs nowrap" style={{ left: 40, top: 18, fontSize: 17, fontWeight: 700, color: c, lineHeight: '20px', ...fade }}>9:41</motion.p>
+      <motion.div className="abs" style={{ left: 374, top: 24, width: 26, height: 12, border: '1.5px solid', borderColor: c, borderRadius: 4, ...fade }} />
     </div>
   );
 }

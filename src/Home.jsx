@@ -4,7 +4,7 @@ import { uri } from './svgs.js';
 import { drops, ripples, toTransition, LOOP } from './fountain.js';
 import { LAMP, lampCore, lampGlow, lampHalo } from './lamp.js';
 import { GENTLE, INK, INK2, useScale } from './ui.jsx';
-import sceneMorning from './assets/scene-morning.jpg';
+import { SCENES } from './scenes.js';
 import { usePullDown } from './Discover.jsx';
 import { H } from './homeUpdateAssets.js';
 import { ExploreFeed } from './Explore.jsx';
@@ -17,53 +17,78 @@ const cardGlass = {
 };
 const h2 = { fontSize: 24, fontWeight: 600, lineHeight: '28px', letterSpacing: -0.36, color: INK };
 
-function Hero({ reduce, pull }) {
+function Layer({ l }) {
+  const initial = {}, animate = {}, transition = {};
+  for (const k of ['opacity', 'x', 'y', 'scale']) {
+    const t = l.t?.[k];
+    if (t) { initial[k] = t.values[0]; animate[k] = t.values; transition[k] = toTransition(t); }
+  }
+  return (
+    <motion.div className="abs" initial={initial} animate={animate} transition={transition}
+      style={{ left: l.x, top: l.y, width: l.w, height: l.h, borderRadius: l.round ? '50%' : l.cr, background: l.bg, border: l.border, boxShadow: l.glow, rotate: l.rot, transformOrigin: l.rot ? '0 0' : '50% 50%', pointerEvents: 'none' }}>
+      {l.k?.map((c, i) => <Layer key={i} l={c} />)}
+    </motion.div>
+  );
+}
+
+function MorningMotion() {
+  return (
+    <>
+      {drops.map((d) => (
+        <motion.div key={d.id} className="abs" data-node-id={d.id}
+          style={{ left: d.left, top: d.top, width: d.size, height: d.size, borderRadius: '50%', background: '#fff' }}
+          initial={{ x: 0, y: 0, opacity: 0 }}
+          animate={{ x: d.t.x.values, y: d.t.y.values, opacity: d.t.opacity.values }}
+          transition={{ x: toTransition(d.t.x), y: toTransition(d.t.y), opacity: toTransition(d.t.opacity) }} />
+      ))}
+      {ripples.map((r) => (
+        <motion.div key={r.id} className="abs" data-node-id={r.id}
+          style={{ left: 130, top: 305, width: 34, height: 6, borderRadius: '50%', border: '1.2px solid #fff', transformOrigin: '50% 50%' }}
+          initial={{ scale: 0.35, opacity: 0 }}
+          animate={{ scale: r.t.scale.values, opacity: r.t.opacity.values }}
+          transition={{ scale: toTransition(r.t.scale), opacity: toTransition(r.t.opacity) }} />
+      ))}
+      {/* Motion · street lamp: warm halo, glow and lantern light swelling slowly on the same 6 s loop */}
+      {[
+        { id: '1067:5930', size: 96, color: '#ff9a1f', blur: 12, t: lampHalo, rest: 0.3 },
+        { id: '1067:5931', size: 54, color: '#ffb82e', blur: 6, t: lampGlow, rest: 0.45 },
+      ].map((l) => (
+        <motion.div key={l.id} className="abs" data-node-id={l.id}
+          style={{ left: LAMP.x - l.size / 2, top: LAMP.y - l.size / 2, width: l.size, height: l.size, borderRadius: '50%', background: l.color, filter: `blur(${l.blur}px)`, pointerEvents: 'none' }}
+          initial={{ opacity: l.rest, scale: 1 }}
+          animate={{ opacity: l.t.opacity.values, scale: l.t.scale.values }}
+          transition={{ opacity: toTransition(l.t.opacity), scale: toTransition(l.t.scale) }} />
+      ))}
+      <motion.div className="abs" data-node-id="1067:5932"
+        style={{ left: LAMP.x - 5, top: LAMP.y - 7, width: 10, height: 14, borderRadius: 5, background: '#ffd17a', filter: 'blur(2px)', pointerEvents: 'none' }}
+        initial={{ opacity: 0.6 }}
+        animate={{ opacity: lampCore.opacity.values }}
+        transition={{ opacity: toTransition(lampCore.opacity) }} />
+    </>
+  );
+}
+
+function Hero({ reduce, pull, scene }) {
   const fade = useTransform(pull, [0, 120], [1, 0]);
   const pulse = reduce ? {} : {
     animate: { scale: [1, 1.025, 1] },
     transition: { duration: LOOP, times: [0, 0.5, 1], ease: 'easeInOut', repeat: Infinity },
   };
+  const { off } = scene;
   return (
     <motion.div className="abs" style={{ left: 0, top: 0, width: 440, height: 314, overflow: 'hidden', borderRadius: '0 0 32px 32px', boxShadow: '0 8px 12px rgba(13,15,26,0.12)', opacity: fade }}>
-      {/* Scene art + Motion · fountain share one 440x550 frame at y -130, pulsing about its centre */}
-      <motion.div className="abs" style={{ left: 0, top: -130, width: 440, height: 550, transformOrigin: '50% 50%' }} {...pulse}>
-        <img src={sceneMorning} alt="" className="abs" style={{ left: 0, top: 130, width: 440, height: 314, display: 'block' }} />
-        {!reduce && (
-          <div className="abs" style={{ left: 0, top: 130, width: 440, height: 314 }}>
-            {drops.map((d) => (
-              <motion.div key={d.id} className="abs" data-node-id={d.id}
-                style={{ left: d.left, top: d.top, width: d.size, height: d.size, borderRadius: '50%', background: '#fff' }}
-                initial={{ x: 0, y: 0, opacity: 0 }}
-                animate={{ x: d.t.x.values, y: d.t.y.values, opacity: d.t.opacity.values }}
-                transition={{ x: toTransition(d.t.x), y: toTransition(d.t.y), opacity: toTransition(d.t.opacity) }} />
-            ))}
-            {ripples.map((r) => (
-              <motion.div key={r.id} className="abs" data-node-id={r.id}
-                style={{ left: 130, top: 305, width: 34, height: 6, borderRadius: '50%', border: '1.2px solid #fff', transformOrigin: '50% 50%' }}
-                initial={{ scale: 0.35, opacity: 0 }}
-                animate={{ scale: r.t.scale.values, opacity: r.t.opacity.values }}
-                transition={{ scale: toTransition(r.t.scale), opacity: toTransition(r.t.opacity) }} />
-            ))}
-            {/* Motion · street lamp: warm halo, glow and lantern light swelling slowly on the same 6 s loop */}
-            {[
-              { id: '1067:5930', size: 96, color: '#ff9a1f', blur: 12, t: lampHalo, rest: 0.3 },
-              { id: '1067:5931', size: 54, color: '#ffb82e', blur: 6, t: lampGlow, rest: 0.45 },
-            ].map((l) => (
-              <motion.div key={l.id} className="abs" data-node-id={l.id}
-                style={{ left: LAMP.x - l.size / 2, top: LAMP.y - l.size / 2, width: l.size, height: l.size, borderRadius: '50%', background: l.color, filter: `blur(${l.blur}px)`, pointerEvents: 'none' }}
-                initial={{ opacity: l.rest, scale: 1 }}
-                animate={{ opacity: l.t.opacity.values, scale: l.t.scale.values }}
-                transition={{ opacity: toTransition(l.t.opacity), scale: toTransition(l.t.scale) }} />
-            ))}
-            <motion.div className="abs" data-node-id="1067:5932"
-              style={{ left: LAMP.x - 5, top: LAMP.y - 7, width: 10, height: 14, borderRadius: 5, background: '#ffd17a', filter: 'blur(2px)', pointerEvents: 'none' }}
-              initial={{ opacity: 0.6 }}
-              animate={{ opacity: lampCore.opacity.values }}
-              transition={{ opacity: toTransition(lampCore.opacity) }} />
-          </div>
-        )}
+      {/* Scene art + its Motion layer share one 440x550 frame at y -off, pulsing about its centre */}
+      <motion.div key={scene.id} className="abs" style={{ left: 0, top: -off, width: 440, height: 550, transformOrigin: '50% 50%' }} {...pulse}>
+        <img src={scene.art} alt="" className="abs" style={{ left: 0, top: off, width: 440, height: 314, display: 'block' }} />
+        {!reduce && (scene.layers
+          ? <div className="abs" style={{ left: 0, top: 0, width: 440, height: 550 }}>{scene.layers.map((l, i) => <Layer key={i} l={l} />)}</div>
+          : (
+            <div className="abs" style={{ left: 0, top: off, width: 440, height: 314 }}>
+              <MorningMotion />
+            </div>
+          ))}
       </motion.div>
-      <div className="abs" style={{ left: 0, top: 0, width: 440, height: 240, background: 'linear-gradient(180deg, rgba(255,252,247,0.85) 0%, rgba(255,252,247,0.62) 60%, rgba(255,252,247,0) 100%)' }} />
+      <div className="abs" style={{ left: 0, top: 0, width: 440, height: 240, background: `linear-gradient(180deg, rgba(${scene.scrim},0.85) 0%, rgba(${scene.scrim},0.62) 60%, rgba(${scene.scrim},0) 100%)` }} />
     </motion.div>
   );
 }
@@ -202,7 +227,9 @@ function RankingRow({ top, n, name, meta, level, onClick, photo, wordmark }) {
   );
 }
 
-export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, reduceMotion, pull, onDiscover, pullOn = true, onOpenExplore, exploreLiked }) {
+export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, reduceMotion, pull, onDiscover, pullOn = true, onOpenExplore, exploreLiked, scene = 'morning' }) {
+  const sc = SCENES.find((x) => x.id === scene) || SCENES[0];
+  const sub = sc.sub, left = sub ? 24 : 23;
   const scrollRef = useRef(null);
   usePullDown({ el: scrollRef, pull, enabled: pullOn, onCommit: onDiscover });
   const r = useTransform(pull, [0, 24], [0, 32]);
@@ -211,19 +238,20 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
     <motion.div className="abs" style={{ inset: 0, y: pull, overflow: 'hidden', background: '#f7f5f1', borderTopLeftRadius: r, borderTopRightRadius: r, boxShadow: sh, zIndex: 1, userSelect: 'none', WebkitUserSelect: 'none' }} onDragStart={(e) => e.preventDefault()}>
     <div ref={scrollRef} className="scroll" style={{ background: '#f7f5f1' }} onScroll={(e) => onScroll?.(e.currentTarget.scrollTop)}>
       <div style={{ position: 'relative', width: 440, height: 2663 }}>
-        <Hero reduce={reduceMotion} pull={pull} />
-        <p className="abs nowrap" style={{ left: 24, top: 59, fontSize: 15, fontWeight: 500, color: INK2 }}>Savannah, GA</p>
+        <Hero reduce={reduceMotion} pull={pull} scene={sc} />
+        <p className="abs nowrap" style={{ left: 24, top: 59, fontSize: 15, fontWeight: 500, color: sc.dark ? 'rgba(255,255,255,0.8)' : INK2 }}>Savannah, GA</p>
         <motion.button className="abs nowrap" onClick={onOpenModes} whileTap={{ scale: 0.95 }} transition={GENTLE}
           style={{ right: 22, top: 46, height: 44, padding: '0 16px', borderRadius: 999, ...lightGlass, fontSize: 15, fontWeight: 500, color: INK }}>
           {modeLabel}
         </motion.button>
-        <p className="abs nowrap" style={{ left: 24, top: 90, fontSize: 40, fontWeight: 600, lineHeight: '44px', letterSpacing: -1, color: INK }}>Good morning</p>
-        <button type="button" onClick={onOpenSearch} className="abs" style={{ left: 23, top: 145, width: 334, height: 52, borderRadius: 999, ...lightGlass, display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px' }}>
+        <p className="abs nowrap" style={{ left: 24, top: 90, fontSize: 40, fontWeight: 600, lineHeight: '44px', letterSpacing: -1, color: sc.dark ? '#fff' : INK }}>{sc.greeting}</p>
+        {sub && <p className="abs nowrap" style={{ left: 24, top: 140, fontSize: 16, color: sc.dark ? 'rgba(255,255,255,0.8)' : INK2 }}>{sub}</p>}
+        <button type="button" onClick={onOpenSearch} className="abs" style={{ left, top: sub ? 175 : 145, width: 334, height: 52, borderRadius: 999, ...lightGlass, display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px' }}>
           <img src={uri('searchHome')} alt="" style={{ width: 20, height: 20, display: 'block' }} />
-          <span style={{ fontSize: 16, color: '#000' }}>Search places</span>
+          <span style={{ fontSize: 16, color: sc.ph }}>Search places</span>
         </button>
         <motion.button className="abs" whileTap={{ scale: 0.92 }} transition={GENTLE}
-          style={{ left: 367, top: 147, width: 48, height: 48, borderRadius: 24, ...lightGlass }}>
+          style={{ left: sub ? 368 : 367, top: sub ? 177 : 147, width: 48, height: 48, borderRadius: 24, ...lightGlass }}>
           <img src={uri('filterHome')} alt="" className="abs" style={{ left: 11, top: 11, width: 24, height: 24 }} />
         </motion.button>
 
