@@ -150,7 +150,7 @@ function SectionHeader({ top, title, onSeeAll }) {
 
 /* ---------- For you stack (component 685:328, variants Front=A/B/C) ---------- */
 const VENUES = {
-  A: { name: 'Foxy Loxy Café', meta: 'Café · 0.5 mi', level: 'Level 2', photo: H.himgPhotoSlot5 },
+  A: { name: 'Foxy Loxy Café', meta: 'Café · 0.5 mi', level: 'Level 2', photo: H.himgFoxyForYou },
   B: { name: 'Gallery Espresso', meta: 'Café · 1.1 mi', level: 'Level 1', photo: H.himgPhotoSlot4 },
   C: { name: 'The Sentient', meta: 'Café · 0.8 mi', level: 'Level 2' , photo: H.himgPhotoSlot3 },
 };
