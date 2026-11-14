@@ -1,4 +1,4 @@
-import { RippleIcon } from './venueIcons.jsx';
+import { SensePin, SENSE_PLACES } from './sensePins.jsx';
 import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'motion/react';
 import { uri, paths } from './svgs.js';
@@ -40,14 +40,14 @@ function Recommendation({ r, onOpen, saved, onToggleSaved }) {
 }
 
 const PINS = [
-  { k: 'pinGallery', left: 98, top: 264, size: 64 },
-  { k: 'pinFoxy', left: 216, top: 340, size: 72 },
-  { k: 'pinSentient', left: 240, top: 606, size: 64 },
+  { left: 98, top: 264, size: 64 },
+  { left: 216, top: 360, size: 72 },
+  { left: 240, top: 606, size: 64 },
 ];
 const LABELS = [
-  { text: 'Gallery Café · Quiet', left: 39, top: 320, ga: '166.5deg' },
-  { text: 'Foxy Loxy · Soft chatter', left: 127, top: 404, ga: '168.2deg' },
-  { text: 'The Sentient · Busy café', left: 168, top: 662, ga: '168.3deg' },
+  { left: 39, top: 320, ga: '166.5deg' },
+  { left: 107, top: 424, ga: '168.2deg' },
+  { left: 168, top: 662, ga: '168.3deg' },
 ];
 const CHIPS = ['All', 'Cafés', 'Dining', 'Nightlife', 'Events'];
 const SENSES = [
@@ -122,15 +122,15 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
 
       {/* Layer / Sensory pins */}
       {PINS.map((pn, i) => (
-        <motion.div key={pn.k} className="abs" style={{ left: pn.left, top: pn.top, width: pn.size, height: pn.size }}
-          initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ ...GENTLE, delay: 0.12 + i * 0.06 }}><RippleIcon k={pn.k} size={pn.size} /></motion.div>
+        <motion.div key={sense + i} className="abs" style={{ left: pn.left, top: pn.top, width: pn.size, height: pn.size }}
+          initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ ...GENTLE, delay: 0.12 + i * 0.06 }}><SensePin sense={sense} place={i} /></motion.div>
       ))}
       {LABELS.map((l, i) => (
-        <motion.div key={l.text} className="abs" style={{ left: l.left, top: l.top }}
+        <motion.div key={sense + i} className="abs" style={{ left: l.left, top: l.top }}
           initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ ...GENTLE, delay: 0.18 + i * 0.06 }}>
           <Glass radius={22} angle={l.ga} style={{ position: 'relative', height: 44 }} contentStyle={{ gap: 8, padding: '0 14.5px 0 10.5px' }}>
             <img src={uri('mapPin')} alt="" style={{ width: 20, height: 20, display: 'block' }} />
-            <span className="nowrap" style={{ fontSize: 14, fontWeight: 500, color: NAVY }}>{l.text}</span>
+            <span className="nowrap" style={{ fontSize: 14, fontWeight: 500, color: NAVY }}>{SENSE_PLACES[sense][i]}</span>
           </Glass>
         </motion.div>
       ))}

@@ -37,6 +37,18 @@ input:focus,textarea:focus{box-shadow:0 0 0 3px rgba(94,90,126,.14)}
 .spk-wave { opacity: .15; animation: spk-pulse 1.6s ease-in-out infinite; }
 .spk-w2 { animation-delay: .35s; }
 
+/* Sense pins: livelier with the level (1 calm, 3 lively) */
+.sp[data-lvl='1'] { --sp-t: 2.6s; } .sp[data-lvl='2'] { --sp-t: 1.7s; } .sp[data-lvl='3'] { --sp-t: 1.1s; }
+.sp .spk-wave { animation-duration: var(--sp-t); animation-delay: var(--sp-delay); }
+.sp .spk-w2 { animation-delay: calc(var(--sp-delay) + .2s); } .sp .spk-w3 { animation-delay: calc(var(--sp-delay) + .4s); }
+.sp-i, .sp-halo { transform-box: fill-box; transform-origin: center; }
+@keyframes sp-hop { 0%, 55%, 100% { transform: translateY(0) scale(1); } 22% { transform: translateY(-1.6px) scale(1.14); } }
+@keyframes sp-spin { to { transform: rotate(360deg); } }
+@keyframes sp-halo { 0% { transform: scale(.86); opacity: .6; } 100% { transform: scale(1.3); opacity: 0; } }
+.sp-crowd { animation: sp-hop var(--sp-t) ease-in-out var(--sp-delay) infinite; }
+.sp-light { animation: sp-spin calc(var(--sp-t) * 6) linear var(--sp-delay) infinite; }
+.sp-halo { animation: sp-halo var(--sp-t) ease-out var(--sp-delay) infinite; }
+
 /* App comfort: reduce motion and vivid palette */
 [data-reduce-motion='on'] .spk-wave, [data-reduce-motion='on'] * { animation: none !important; }
 [data-reduce-motion='on'] .spk-wave { opacity: 1; }
