@@ -53,3 +53,8 @@
 .s-sugg-h{margin-top:36px!important}
 .s-sugg{display:grid;grid-template-columns:192px 192px;gap:8px}
 .s-sugg button{height:46px;border-radius:12px;background:#d9eae0;color:#2b5d4c;font:600 15px Figtree,sans-serif;text-align:left;padding:0 14px}
+/* Category illustrations: a gentle wiggle on hover / press */
+@keyframes s-wiggle{0%{transform:translate(0,0) rotate(0)}22%{transform:translate(-1.5px,-3px) rotate(-3.5deg)}48%{transform:translate(1px,-1.5px) rotate(2.8deg)}72%{transform:translate(-.5px,-.5px) rotate(-1.4deg)}100%{transform:translate(0,0) rotate(0)}}
+.s-category img{transform-origin:70% 85%}
+.s-category:hover img,.s-category:active img,.s-category:focus-visible img{animation:s-wiggle .7s cubic-bezier(.36,.07,.19,.97) both}
+@media (prefers-reduced-motion:reduce){.s-category:hover img,.s-category:active img{animation:none}}
