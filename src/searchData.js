@@ -64,7 +64,17 @@ export const PLACES = [...inventory.values()].map(p => {
 PLACES.push({ id: 'bakery-demo', name: 'Auspicious Baking Co.', type: 'Bakery', area: 'Savannah', distance: '2.1 mi', s: 2, l: 4, c: 2, seat: ['outdoor'], sound: 'Quiet', light: 'Natural', crowd: 'Calm', seating: 'Patio', art: 'Bakeries', color: '#ebd7b4', tags: ['Bakeries', 'Brunch', 'Low-key', 'Cozy', 'Quiet now', 'Outdoor seating', 'Natural light', 'New in Savannah'] });
 
 export function matchesFilters(place, filters) {
-  return filters.every(f => f === 'Quiet' ? place.s != null && place.s <= 2 : f === 'Natural light' ? place.tags.includes('Natural light') : f === 'Outdoor seating' ? ['Patio', 'Outdoor'].includes(place.seating) : f === 'Less crowded' && place.c != null && place.c <= 2);
+  return filters.every(f => {
+    if (f === 'Quiet') return place.s != null && place.s <= 2;
+    if (f === 'Lively') return place.s != null && place.s >= 4;
+    if (f === 'Natural light') return place.tags.includes('Natural light');
+    if (f === 'Soft light') return place.l != null && place.l <= 3;
+    if (f === 'Bright light') return place.l != null && place.l >= 4;
+    if (f === 'Outdoor seating') return ['Patio', 'Outdoor'].includes(place.seating);
+    if (f === 'Less crowded') return place.c != null && place.c <= 2;
+    if (f === 'Busy') return place.c != null && place.c >= 4;
+    return true;
+  });
 }
 export function searchPlaces(query, category, filters, hasSavedPlace, mode) {
   const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();

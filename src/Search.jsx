@@ -2,10 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useDragControls, useIsPresent, useReducedMotion } from 'motion/react';
 import { Glass, GENTLE } from './ui.jsx';
 import { searchAssets } from './searchAssets.js';
-import { FILTERS, SEARCH_GROUPS, PLACES, searchPlaces } from './searchData.js';
+import { SEARCH_GROUPS, PLACES, searchPlaces } from './searchData.js';
+import { AdjustSearchPage, ADJUST_DEFAULT } from './SettingsPages.jsx';
 import './search.css';
 
 const CHIPS = [['All', 61], ['Made for you', 133], ['Moods', 89], ['Activities', 107], ['Events', 89]];
+const RECENTS = [['Quiet cafés', { category: 'Cafés', filters: ['Quiet'] }], ['Foxy Loxy Café', { query: 'Foxy Loxy' }], ['Outdoor seating', { category: 'Outdoor seating' }]];
+const SUGGESTED = [['Quiet spaces', 'Quiet now'], ['Natural light', 'Natural light'], ['Less crowded', 'Low-key'], ['Booth seating', 'Booths & corners']];
+const prefFilters = p => [p.sound === 'Quiet' && 'Quiet', p.sound === 'Lively' && 'Lively', p.light === 'Soft' && 'Soft light', p.light === 'Bright' && 'Bright light', p.crowd === 'Relaxed' && 'Less crowded', p.crowd === 'Busy' && 'Busy'].filter(Boolean);
+const FILTER_PREF = { 'Quiet': ['sound', 'Any'], 'Lively': ['sound', 'Any'], 'Soft light': ['light', 'Any'], 'Bright light': ['light', 'Any'], 'Less crowded': ['crowd', 'Any'], 'Busy': ['crowd', 'Any'] };
 const asset = name => searchAssets[`imgIllustration${name}`];
 function Pill({ children, selected, className = '', ...props }) {
   return <motion.button type="button" className={`s-pill ${selected ? 'selected' : ''} ${className}`} whileTap={{ scale: .96 }} transition={GENTLE} {...props}>
@@ -23,7 +28,9 @@ export default function Search({ route, active, onNavigate, onBack, onOpenVenue,
   const [group, setGroup] = useState('All');
   const [category, setCategory] = useState('');
   const [filters, setFilters] = useState([]);
-  const [draft, setDraft] = useState([]);
+  const [prefs, setPrefs] = useState(ADJUST_DEFAULT);
+  const [draft, setDraft] = useState(ADJUST_DEFAULT);
+  const [focused, setFocused] = useState(false);
   const [place, setPlace] = useState(() => PLACES.find(p => p.id === 'gallery'));
   const browseRef = useRef(null), resultsRef = useRef(null), inputRef = useRef(null), dialogRef = useRef(null);
   const returnRoute = useRef('search');
@@ -32,15 +39,17 @@ export default function Search({ route, active, onNavigate, onBack, onOpenVenue,
   const dragControls = useDragControls();
   const reduce = useReducedMotion();
   const modal = route === 'search-filters' || route === 'search-place';
+  const showRecent = focused && !query.trim() && route === 'search';
   const underlying = modal ? returnRoute.current : route;
-  const results = searchPlaces(query, category, filters, hasSaved, activeMode);
-  const draftResults = searchPlaces(query, category, draft, hasSaved, activeMode);
-  const conflict = (filters.includes('Quiet') || activeMode?.prefs?.sound === 'Quiet') && ['Buzzing', 'Live music'].includes(category);
+  const found = searchPlaces(query, category, filters, hasSaved, activeMode);
+  const results = prefs.rank === 'Distance' ? [...found].sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance)) : found;
+    const conflict = (filters.includes('Quiet') || activeMode?.prefs?.sound === 'Quiet') && ['Buzzing', 'Live music'].includes(category);
   const close = () => { if (!dismissing.current) { dismissing.current = true; onBack(returnRoute.current); } };
 
   useEffect(() => {
     if (route === 'search') { setQuery(''); setCategory(''); }
-    if (route === 'search-filters') setDraft(filters);
+    if (route === 'search-filters') setDraft(prefs);
+    if (route !== 'search') setFocused(false);
   }, [route]); // Drafts are initialized once on entry, then committed only by Apply.
 
   useEffect(() => {
@@ -58,19 +67,21 @@ export default function Search({ route, active, onNavigate, onBack, onOpenVenue,
     if (label === 'Events') chooseCategory('Events');
     else { setQuery(''); setCategory(''); onNavigate('search', route === 'search-results'); browseRef.current?.scrollTo(0, 0); }
   };
-  const openFilters = e => { openerRef.current = e.currentTarget; inputRef.current?.blur(); returnRoute.current = route; setDraft(filters); onNavigate('search-filters'); };
+  const openFilters = e => { openerRef.current = e.currentTarget; inputRef.current?.blur(); returnRoute.current = route; setDraft(prefs); onNavigate('search-filters'); };
   const openPlace = (p, trigger) => {
     if (p.id === 'foxy') onOpenVenue();
     else { openerRef.current = trigger; setPlace(p); returnRoute.current = route; onNavigate('search-place'); }
   };
-  const reset = () => { setQuery(''); setCategory(''); setFilters([]); setGroup('All'); onNavigate('search', true); };
+  const reset = () => { setQuery(''); setCategory(''); setFilters([]); setPrefs(ADJUST_DEFAULT); setGroup('All'); onNavigate('search', true); };
   const goBack = () => { setQuery(''); setCategory(''); onNavigate('search', true); };
   const apply = () => {
     if (dismissing.current) return;
     dismissing.current = true;
-    setFilters(draft); resultsRef.current?.scrollTo(0, 0);
-    onNavigate(draft.length || query.trim() || category ? 'search-results' : returnRoute.current, true);
+    setPrefs(draft); setFilters(prefFilters(draft)); resultsRef.current?.scrollTo(0, 0);
+    onNavigate('search-results', true);
   };
+  const removeFilter = f => { setFilters(v => v.filter(x => x !== f)); const m = FILTER_PREF[f]; if (m) setPrefs(p => ({ ...p, [m[0]]: m[1] })); };
+  const pickRecent = o => { setFocused(false); inputRef.current?.blur(); setFilters(o.filters || []); if (o.query) { setCategory(''); setQuery(o.query); } else { setQuery(''); setCategory(o.category); } resultsRef.current?.scrollTo(0, 0); navigateResults(); };
   const handleDialogKey = e => {
     if (e.key === 'Escape') { e.preventDefault(); close(); }
     if (e.key === 'Tab') {
@@ -86,7 +97,7 @@ export default function Search({ route, active, onNavigate, onBack, onOpenVenue,
       <form className="s-search" role="search" onSubmit={e => { e.preventDefault(); if (query.trim()) { navigateResults(); inputRef.current.blur(); } else inputRef.current.focus(); }}>
         <Glass radius={26} angle="169.97deg" style={{ inset: 0 }} contentStyle={{ gap: 12, padding: '0 16.5px' }}>
           <img src={searchAssets.imgSearch} width="22" height="22" alt="" />
-          <input ref={inputRef} aria-label="Search places" placeholder="Search places" value={query} autoComplete="off" enterKeyHint="search" onChange={e => { setQuery(e.target.value); setCategory(''); resultsRef.current?.scrollTo(0, 0); if (e.target.value.trim()) navigateResults(); }} />
+          <input ref={inputRef} onFocus={() => setFocused(true)} onBlur={() => setTimeout(() => setFocused(false), 120)} aria-label="Search places" placeholder="Search places" value={query} autoComplete="off" enterKeyHint="search" onChange={e => { setQuery(e.target.value); setCategory(''); resultsRef.current?.scrollTo(0, 0); if (e.target.value.trim()) navigateResults(); }} />
           {query && <button type="button" className="s-clear" aria-label="Clear search" onClick={() => { setQuery(''); if (!category && !filters.length) onNavigate('search', true); inputRef.current.focus(); }}>×</button>}
         </Glass>
       </form>
@@ -108,18 +119,31 @@ export default function Search({ route, active, onNavigate, onBack, onOpenVenue,
       <div ref={resultsRef} className="s-viewport scroll" style={{ display: underlying === 'search-results' ? 'block' : 'none' }} aria-label="Search results">
         <motion.div className="s-results" layout transition={GENTLE}>
           <div className="s-results-heading"><button type="button" className="s-back" aria-label="Back to browse" onClick={goBack}>‹</button><div><h2>{category || (query.trim() ? `“${query.trim()}”` : 'Places for you')}</h2><p role="status">{results.length} {results.length === 1 ? 'match' : 'matches'} in Savannah</p></div></div>
-          {(category || filters.length > 0) && <div className="s-active-filters">{category && <Pill selected onClick={() => setCategory('')} aria-label={`Remove ${category}`}>{category} ×</Pill>}{filters.map(f => <Pill key={f} selected onClick={() => setFilters(v => v.filter(x => x !== f))} aria-label={`Remove ${f}`}>{f} ×</Pill>)}</div>}
+          {(category || filters.length > 0) && <div className="s-active-filters">{category && <Pill selected onClick={() => setCategory('')} aria-label={`Remove ${category}`}>{category} ×</Pill>}{filters.map(f => <Pill key={f} selected onClick={() => removeFilter(f)} aria-label={`Remove ${f}`}>{f} ×</Pill>)}</div>}
           <AnimatePresence initial={false} mode="popLayout">{(underlying === 'search-results' ? results : []).map(p => <motion.button layout key={p.id} className="s-result-button" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: .97 }} transition={GENTLE} whileTap={{ scale: .98 }} onClick={e => openPlace(p, e.currentTarget)} aria-label={`View ${p.name}`}>
             <Glass radius={28} className="s-result"><div className="s-result-art" style={{ background: p.color }}><img src={asset(p.art)} alt="" /></div><div className="s-result-info"><h3>{p.name}</h3><p>{p.type} · {p.area}</p><span>{p.sound} · {p.light} light · {p.distance}</span>{p.id === 'foxy' && booking && <span>Booked · {booking.guests} guests · {booking.time}</span>}</div><span className="s-chevron">›</span></Glass>
           </motion.button>)}</AnimatePresence>
         </motion.div>
       </div>
     </div>
-    <AnimatePresence>{modal && active && <SheetLayer key={route}>
+    <AnimatePresence>{showRecent && <motion.div key="recent" className="s-recent" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .18 }} onMouseDown={e => e.preventDefault()}>
+      <h2>Recent searches</h2>
+      <div className="s-recent-list">{RECENTS.map(([label, o]) => <motion.button key={label} type="button" whileTap={{ scale: .98 }} transition={GENTLE} onClick={() => pickRecent(o)}>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3 8.5C3 5.7 5.2 3.5 8 3.5s5 2.2 5 5-2.2 5-5 5H5" stroke="#2f6b57" strokeWidth="1.6" strokeLinecap="round"/><path d="M5.5 6.5 3 8.7l2.7 2.3" stroke="#2f6b57" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        <span>{label}</span>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 9 9 3M4 3h5v5" stroke="#2a2650" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </motion.button>)}</div>
+      <h2 className="s-sugg-h">Suggested searches</h2>
+      <div className="s-sugg">{SUGGESTED.map(([label, cat]) => <motion.button key={label} type="button" whileTap={{ scale: .97 }} transition={GENTLE} onClick={() => pickRecent({ category: cat })}>{label}</motion.button>)}</div>
+    </motion.div>}</AnimatePresence>
+    <AnimatePresence>{route === 'search-filters' && active && <motion.div key="adjust" className="abs" style={{ inset: 0, zIndex: 20 }} initial={{ x: 440 }} animate={{ x: 0 }} exit={{ x: 440 }} transition={{ type: 'spring', stiffness: 380, damping: 40 }}>
+      <AdjustSearchPage draft={draft} setDraft={setDraft} onBack={close} onApply={apply} />
+    </motion.div>}</AnimatePresence>
+    <AnimatePresence>{route === 'search-place' && active && <SheetLayer key={route}>
       <button className="s-scrim" aria-label="Dismiss sheet" type="button" onClick={close}/>
-      <motion.div ref={dialogRef} className="s-sheet" role="dialog" aria-modal="true" aria-label={route === 'search-filters' ? 'Search filters' : place.name} tabIndex={-1} onKeyDown={handleDialogKey} initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={GENTLE} drag="y" dragControls={dragControls} dragListener={false} dragConstraints={{ top: 0, bottom: 0 }} dragElastic={{ top: 0, bottom: .35 }} onDragEnd={(_, info) => { if (info.offset.y > 90 || info.velocity.y > 500) close(); }}>
-        <div className="s-drag-handle" onPointerDown={e => dragControls.start(e)} aria-hidden="true"><div className="s-handle"/></div><div className="s-sheet-heading"><h2>{route === 'search-filters' ? 'Filters' : place.name}</h2><button type="button" className="s-close" aria-label="Close sheet" onClick={close}>×</button></div>
-        {route === 'search-filters' ? <><div className="s-sheet-body"><div className="s-filter-options">{FILTERS.map(f => <Pill key={f} selected={draft.includes(f)} aria-pressed={draft.includes(f)} onClick={() => setDraft(v => v.includes(f) ? v.filter(x => x !== f) : [...v, f])}>{f}{draft.includes(f) ? ' ✓' : ''}</Pill>)}</div></div><div className="s-sheet-actions"><button type="button" onClick={() => setDraft([])}>Reset filters</button><Pill selected onClick={apply}>Show {draftResults.length} {draftResults.length === 1 ? 'match' : 'matches'}</Pill></div></> : <><div className="s-sheet-body"><div className="s-place-art" style={{ background: place.color }}><img src={asset(place.art)} alt=""/></div><p className="s-sheet-intro">{place.type} · {place.area} · {place.distance}</p><div className="s-place-senses">{[['Sound', place.sound], ['Light', place.light], ['Crowd', place.crowd], ['Seating', place.seating]].map(([label, value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div></div><div className="s-sheet-footer"><Pill selected onClick={close}>Done</Pill></div></>}
+      <motion.div ref={dialogRef} className="s-sheet" role="dialog" aria-modal="true" aria-label={place.name} tabIndex={-1} onKeyDown={handleDialogKey} initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={GENTLE} drag="y" dragControls={dragControls} dragListener={false} dragConstraints={{ top: 0, bottom: 0 }} dragElastic={{ top: 0, bottom: .35 }} onDragEnd={(_, info) => { if (info.offset.y > 90 || info.velocity.y > 500) close(); }}>
+        <div className="s-drag-handle" onPointerDown={e => dragControls.start(e)} aria-hidden="true"><div className="s-handle"/></div><div className="s-sheet-heading"><h2>{place.name}</h2><button type="button" className="s-close" aria-label="Close sheet" onClick={close}>×</button></div>
+        {<><div className="s-sheet-body"><div className="s-place-art" style={{ background: place.color }}><img src={asset(place.art)} alt=""/></div><p className="s-sheet-intro">{place.type} · {place.area} · {place.distance}</p><div className="s-place-senses">{[['Sound', place.sound], ['Light', place.light], ['Crowd', place.crowd], ['Seating', place.seating]].map(([label, value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div></div><div className="s-sheet-footer"><Pill selected onClick={close}>Done</Pill></div></>}
       </motion.div>
     </SheetLayer>}</AnimatePresence>
   </div>;
