@@ -209,7 +209,7 @@ const others = () => [
       C: { P: 1.4, xl: 206.4, xr: 224.4, y: 392.4, dx: 48, up: -6, down: 46, delays: seq(5, 0.28) },
       rip: { x: 162, y: 440, w: 110, h: 12 } }),
       ...SPARKLES.map((a) => sparkle(...a))] },
-  { id: 'music', label: 'Music Festival', art: music, off: 125, scrim: DARK, dark: true, ph: '#4b5462', greeting: 'Jazz Fest, gently', sub: 'Seated, lower-volume sets this week',
+  { id: 'music', label: 'Savannah Music Festival', art: music, off: 125, scrim: DARK, dark: true, ph: '#4b5462', greeting: 'Jazz Fest, gently', sub: 'Seated, lower-volume sets this week',
     layers: [note(182, 6, 0, -1, true), note(198, 8, 0.75, 1), note(182, 6, 1.5, -1), note(198, 8, 2.25, 1),
       glow(89, 315, 96, 96, '#ffb347', 24, by(0.28, OP1), SC1), glow(109, 335, 56, 56, '#ffd27a', 12, by(0.4, OP1), SC1),
       glow(252, 315, 96, 96, '#ffb347', 24, by(0.23, OP2), SC2), glow(272, 335, 56, 56, '#ffd27a', 12, by(0.33, OP2), SC2)] },

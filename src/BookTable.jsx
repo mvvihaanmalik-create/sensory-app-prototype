@@ -49,10 +49,10 @@ export const ZONES = {
   Patio: {
     tables: [
       T(1, 16, 96, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], { stepFree: true }),
-      T(2, 127, 96, 110, 56, 2, 2, ['Sound · Easy to talk', 'Light · Bright', 'Temp · Warm'], { sunny: true, stepFree: true, space: true }),
-      T(3, 278, 96, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Bright', 'Temp · Cool'], { sunny: true, ac: true }),
+      T(2, 127, 96, 110, 56, 2, 2, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { sunny: true, stepFree: true, space: true }),
+      T(3, 278, 96, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { sunny: true, ac: true }),
       T(4, 16, 222, 110, 60, 2, 2, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild, away from AC', 'Far from speaker'], { stepFree: true, space: true }),
-      T(5, 196, 222, 150, 60, 2, 2, ['Sound · Lively', 'Light · Bright', 'Temp · Mild'], { speaker: true, sunny: true, space: true, stepFree: true }),
+      T(5, 196, 222, 150, 60, 2, 2, ['Sound · Lively', 'Light · Natural', 'Temp · Mild'], { speaker: true, sunny: true, space: true, stepFree: true }),
       T(6, 16, 348, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], { exit: true, stepFree: true }),
       T(7, 150, 348, 70, 56, 1, 1, ['Sound · Lively', 'Light · Shaded', 'Temp · Mild'], { speaker: true, exit: true }),
     ],
@@ -64,10 +64,10 @@ export const ZONES = {
   },
   'Garden pond': {
     tables: [
-      T(8, 16, 70, 70, 56, 1, 1, ['Sound · Quiet', 'Light · Shaded', 'Temp · Mild'], { stepFree: false }),
-      T(9, 294, 70, 70, 56, 1, 1, ['Sound · Quiet', 'Light · Shaded', 'Temp · Mild'], {}),
-      T(10, 16, 316, 110, 60, 2, 2, ['Sound · Quiet', 'Light · Shaded', 'Temp · Mild'], { space: true }),
-      T(11, 236, 316, 110, 60, 2, 2, ['Sound · Easy to talk', 'Light · Bright', 'Temp · Warm'], { sunny: true, space: true }),
+      T(8, 16, 70, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], { stepFree: false }),
+      T(9, 294, 70, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], {}),
+      T(10, 16, 316, 110, 60, 2, 2, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], { space: true }),
+      T(11, 236, 316, 110, 60, 2, 2, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { sunny: true, space: true }),
     ],
     marks: [
       { kind: 'pond', x: 106, y: 150, w: 180, h: 120 },
@@ -75,12 +75,12 @@ export const ZONES = {
   },
   Indoor: {
     tables: [
-      T(12, 16, 120, 70, 56, 1, 1, ['Sound · Lively', 'Light · Natural', 'Temp · Cool'], { speaker: true, ac: true, stepFree: true }),
-      T(13, 150, 120, 70, 56, 1, 1, ['Sound · Lively', 'Light · Natural', 'Temp · Cool'], { ac: true, stepFree: true }),
-      T(14, 16, 240, 110, 60, 2, 2, ['Sound · Easy to talk', 'Light · Warm & cozy', 'Temp · Mild'], { soft: true, stepFree: true, space: true }),
-      T(15, 196, 240, 150, 60, 2, 2, ['Sound · Easy to talk', 'Light · Warm & cozy', 'Temp · Mild'], { soft: true, stepFree: true, space: true }),
+      T(12, 16, 120, 70, 56, 1, 1, ['Sound · Lively', 'Light · Natural', 'Temp · Mild'], { speaker: true, ac: true, stepFree: true }),
+      T(13, 150, 120, 70, 56, 1, 1, ['Sound · Lively', 'Light · Natural', 'Temp · Mild'], { ac: true, stepFree: true }),
+      T(14, 16, 240, 110, 60, 2, 2, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], { soft: true, stepFree: true, space: true }),
+      T(15, 196, 240, 150, 60, 2, 2, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], { soft: true, stepFree: true, space: true }),
       T(16, 16, 360, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { exit: true, stepFree: true }),
-      T(17, 150, 360, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Warm & cozy', 'Temp · Mild'], { exit: true, soft: true, stepFree: true }),
+      T(17, 150, 360, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], { exit: true, soft: true, stepFree: true }),
     ],
     marks: [
       { kind: 'block', x: 20, y: 20, w: 260, h: 40, text: '' },
@@ -91,9 +91,9 @@ export const ZONES = {
   },
   Bar: {
     tables: [
-      T(18, 16, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Bright', 'Temp · Cool'], { ac: true, sunny: true, bar: true }),
-      T(19, 147, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Bright', 'Temp · Cool'], { ac: true, sunny: true, bar: true }),
-      T(20, 278, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Bright', 'Temp · Cool'], { speaker: true, sunny: true, bar: true }),
+      T(18, 16, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Natural', 'Temp · Mild'], { ac: true, sunny: true, bar: true }),
+      T(19, 147, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Natural', 'Temp · Mild'], { ac: true, sunny: true, bar: true }),
+      T(20, 278, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Natural', 'Temp · Mild'], { speaker: true, sunny: true, bar: true }),
       T(21, 16, 300, 98, 44, 0, 2, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { bar: true, exit: true }),
       T(22, 147, 300, 98, 44, 0, 2, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { bar: true }),
       T(23, 278, 300, 98, 44, 0, 2, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { bar: true }),
@@ -625,7 +625,7 @@ export function BookingConfirmed({ booking, onClose, onChange }) {
                   <VIcon name={added ? 'check' : 'cal'} size={20} />
                 </motion.span>
               </AnimatePresence>
-              <span style={t(15, 600)}>{added ? 'Added' : 'Add to calendar'}</span>
+              <span style={t(15, 600)}>Add to calendar</span>
             </G>
             <G as="button" r={26} whileTap={{ scale: 0.96 }} transition={TAP}
               style={{ flex: '1 0 0', height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>

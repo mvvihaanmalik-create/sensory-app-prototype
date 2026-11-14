@@ -75,7 +75,7 @@ const list = (a) => (a.length < 2 ? a[0] : `${[a[0], ...a.slice(1, -1).map(low)]
 // Why this place is on the card: what matches the active mode, what is unknown, and one honest heads-up.
 export function reasonFor(p, prefs, modeName) {
   const cs = checks(p, prefs);
-  if (!cs.length) return { line: 'Picked from places near you. Set preferences in your mode to tune this.', note: null };
+  if (!cs.length) return { line: '', note: null };
   const hit = cs.filter((c) => c.fit != null && c.fit >= 0.85).map((c) => PHRASE[c.k](p, prefs)).slice(0, 3);
   const miss = cs.find((c) => c.fit != null && c.fit < 0.5);
   const unknown = cs.filter((c) => c.fit == null).map((c) => (c.k === 'light' ? 'lighting' : c.k === 'seat' ? 'seating' : c.k));

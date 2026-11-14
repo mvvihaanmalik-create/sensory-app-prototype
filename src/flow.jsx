@@ -290,7 +290,7 @@ export function ReviewCard({ r }) {
           <motion.span animate={helpful ? { rotate: [0, -18, 0], scale: [1, 1.2, 1] } : {}} transition={{ duration: 0.4 }}>
             <VIcon name="thumbsUp" fill={NAVY} />
           </motion.span>
-          <span style={t(13, helpful ? 600 : 500)}>{helpful ? 'Helpful · 1' : 'Helpful'}</span>
+          <span style={t(13, helpful ? 600 : 500)}>Helpful</span>
         </motion.button>
       )}
     </G>
@@ -359,7 +359,7 @@ export function DayChart({ icon, title, week, nowIdx = 11, liveText, info, descr
                 {DAYS.map((d) => (
                   <button key={d} onClick={() => { setDay(d); setSel(null); setMenu(false); }}
                     style={{ width: '100%', height: 36, borderRadius: 14, padding: '0 12px', display: 'flex', alignItems: 'center', background: d === day ? 'rgba(94,90,126,0.1)' : 'transparent' }}>
-                    <span style={t(14, d === day ? 600 : 500)}>{d === 'Sun' ? 'Sun · Today' : d}</span>
+                    <span style={t(14, d === day ? 600 : 500)}>{d}</span>
                   </button>
                 ))}
               </motion.div>
