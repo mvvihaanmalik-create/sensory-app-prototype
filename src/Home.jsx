@@ -153,7 +153,7 @@ function SectionHeader({ top, title, onSeeAll }) {
 /* ---------- For you stack (component 685:328, variants Front=A/B/C) ---------- */
 const VENUES = {
   A: { name: 'Foxy Loxy Café', meta: 'Café · 0.5 mi', level: 'Level 2', photo: VP.garden },
-  B: { name: 'Gallery Espresso', meta: 'Café · 1.1 mi', level: 'Level 1', photo: VP.indoor },
+  B: { name: 'Gallery Café', meta: 'Café · 1.1 mi', level: 'Level 1', photo: VP.indoor },
   C: { name: 'The Sentient', meta: 'Café · 0.8 mi', level: 'Level 2' , photo: VP.bar },
 };
 const KEYS = ['A', 'B', 'C'];
@@ -303,7 +303,7 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
         <ForYouStack onOpenVenue={onOpenVenue} />
 
         <SectionHeader top={946} title="Popular Around you" onSeeAll={() => onOpenPage?.('popular')} />
-        <RankingRow top={998} n={1} photo={H.himgPhotoSlot} name="Gallery Espresso" meta="Café · 1.1 mi" level={1} />
+        <RankingRow top={998} n={1} photo={H.himgPhotoSlot} name="Gallery Café" meta="Café · 1.1 mi" level={1} />
         <RankingRow top={1106} n={2} wordmark name="Foxy Loxy Café" meta="Café · 0.5 mi" level={2} onClick={onOpenVenue} />
         <RankingRow top={1214} n={3} photo={H.himgPhotoSlot2} name="The Sentient" meta="Café · 0.8 mi" level={2} />
 
