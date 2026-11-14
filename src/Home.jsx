@@ -1,12 +1,14 @@
-import { useRef, useState } from 'react';
-import { motion, useTransform } from 'motion/react';
+import { useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion, useTransform } from 'motion/react';
 import { uri } from './svgs.js';
 import { drops, ripples, toTransition, LOOP } from './fountain.js';
 import { LAMP, lampCore, lampGlow, lampHalo } from './lamp.js';
 import { GENTLE, INK, INK2, useScale } from './ui.jsx';
-import sceneMorning from './assets/scene-morning.jpg';
+import { SCENES } from './scenes.js';
 import { usePullDown } from './Discover.jsx';
 import { H } from './homeUpdateAssets.js';
+import { RippleIcon } from './venueIcons.jsx';
+import { VP } from './venuePhotos.js';
 import { ExploreFeed } from './Explore.jsx';
 
 const lightGlass = {
@@ -17,55 +19,115 @@ const cardGlass = {
 };
 const h2 = { fontSize: 24, fontWeight: 600, lineHeight: '28px', letterSpacing: -0.36, color: INK };
 
-function Hero({ reduce, pull }) {
+function Layer({ l }) {
+  const initial = {}, animate = {}, transition = {};
+  for (const k of ['opacity', 'x', 'y', 'scale']) {
+    const t = l.t?.[k];
+    if (t) { initial[k] = t.values[0]; animate[k] = t.values; transition[k] = toTransition(t); }
+  }
+  return (
+    <motion.div className="abs" initial={initial} animate={animate} transition={transition}
+      style={{ left: l.x, top: l.y, width: l.w, height: l.h, borderRadius: l.round ? '50%' : l.cr, background: l.bg, border: l.border, boxShadow: l.glow, rotate: l.rot, filter: l.blur ? `blur(${l.blur}px)` : undefined, transformOrigin: l.rot ? '0 0' : '50% 50%', pointerEvents: 'none' }}>
+      {l.k?.map((c, i) => <Layer key={i} l={c} />)}
+    </motion.div>
+  );
+}
+
+function MorningMotion() {
+  return (
+    <>
+      {drops.map((d) => (
+        <motion.div key={d.id} className="abs" data-node-id={d.id}
+          style={{ left: d.left, top: d.top, width: d.size, height: d.size, borderRadius: '50%', background: '#fff' }}
+          initial={{ x: 0, y: 0, opacity: 0 }}
+          animate={{ x: d.t.x.values, y: d.t.y.values, opacity: d.t.opacity.values }}
+          transition={{ x: toTransition(d.t.x), y: toTransition(d.t.y), opacity: toTransition(d.t.opacity) }} />
+      ))}
+      {ripples.map((r) => (
+        <motion.div key={r.id} className="abs" data-node-id={r.id}
+          style={{ left: 130, top: 305, width: 34, height: 6, borderRadius: '50%', border: '1.2px solid #fff', transformOrigin: '50% 50%' }}
+          initial={{ scale: 0.35, opacity: 0 }}
+          animate={{ scale: r.t.scale.values, opacity: r.t.opacity.values }}
+          transition={{ scale: toTransition(r.t.scale), opacity: toTransition(r.t.opacity) }} />
+      ))}
+      {/* Motion · street lamp: warm halo, glow and lantern light swelling slowly on the same 6 s loop */}
+      {[
+        { id: '1067:5930', size: 96, color: '#ff9a1f', blur: 12, t: lampHalo, rest: 0.3 },
+        { id: '1067:5931', size: 54, color: '#ffb82e', blur: 6, t: lampGlow, rest: 0.45 },
+      ].map((l) => (
+        <motion.div key={l.id} className="abs" data-node-id={l.id}
+          style={{ left: LAMP.x - l.size / 2, top: LAMP.y - l.size / 2, width: l.size, height: l.size, borderRadius: '50%', background: l.color, filter: `blur(${l.blur}px)`, pointerEvents: 'none' }}
+          initial={{ opacity: l.rest, scale: 1 }}
+          animate={{ opacity: l.t.opacity.values, scale: l.t.scale.values }}
+          transition={{ opacity: toTransition(l.t.opacity), scale: toTransition(l.t.scale) }} />
+      ))}
+      <motion.div className="abs" data-node-id="1067:5932"
+        style={{ left: LAMP.x - 5, top: LAMP.y - 7, width: 10, height: 14, borderRadius: 5, background: '#ffd17a', filter: 'blur(2px)', pointerEvents: 'none' }}
+        initial={{ opacity: 0.6 }}
+        animate={{ opacity: lampCore.opacity.values }}
+        transition={{ opacity: toTransition(lampCore.opacity) }} />
+    </>
+  );
+}
+
+function Hero({ reduce, pull, scene }) {
   const fade = useTransform(pull, [0, 120], [1, 0]);
   const pulse = reduce ? {} : {
     animate: { scale: [1, 1.025, 1] },
     transition: { duration: LOOP, times: [0, 0.5, 1], ease: 'easeInOut', repeat: Infinity },
   };
+  const { off } = scene;
   return (
     <motion.div className="abs" style={{ left: 0, top: 0, width: 440, height: 314, overflow: 'hidden', borderRadius: '0 0 32px 32px', boxShadow: '0 8px 12px rgba(13,15,26,0.12)', opacity: fade }}>
-      {/* Scene art + Motion · fountain share one 440x550 frame at y -130, pulsing about its centre */}
-      <motion.div className="abs" style={{ left: 0, top: -130, width: 440, height: 550, transformOrigin: '50% 50%' }} {...pulse}>
-        <img src={sceneMorning} alt="" className="abs" style={{ left: 0, top: 130, width: 440, height: 314, display: 'block' }} />
-        {!reduce && (
-          <div className="abs" style={{ left: 0, top: 130, width: 440, height: 314 }}>
-            {drops.map((d) => (
-              <motion.div key={d.id} className="abs" data-node-id={d.id}
-                style={{ left: d.left, top: d.top, width: d.size, height: d.size, borderRadius: '50%', background: '#fff' }}
-                initial={{ x: 0, y: 0, opacity: 0 }}
-                animate={{ x: d.t.x.values, y: d.t.y.values, opacity: d.t.opacity.values }}
-                transition={{ x: toTransition(d.t.x), y: toTransition(d.t.y), opacity: toTransition(d.t.opacity) }} />
-            ))}
-            {ripples.map((r) => (
-              <motion.div key={r.id} className="abs" data-node-id={r.id}
-                style={{ left: 130, top: 305, width: 34, height: 6, borderRadius: '50%', border: '1.2px solid #fff', transformOrigin: '50% 50%' }}
-                initial={{ scale: 0.35, opacity: 0 }}
-                animate={{ scale: r.t.scale.values, opacity: r.t.opacity.values }}
-                transition={{ scale: toTransition(r.t.scale), opacity: toTransition(r.t.opacity) }} />
-            ))}
-            {/* Motion · street lamp: warm halo, glow and lantern light swelling slowly on the same 6 s loop */}
-            {[
-              { id: '1067:5930', size: 96, color: '#ff9a1f', blur: 12, t: lampHalo, rest: 0.3 },
-              { id: '1067:5931', size: 54, color: '#ffb82e', blur: 6, t: lampGlow, rest: 0.45 },
-            ].map((l) => (
-              <motion.div key={l.id} className="abs" data-node-id={l.id}
-                style={{ left: LAMP.x - l.size / 2, top: LAMP.y - l.size / 2, width: l.size, height: l.size, borderRadius: '50%', background: l.color, filter: `blur(${l.blur}px)`, pointerEvents: 'none' }}
-                initial={{ opacity: l.rest, scale: 1 }}
-                animate={{ opacity: l.t.opacity.values, scale: l.t.scale.values }}
-                transition={{ opacity: toTransition(l.t.opacity), scale: toTransition(l.t.scale) }} />
-            ))}
-            <motion.div className="abs" data-node-id="1067:5932"
-              style={{ left: LAMP.x - 5, top: LAMP.y - 7, width: 10, height: 14, borderRadius: 5, background: '#ffd17a', filter: 'blur(2px)', pointerEvents: 'none' }}
-              initial={{ opacity: 0.6 }}
-              animate={{ opacity: lampCore.opacity.values }}
-              transition={{ opacity: toTransition(lampCore.opacity) }} />
-          </div>
-        )}
+      <AnimatePresence initial={false}>
+      <motion.div key={scene.id} className="abs" style={{ inset: 0 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 1, transition: { duration: 0.35 } }} transition={{ duration: 0.3 }}>
+      {/* Scene art + its Motion layer share one 440x550 frame at y -off, pulsing about its centre */}
+      <motion.div className="abs" style={{ left: 0, top: -off, width: 440, height: 550, transformOrigin: '50% 50%' }} {...pulse}>
+        <img src={scene.art} alt="" className="abs" style={{ left: 0, top: off, width: 440, height: 314, display: 'block' }} />
+        {!reduce && (scene.layers
+          ? <div className="abs" style={{ left: 0, top: 0, width: 440, height: 550 }}>{scene.layers.map((l, i) => <Layer key={i} l={l} />)}</div>
+          : (
+            <div className="abs" style={{ left: 0, top: off, width: 440, height: 314 }}>
+              <MorningMotion />
+            </div>
+          ))}
       </motion.div>
-      <div className="abs" style={{ left: 0, top: 0, width: 440, height: 240, background: 'linear-gradient(180deg, rgba(255,252,247,0.85) 0%, rgba(255,252,247,0.62) 60%, rgba(255,252,247,0) 100%)' }} />
+      <div className="abs" style={{ left: 0, top: 0, width: 440, height: 240, background: `linear-gradient(180deg, rgba(${scene.scrim},0.85) 0%, rgba(${scene.scrim},0.62) 60%, rgba(${scene.scrim},0) 100%)` }} />
+      </motion.div>
+      </AnimatePresence>
     </motion.div>
   );
+}
+
+// Swipe on the hero: right to left goes to the next scene, left to right to the previous one
+function useHeroSwipe(el, onStep) {
+  const scale = useScale();
+  const sc = useRef(scale); sc.current = scale;
+  const cb = useRef(onStep); cb.current = onStep;
+  useEffect(() => {
+    const node = el.current;
+    if (!node) return undefined;
+    let g = null;
+    const ts = (e) => {
+      if (e.touches.length !== 1) { g = null; return; }
+      const t = e.touches[0], r = node.getBoundingClientRect();
+      g = (t.clientY - r.top) / sc.current + node.scrollTop < 314 ? { x: t.clientX, y: t.clientY } : null;
+    };
+    const tm = (e) => { if (g && e.touches.length) { g.lx = e.touches[0].clientX; g.ly = e.touches[0].clientY; } };
+    const te = (e) => {
+      if (!g) return;
+      const t = e.changedTouches[0] || { clientX: g.lx ?? g.x, clientY: g.ly ?? g.y };
+      const dx = (t.clientX - g.x) / sc.current, dy = (t.clientY - g.y) / sc.current;
+      g = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) cb.current?.(dx < 0 ? 1 : -1);
+    };
+    const tc = () => { g = null; };
+    node.addEventListener('touchstart', ts, { passive: true });
+    node.addEventListener('touchmove', tm, { passive: true });
+    node.addEventListener('touchend', te, { passive: true });
+    node.addEventListener('touchcancel', tc, { passive: true });
+    return () => { node.removeEventListener('touchstart', ts); node.removeEventListener('touchmove', tm); node.removeEventListener('touchend', te); node.removeEventListener('touchcancel', tc); };
+  }, [el]);
 }
 
 const CATS = [
@@ -90,9 +152,9 @@ function SectionHeader({ top, title, onSeeAll }) {
 
 /* ---------- For you stack (component 685:328, variants Front=A/B/C) ---------- */
 const VENUES = {
-  A: { name: 'Foxy Loxy Café', meta: 'Café · 0.5 mi', level: 'Level 2', photo: H.himgPhotoSlot5 },
-  B: { name: 'Gallery Espresso', meta: 'Café · 1.1 mi', level: 'Level 1', photo: H.himgPhotoSlot4 },
-  C: { name: 'The Sentient', meta: 'Café · 0.8 mi', level: 'Level 2' , photo: H.himgPhotoSlot3 },
+  A: { name: 'Foxy Loxy Café', meta: 'Café · 0.5 mi', level: 'Level 2', photo: VP.garden },
+  B: { name: 'Gallery Café', meta: 'Café · 1.1 mi', level: 'Level 1', photo: VP.indoor },
+  C: { name: 'The Sentient', meta: 'Café · 0.8 mi', level: 'Level 2' , photo: VP.bar },
 };
 const KEYS = ['A', 'B', 'C'];
 const ROLE = {
@@ -107,18 +169,22 @@ function VenueCard({ v }) {
   return (
     <>
       <img src={v.photo} alt="" className="abs" style={{inset:0,width:260,height:350,objectFit:'cover'}} />
-      <div className="abs" style={{ left: 10, top: 10, display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 999,
-        background: '#f7f5f1', boxShadow: '0 4px 14px rgba(27,42,68,0.05)' }}>
-        <img src={uri('rippleCard')} alt="" style={{ width: 28, height: 28, display: 'block' }} />
-        <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: INK }}>{v.level}</span>
+      <div className="abs" style={{ left: 0, right: 0, top: 171, bottom: 0, borderRadius: '0 0 32px 32px', WebkitBackdropFilter: 'blur(14px)', backdropFilter: 'blur(14px)',
+        WebkitMaskImage: 'linear-gradient(180deg, transparent 0%, #000 62%)', maskImage: 'linear-gradient(180deg, transparent 0%, #000 62%)' }} />
+      <div className="abs" style={{ inset: 0, background: 'linear-gradient(180deg, rgba(6,6,6,0) 49%, rgba(6,6,6,0.18) 64%, rgba(6,6,6,0.37) 78%, rgba(6,6,6,0.61) 100%)' }} />
+      <div className="abs" style={{ left: 12, top: 12, height: 36, display: 'flex', alignItems: 'center', gap: 4, padding: '0 14px 0 8px', borderRadius: 999,
+        border: '1.5px solid rgba(255,255,255,0.95)', boxShadow: '0 8px 20px rgba(42,38,80,0.14), inset 0 1px 0 rgba(255,255,255,0.9)',
+        WebkitBackdropFilter: 'blur(24px)', backdropFilter: 'blur(24px)',
+        backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.55) 14%, rgba(255,255,255,0.08) 86%), linear-gradient(90deg, rgba(255,255,255,0.55), rgba(255,255,255,0.55))' }}>
+        <RippleIcon k="rippleCard" size={28} />
+        <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: '#2a2650' }}>{v.level}</span>
       </div>
-      <div className="abs" style={{ left: 10, top: 224, width: 236, height: 112, borderRadius: 20, border: '1px solid rgba(20,24,31,0.08)',
-        background:'rgba(255,255,255,0.8)', WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)', padding: 16, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
-        <p className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: INK }}>{v.name}</p>
-        <p className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: INK2 }}>{v.meta}</p>
+      <div className="abs" style={{ left: 12, top: 226, width: 236, height: 112, padding: 17, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+        <p className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: '#fff' }}>{v.name}</p>
+        <p className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.86)' }}>{v.meta}</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '2px 0' }}>
-          <img src={uri('dot')} alt="" style={{ width: 8, height: 8, display: 'block' }} />
-          <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: INK }}>Good fit</span>
+          <span style={{ width: 8, height: 8, borderRadius: 4, background: '#fff', display: 'block' }} />
+          <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Good fit</span>
         </div>
       </div>
     </>
@@ -167,7 +233,8 @@ function ForYouStack({ onOpenVenue }) {
             onPointerUp={isFront ? onUp : undefined} onPointerCancel={isFront ? onUp : undefined}
             whileTap={!isFront ? { scale: 0.78 } : undefined}>
             <div className="abs" style={{ inset: 0, borderRadius: 32, overflow: 'hidden', background: 'rgba(255,255,255,0.85)',
-              border: '1px solid rgba(20,24,31,0.08)', boxShadow: '0 12px 32px rgba(27,42,68,0.06)' }}>
+              border: '1px solid rgba(20,24,31,0.08)', boxShadow: '0 12px 32px rgba(27,42,68,0.06)',
+              isolation: 'isolate', transform: 'translateZ(0)', WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
               <VenueCard v={VENUES[k]} />
             </div>
           </motion.div>
@@ -195,35 +262,39 @@ function RankingRow({ top, n, name, meta, level, onClick, photo, wordmark }) {
         <span className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: INK2 }}>{meta}</span>
       </span>
       <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <img src={uri(level === 1 ? 'ripple1' : 'ripple2')} alt="" style={{ width: 36, height: 36, display: 'block' }} />
+        <RippleIcon k={level === 1 ? 'ripple1' : 'ripple2'} size={36} />
         <span style={{ fontSize: 17, fontWeight: 700, color: INK }}>{level}</span>
       </span>
     </motion.button>
   );
 }
 
-export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, reduceMotion, pull, onDiscover, pullOn = true, onOpenExplore, exploreLiked }) {
+export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, reduceMotion, pull, onDiscover, pullOn = true, onOpenExplore, exploreLiked, scene = 'morning', onStepScene }) {
+  const sc = SCENES.find((x) => x.id === scene) || SCENES[0];
+  const sub = sc.sub, left = sub ? 24 : 23;
   const scrollRef = useRef(null);
   usePullDown({ el: scrollRef, pull, enabled: pullOn, onCommit: onDiscover });
+  useHeroSwipe(scrollRef, onStepScene);
   const r = useTransform(pull, [0, 24], [0, 32]);
   const sh = useTransform(pull, [0, 24], ['0 -10px 28px rgba(42,38,80,0)', '0 -10px 28px rgba(42,38,80,0.12)']);
   return (
     <motion.div className="abs" style={{ inset: 0, y: pull, overflow: 'hidden', background: '#f7f5f1', borderTopLeftRadius: r, borderTopRightRadius: r, boxShadow: sh, zIndex: 1, userSelect: 'none', WebkitUserSelect: 'none' }} onDragStart={(e) => e.preventDefault()}>
     <div ref={scrollRef} className="scroll" style={{ background: '#f7f5f1' }} onScroll={(e) => onScroll?.(e.currentTarget.scrollTop)}>
       <div style={{ position: 'relative', width: 440, height: 2663 }}>
-        <Hero reduce={reduceMotion} pull={pull} />
-        <p className="abs nowrap" style={{ left: 24, top: 59, fontSize: 15, fontWeight: 500, color: INK2 }}>Savannah, GA</p>
+        <Hero reduce={reduceMotion} pull={pull} scene={sc} />
+        <p className="abs nowrap" style={{ left: 24, top: 59, fontSize: 15, fontWeight: 500, color: sc.dark ? 'rgba(255,255,255,0.8)' : INK2 }}>Savannah, GA</p>
         <motion.button className="abs nowrap" onClick={onOpenModes} whileTap={{ scale: 0.95 }} transition={GENTLE}
           style={{ right: 22, top: 46, height: 44, padding: '0 16px', borderRadius: 999, ...lightGlass, fontSize: 15, fontWeight: 500, color: INK }}>
           {modeLabel}
         </motion.button>
-        <p className="abs nowrap" style={{ left: 24, top: 90, fontSize: 40, fontWeight: 600, lineHeight: '44px', letterSpacing: -1, color: INK }}>Good morning</p>
-        <button type="button" onClick={onOpenSearch} className="abs" style={{ left: 23, top: 145, width: 334, height: 52, borderRadius: 999, ...lightGlass, display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px' }}>
+        <p className="abs nowrap" style={{ left: 24, top: 90, fontSize: 40, fontWeight: 600, lineHeight: '44px', letterSpacing: -1, color: sc.dark ? '#fff' : INK }}>{sc.greeting}</p>
+        {sub && <p className="abs nowrap" style={{ left: 24, top: 140, fontSize: 16, color: sc.dark ? 'rgba(255,255,255,0.8)' : INK2 }}>{sub}</p>}
+        <button type="button" onClick={onOpenSearch} className="abs" style={{ left, top: sub ? 175 : 145, width: 334, height: 52, borderRadius: 999, ...lightGlass, display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px' }}>
           <img src={uri('searchHome')} alt="" style={{ width: 20, height: 20, display: 'block' }} />
-          <span style={{ fontSize: 16, color: '#000' }}>Search places</span>
+          <span style={{ fontSize: 16, color: sc.ph }}>Search places</span>
         </button>
         <motion.button className="abs" whileTap={{ scale: 0.92 }} transition={GENTLE}
-          style={{ left: 367, top: 147, width: 48, height: 48, borderRadius: 24, ...lightGlass }}>
+          style={{ left: sub ? 368 : 367, top: sub ? 177 : 147, width: 48, height: 48, borderRadius: 24, ...lightGlass }}>
           <img src={uri('filterHome')} alt="" className="abs" style={{ left: 11, top: 11, width: 24, height: 24 }} />
         </motion.button>
 
@@ -232,7 +303,7 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
         <ForYouStack onOpenVenue={onOpenVenue} />
 
         <SectionHeader top={946} title="Popular Around you" onSeeAll={() => onOpenPage?.('popular')} />
-        <RankingRow top={998} n={1} photo={H.himgPhotoSlot} name="Gallery Espresso" meta="Café · 1.1 mi" level={1} />
+        <RankingRow top={998} n={1} photo={H.himgPhotoSlot} name="Gallery Café" meta="Café · 1.1 mi" level={1} />
         <RankingRow top={1106} n={2} wordmark name="Foxy Loxy Café" meta="Café · 0.5 mi" level={2} onClick={onOpenVenue} />
         <RankingRow top={1214} n={3} photo={H.himgPhotoSlot2} name="The Sentient" meta="Café · 0.8 mi" level={2} />
 

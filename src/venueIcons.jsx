@@ -1,3 +1,4 @@
+import { svgSrc } from './svgs.js';
 // Phosphor icon paths exported from the Venue page frames (Figma section 789:3120).
 // Each entry: [viewBox size, path d, default fill]
 export const vi = {
@@ -36,11 +37,35 @@ import { profileIcons } from './svgs.js';
 vi.bell = [22, profileIcons.bell, '#5E5A7E'];
 
 export function VIcon({ name, size, fill, style }) {
+  if (name === 'speakerHigh') return <SpeakerWaves size={size || 26} fill={fill} style={style} />;
   const [vb, d, f, transform] = vi[name];
   const s = size || vb;
   return (
     <svg width={s} height={s} viewBox={`0 0 ${vb} ${vb}`} fill="none" style={{ display: 'block', flex: 'none', ...style }}>
       <path d={d} fill={fill || f} transform={transform} />
+    </svg>
+  );
+}
+
+// Sound-level icon (dot + arcs) with the arcs pulsing outward on a loop
+export function RippleIcon({ k, size }) {
+  let n = 0;
+  const html = svgSrc(k)
+    .replace(/width="\d+" height="\d+"/, `width="${size}" height="${size}" style="display:block"`)
+    .replace(/<path (d="[^"]*") stroke=/g, (m, d) => `<path class="spk-wave spk-w${++n}" ${d} stroke=`);
+  return <span style={{ display: 'block', width: size, height: size, flex: 'none' }} dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
+// Speaker with animated sound waves (cone + two wave arcs split from speakerHigh)
+export function SpeakerWaves({ size = 26, fill, style }) {
+  const c = fill || '#5E5A7E';
+  const d = vi.speakerHigh[1];
+  const cone = d.slice(0, 937), w1 = d.slice(937, 1713), w2 = d.slice(1713);
+  return (
+    <svg width={size} height={size} viewBox="0 0 26 26" fill="none" style={{ display: 'block', flex: 'none', ...style }}>
+      <path d={cone} fill={c} />
+      <path className="spk-wave spk-w1" d={w1} fill={c} />
+      <path className="spk-wave spk-w2" d={w2} fill={c} />
     </svg>
   );
 }

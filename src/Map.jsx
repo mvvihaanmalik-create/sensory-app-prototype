@@ -1,3 +1,4 @@
+import { RippleIcon } from './venueIcons.jsx';
 import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'motion/react';
 import { uri, paths } from './svgs.js';
@@ -121,8 +122,8 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
 
       {/* Layer / Sensory pins */}
       {PINS.map((pn, i) => (
-        <motion.img key={pn.k} src={uri(pn.k)} alt="" className="abs" style={{ left: pn.left, top: pn.top, width: pn.size, height: pn.size }}
-          initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ ...GENTLE, delay: 0.12 + i * 0.06 }} />
+        <motion.div key={pn.k} className="abs" style={{ left: pn.left, top: pn.top, width: pn.size, height: pn.size }}
+          initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ ...GENTLE, delay: 0.12 + i * 0.06 }}><RippleIcon k={pn.k} size={pn.size} /></motion.div>
       ))}
       {LABELS.map((l, i) => (
         <motion.div key={l.text} className="abs" style={{ left: l.left, top: l.top }}

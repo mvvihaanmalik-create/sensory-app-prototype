@@ -6,11 +6,12 @@ import { TAP } from './flow.jsx';
 import { MODE_GREEN, MODE_TINT, modeSummary } from './Modes.jsx';
 import { SavedPlaceList } from './Lists.jsx';
 import { profileAssets as A } from './profileAssets.js';
+import { AppComfortPage, COMFORT_DEFAULT } from './SettingsPages.jsx';
 import './profile.css';
 
-const rise = i => ({ initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { ...GENTLE, delay: .05 + i * .05 } });
-function SettingsRow({ icon, label, i, angle = '171.1096deg' }) {
-  return <motion.button {...rise(i)} whileTap={{ scale: .98 }} transition={GENTLE} style={{ position: 'relative', width: 392, height: 56, textAlign: 'left' }}>
+const rise = () => ({ initial: false });
+function SettingsRow({ icon, label, i, angle = '171.1096deg', onClick }) {
+  return <motion.button {...rise(i)} onClick={onClick} whileTap={{ scale: .98 }} transition={GENTLE} style={{ position: 'relative', width: 392, height: 56, textAlign: 'left' }}>
     <Glass radius={28} angle={angle} style={{ inset: 0 }} contentStyle={{ gap: 12, padding: '0 16.5px 0 18.5px' }}>
       <img src={A[icon]} alt="" /><span style={{ flex: '1 0 0', fontSize: 16, fontWeight: 500, color: NAVY }}>{label}</span><img src={A.caret} alt="" />
     </Glass>
@@ -58,10 +59,17 @@ function MyModes({ modes, activeId, onPick, onEdit, onAdd }) {
 
 export default function Profile({ onScroll, savedCount = 12, savedPlaces = [], modes, activeId, onPickMode, onEditMode, onAddMode, onOpenVenue }) {
   const [savedOpen, setSavedOpen] = useState(false);
+  const [comfortOpen, setComfortOpen] = useState(false);
+  const [comfort, setComfort] = useState(COMFORT_DEFAULT);
+  useEffect(() => {
+    const r = document.documentElement;
+    r.dataset.reduceMotion = comfort.motion === 'On' ? 'on' : 'off';
+    r.dataset.vivid = comfort.palette === 'Vivid' ? 'on' : 'off';
+  }, [comfort]);
   const knob = useAnimationControls();
   const nudge = () => knob.start({ x: [0, 6, 0], transition: { duration: .45, ease: 'easeInOut' } });
   return <div className="abs" style={{ inset: 0, background: '#f7f5f1' }}>
-    <div className="scroll" onScroll={e => onScroll?.(e.currentTarget.scrollTop)} aria-hidden={savedOpen || undefined}>
+    <div className="scroll" onScroll={e => onScroll?.(e.currentTarget.scrollTop)} aria-hidden={savedOpen || comfortOpen || undefined}>
       <div style={{ position: 'relative', width: 440, minHeight: 956 }}>
         <p className="abs nowrap" style={{ left: 24, top: 59, fontSize: 15, fontWeight: 500, color: INK2 }}>Savannah, GA</p>
         <p className="abs nowrap" style={{ left: 24, top: 90, fontSize: 40, fontWeight: 600, lineHeight: '44px', letterSpacing: -1, color: INK }}>Profile</p>
@@ -76,7 +84,7 @@ export default function Profile({ onScroll, savedCount = 12, savedPlaces = [], m
           <MyModes modes={modes} activeId={activeId} onPick={onPickMode} onEdit={onEditMode} onAdd={onAddMode} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <SettingsRow icon="share" label="Share comfort profile" i={4} />
-            <SettingsRow icon="sliders" label="App comfort" i={4.5} angle="171.8699deg" />
+            <SettingsRow icon="sliders" label="App comfort" i={4.5} angle="171.8699deg" onClick={() => setComfortOpen(true)} />
             <motion.button {...rise(5)} onClick={nudge} style={{ position: 'relative', width: 392, height: 64, textAlign: 'left' }}>
               <Glass radius={32} angle="170.7274deg" style={{ inset: 0 }} contentStyle={{ gap: 12, padding: '10.5px 10.5px 10.5px 18.5px' }}>
                 <img src={A.bell} alt="" /><span style={{ flex: '1 0 0', display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 16, fontWeight: 500, color: NAVY }}>Sensory change alerts</span><span style={{ fontSize: 13, color: MUTED }}>Coming soon</span></span><span style={{ position: 'relative', width: 52, height: 32, flex: 'none' }}><motion.img animate={knob} src={A.toggle} alt="" style={{ position: 'absolute', left: 0, top: 0 }} /></span>
@@ -89,6 +97,9 @@ export default function Profile({ onScroll, savedCount = 12, savedPlaces = [], m
     <AnimatePresence>{savedOpen && <motion.div className="abs" data-saved-places style={{ inset: 0, background: '#f7f5f1' }} initial={{ x: 440 }} animate={{ x: 0 }} exit={{ x: 440 }} transition={{ type: 'spring', stiffness: 260, damping: 32 }}>
       <div className="scroll" style={{ top: 118 }}><div style={{ padding: '0 24px 140px' }}><p style={{ fontSize: 40, fontWeight: 600, lineHeight: '44px', letterSpacing: -1, marginBottom: 12 }}>Saved places</p><SavedPlaceList rows={savedPlaces} onOpen={v => { if (v.venue) onOpenVenue(); }} /></div></div>
       <motion.button className="abs" aria-label="Back" onClick={() => setSavedOpen(false)} whileTap={{ scale: .9 }} transition={TAP} style={{ left: 24, top: 54, width: 48, height: 48 }}><Glass radius={24} style={{ inset: 0 }} contentStyle={{ justifyContent: 'center' }}><img src={A.back} alt="" /></Glass></motion.button>
+    </motion.div>}</AnimatePresence>
+    <AnimatePresence>{comfortOpen && <motion.div className="abs" data-app-comfort style={{ inset: 0 }} initial={{ x: 440 }} animate={{ x: 0 }} exit={{ x: 440 }} transition={{ type: 'spring', stiffness: 380, damping: 40 }}>
+      <AppComfortPage value={comfort} onChange={setComfort} onBack={() => setComfortOpen(false)} />
     </motion.div>}</AnimatePresence>
   </div>;
 }

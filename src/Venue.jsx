@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useMotionValue, useTransform } from 'motion/re
 import { GENTLE, Icon } from './ui.jsx';
 import { paths } from './svgs.js';
 import { VIcon } from './venueIcons.jsx';
+import { VP, ZONES, GRID } from './venuePhotos.js';
 import { G, CircleBtn, Chip, SenseTiles, InfoList, ReviewSummary, AISummary, ReviewCard, H, PrimaryCTA, Toast, DayChart, weekFrom, NAVY, MUTED, PURPLE, DIV, TAP, t } from './flow.jsx';
 
 export const VENUE = {
@@ -15,45 +16,28 @@ export const VENUE = {
 // Typical crowd by hour, 6a to 11p (18 bars). Sunday matches the Figma frame.
 export const CROWD_SUN = [8, 15, 23, 31, 37, 44, 42, 52, 50, 64, 73, 85, 94, 87, 75, 67, 52, 37];
 export const CROWD_WEEK = weekFrom(CROWD_SUN);
-export const crowdWord = (v) => (v < 25 ? 'Usually quiet' : v < 50 ? 'Usually not too busy' : v < 75 ? 'Usually a little busy' : 'Usually busy');
+export const crowdWord = (v) => (v < 25 ? 'Usually calm and comfortable' : v < 50 ? 'Usually not too busy' : v < 75 ? 'Busy' : 'Packed');
 export function CrowdCard() {
   return (
     <DayChart icon={<Icon d={paths.users} size={24} fill={NAVY} />} title="Crowd" week={CROWD_WEEK} liveText="Live · Busier than usual" describe={crowdWord}
-      info="Based on visits over the past few weeks. Live shows how busy it is right now compared with a usual Sunday." />
+      info="Tap a bar for details" />
   );
 }
 
 export const SENSE_VALUES = { sound: 'Lively', light: 'Natural', crowd: 'Busy', temp: 'Mild', seating: 'Patio' };
 
-const HOURS = [['Sun', '8 AM – 9 PM'], ['Mon', '7 AM – 9 PM'], ['Tue', '7 AM – 9 PM'], ['Wed', '7 AM – 9 PM'], ['Thu', '7 AM – 9 PM'], ['Fri', '7 AM – 10 PM'], ['Sat', '8 AM – 10 PM']];
 
 function Overview({ onReviews, firstReview }) {
-  const [hours, setHours] = useState(false);
   const rows = [
     { icon: 'storefront', text: 'Dine-in · Takeout · Delivery' },
     { icon: 'mapPin', text: VENUE.address },
     {
       render: (
         <div style={{ width: '100%' }}>
-          <button onClick={() => setHours((h) => !h)} style={{ width: '100%', height: 52, padding: '0 18px 0 20px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}>
+          <button style={{ width: '100%', height: 52, padding: '0 18px 0 20px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}>
             <VIcon name="clock" />
             <span style={{ ...t(15, 500), flex: '1 0 0' }}>Open · Closes 9 PM</span>
-            <motion.span animate={{ rotate: hours ? 180 : 0 }} transition={GENTLE}><VIcon name="caretDown" /></motion.span>
           </button>
-          <AnimatePresence initial={false}>
-            {hours && (
-              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={GENTLE} style={{ overflow: 'hidden' }}>
-                <div style={{ padding: '0 18px 12px 56px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {HOURS.map(([d, h]) => (
-                    <div key={d} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={t(14, d === 'Sun' ? 600 : 400, d === 'Sun' ? NAVY : MUTED)}>{d === 'Sun' ? 'Sunday · Today' : d}</span>
-                      <span style={t(14, d === 'Sun' ? 600 : 400, d === 'Sun' ? NAVY : MUTED)}>{h}</span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       ),
     },
@@ -76,7 +60,7 @@ function Overview({ onReviews, firstReview }) {
   );
 }
 
-const DISHES = [['Breakfast taco', 'Tex-Mex'], ['Kolache', 'Bakery'], ['Horchata latte', 'Coffee'], ['Chai', 'Tea']];
+const DISHES = [['Breakfast taco', 'Tex-Mex'], ['Kolache', 'Bakery'], ['Horchata latte', 'Coffee'], ['Chai', 'Coffee']];
 function Menu() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -94,7 +78,7 @@ function Menu() {
       </div>
       <H>Menu photos</H>
       <div style={{ display: 'grid', gridTemplateColumns: '188px 188px', gap: 16 }}>
-        {[0, 1, 2, 3].map((i) => <motion.div key={i} whileTap={{ scale: 0.97 }} style={{ height: 188, borderRadius: 24, background: '#dbdbde' }} />)}
+        {[VP.tacos, VP.pie, VP.counter, VP.patio].map((src, i) => <motion.div key={i} whileTap={{ scale: 0.97 }} style={{ height: 188, borderRadius: 24, background: `#dbdbde url(${src}) center / cover` }} />)}
       </div>
       <G as="button" r={28} whileTap={{ scale: 0.98 }} transition={TAP} style={{ height: 56, padding: '0 18px 0 20px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}>
         <VIcon name="forkKnife" />
@@ -125,7 +109,7 @@ function Reviews({ onWrite, mine }) {
       <G as="button" r={26} onClick={onWrite} whileTap={{ scale: 0.98 }} transition={TAP}
         style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
         <VIcon name="pencil" />
-        <span style={t(15, 600)}>{mine ? 'Edit your review' : 'Write a review'}</span>
+        <span style={t(15, 600)}>Write a review</span>
       </G>
       <div className="hscroll" style={{ margin: '0 -24px -24px', padding: '4px 24px 40px', display: 'flex', gap: 8 }}>
         {FILTERS.map((c) => <Chip key={c} label={c} on={f === c} onClick={() => setF(c)} />)}
@@ -166,7 +150,7 @@ function Photos() {
           <div key={ci} style={{ width: 188, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {col.map((h, i) => (
               <motion.div key={`${ci}-${i}`} layout initial={false} animate={{ height: h }} transition={GENTLE} whileTap={{ scale: 0.97 }}
-                style={{ borderRadius: 24, background: (ci + i) % 2 ? '#dbdbde' : '#e0e0e3' }} />
+                style={{ borderRadius: 24, background: `#dbdbde url(${GRID[(ci + (k % 2)) % 2][i]}) center / cover` }} />
             ))}
           </div>
         ))}
@@ -197,7 +181,7 @@ export default function Venue({ tab, setTab, onBack, backLabel = 'Back', saved =
   return (
     <div className="abs" style={{ inset: 0, background: '#f7f5f1' }}>
       <div ref={scroller} className="scroll" onScroll={(e) => { sy.set(e.currentTarget.scrollTop); onScroll?.(e.currentTarget.scrollTop); }}>
-        <motion.div style={{ height: 320, background: '#dbdbde', y: heroY, scale: heroScale, transformOrigin: '50% 0' }} />
+        <motion.div style={{ height: 320, background: `#dbdbde url(${VP.hero}) center / cover`, y: heroY, scale: heroScale, transformOrigin: '50% 0' }} />
         <div style={{ position: 'relative', background: '#f7f5f1', padding: '24px 24px 140px', display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <h1 style={t(28, 600, NAVY, { letterSpacing: -0.4 })}>{VENUE.name}</h1>
@@ -206,8 +190,10 @@ export default function Venue({ tab, setTab, onBack, backLabel = 'Back', saved =
           <SenseTiles values={SENSE_VALUES} onOpen={onSense} />
           <div className="hscroll" style={{ margin: '0 -24px', padding: '0 24px', display: 'flex', gap: 12 }}>
             {[300, 220, 220, 220].map((w, i) => (
-              <motion.button key={i} aria-label="See photos" onClick={() => goTab('photos', true)} whileTap={{ scale: 0.97 }} transition={TAP}
-                style={{ width: w, height: 280, borderRadius: 24, background: i % 2 ? '#e0e0e3' : '#dbdbde', flex: 'none' }} />
+              <motion.button key={i} aria-label={`See photos · ${ZONES[i][0]}`} onClick={() => goTab('photos', true)} whileTap={{ scale: 0.97 }} transition={TAP}
+                style={{ position: 'relative', width: w, height: 280, borderRadius: 24, background: `#dbdbde url(${ZONES[i][1]}) center / cover`, flex: 'none', overflow: 'hidden' }}>
+                <span className="abs nowrap" style={{ left: 12, bottom: 12, height: 30, padding: '0 14px', borderRadius: 16, background: 'rgba(255,255,255,0.88)', border: '1.5px solid rgba(255,255,255,0.95)', boxShadow: '0 4px 12px rgba(42,38,80,0.12)', display: 'flex', alignItems: 'center', ...t(13, 600, NAVY) }}>{ZONES[i][0]}</span>
+              </motion.button>
             ))}
           </div>
           <div style={{ height: 104 }} />

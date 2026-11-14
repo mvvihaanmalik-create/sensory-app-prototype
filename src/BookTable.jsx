@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useAnimationControls } from 'motion/react';
 import { GENTLE, Icon } from './ui.jsx';
 import { paths } from './svgs.js';
-import { VIcon } from './venueIcons.jsx';
+import { VIcon, SpeakerWaves } from './venueIcons.jsx';
 import { G, CircleBtn, TopBar, Section, Chip, ChipGroup, PrimaryCTA, InfoList, Pill, NAVY, DIV, TAP, t } from './flow.jsx';
 import { VENUE } from './Venue.jsx';
 
@@ -19,8 +19,8 @@ export const DATES = Array.from({ length: 30 }, (_, i) => {
   return {
     i, dow, num: d.getDate(), month: d.toLocaleString('en-US', { month: 'long' }),
     label: i === 0 ? 'Today' : dow,
-    short: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : `${dow} ${mon} ${d.getDate()}`,
-    long: `${i === 0 ? 'Today, ' : i === 1 ? 'Tomorrow, ' : ''}${dow} ${mon} ${d.getDate()}`,
+    short: i === 0 ? 'Today' : `${dow} ${mon} ${d.getDate()}`,
+    long: `${i === 0 ? 'Today, ' : ''}${dow} ${mon} ${d.getDate()}`,
   };
 });
 const MONTHS = [...new Set(DATES.map((d) => d.month))];
@@ -48,13 +48,13 @@ const T = (id, x, y, w, h, top, bottom, tags, f = {}) => ({ id, x, y, w, h, top,
 export const ZONES = {
   Patio: {
     tables: [
-      T(1, 16, 96, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild', 'By the garden path'], { stepFree: true }),
-      T(2, 127, 96, 110, 56, 2, 2, ['Sound · Easy to talk', 'Light · Sunny', 'Temp · Warm after 2 PM'], { sunny: true, stepFree: true, space: true }),
-      T(3, 278, 96, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Sunny', 'Temp · Cool, by the AC vent'], { sunny: true, ac: true }),
+      T(1, 16, 96, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], { stepFree: true }),
+      T(2, 127, 96, 110, 56, 2, 2, ['Sound · Easy to talk', 'Light · Bright', 'Temp · Warm'], { sunny: true, stepFree: true, space: true }),
+      T(3, 278, 96, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Bright', 'Temp · Cool'], { sunny: true, ac: true }),
       T(4, 16, 222, 110, 60, 2, 2, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild, away from AC', 'Far from speaker'], { stepFree: true, space: true }),
-      T(5, 196, 222, 150, 60, 2, 2, ['Sound · Lively', 'Light · Sunny', 'Temp · Mild', 'Close to speaker'], { speaker: true, sunny: true, space: true, stepFree: true }),
-      T(6, 16, 348, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild', 'By the side gate'], { exit: true, stepFree: true }),
-      T(7, 150, 348, 70, 56, 1, 1, ['Sound · Lively', 'Light · Shaded', 'Temp · Mild', 'Next to speaker'], { speaker: true, exit: true }),
+      T(5, 196, 222, 150, 60, 2, 2, ['Sound · Lively', 'Light · Bright', 'Temp · Mild'], { speaker: true, sunny: true, space: true, stepFree: true }),
+      T(6, 16, 348, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], { exit: true, stepFree: true }),
+      T(7, 150, 348, 70, 56, 1, 1, ['Sound · Lively', 'Light · Shaded', 'Temp · Mild'], { speaker: true, exit: true }),
     ],
     marks: [
       { kind: 'tag', x: 20, y: 28, text: 'Garden pond this way →', go: 'Garden pond' },
@@ -64,45 +64,43 @@ export const ZONES = {
   },
   'Garden pond': {
     tables: [
-      T(8, 16, 70, 70, 56, 1, 1, ['Sound · Quiet, water sounds', 'Light · Dappled shade', 'Temp · Mild', 'By the pond'], { stepFree: false }),
-      T(9, 294, 70, 70, 56, 1, 1, ['Sound · Quiet', 'Light · Dappled shade', 'Temp · Mild', 'By the pond'], {}),
-      T(10, 16, 316, 110, 60, 2, 2, ['Sound · Quiet', 'Light · Shaded', 'Temp · Mild', 'Under the oak'], { space: true }),
-      T(11, 236, 316, 110, 60, 2, 2, ['Sound · Easy to talk', 'Light · Sunny', 'Temp · Warm after 2 PM', 'Pond view'], { sunny: true, space: true }),
+      T(8, 16, 70, 70, 56, 1, 1, ['Sound · Quiet', 'Light · Shaded', 'Temp · Mild'], { stepFree: false }),
+      T(9, 294, 70, 70, 56, 1, 1, ['Sound · Quiet', 'Light · Shaded', 'Temp · Mild'], {}),
+      T(10, 16, 316, 110, 60, 2, 2, ['Sound · Quiet', 'Light · Shaded', 'Temp · Mild'], { space: true }),
+      T(11, 236, 316, 110, 60, 2, 2, ['Sound · Easy to talk', 'Light · Bright', 'Temp · Warm'], { sunny: true, space: true }),
     ],
     marks: [
       { kind: 'pond', x: 106, y: 150, w: 180, h: 120 },
-      { kind: 'tag', x: 20, y: 420, text: '← Patio this way', go: 'Patio' },
-      { kind: 'note', x: 232, y: 424, text: 'Gravel path, one step' },
     ],
   },
   Indoor: {
     tables: [
-      T(12, 16, 120, 70, 56, 1, 1, ['Sound · Lively', 'Light · Natural, by the window', 'Temp · Cool', 'Next to speaker'], { speaker: true, ac: true, stepFree: true }),
-      T(13, 150, 120, 70, 56, 1, 1, ['Sound · Lively', 'Light · Natural', 'Temp · Cool, by the counter vent'], { ac: true, stepFree: true }),
-      T(14, 16, 240, 110, 60, 2, 2, ['Sound · Easy to talk', 'Light · Warm & cozy', 'Temp · Mild', 'By the art wall'], { soft: true, stepFree: true, space: true }),
-      T(15, 196, 240, 150, 60, 2, 2, ['Sound · Easy to talk', 'Light · Warm & cozy', 'Temp · Mild', 'Sofa seating'], { soft: true, stepFree: true, space: true }),
-      T(16, 16, 360, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild', 'Near the exit'], { exit: true, stepFree: true }),
-      T(17, 150, 360, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Warm & cozy', 'Temp · Mild', 'Near the exit'], { exit: true, soft: true, stepFree: true }),
+      T(12, 16, 120, 70, 56, 1, 1, ['Sound · Lively', 'Light · Natural', 'Temp · Cool'], { speaker: true, ac: true, stepFree: true }),
+      T(13, 150, 120, 70, 56, 1, 1, ['Sound · Lively', 'Light · Natural', 'Temp · Cool'], { ac: true, stepFree: true }),
+      T(14, 16, 240, 110, 60, 2, 2, ['Sound · Easy to talk', 'Light · Warm & cozy', 'Temp · Mild'], { soft: true, stepFree: true, space: true }),
+      T(15, 196, 240, 150, 60, 2, 2, ['Sound · Easy to talk', 'Light · Warm & cozy', 'Temp · Mild'], { soft: true, stepFree: true, space: true }),
+      T(16, 16, 360, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { exit: true, stepFree: true }),
+      T(17, 150, 360, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Warm & cozy', 'Temp · Mild'], { exit: true, soft: true, stepFree: true }),
     ],
     marks: [
-      { kind: 'block', x: 20, y: 20, w: 260, h: 40, text: 'Counter' },
+      { kind: 'block', x: 20, y: 20, w: 260, h: 40, text: '' },
       { kind: 'icon', x: 300, y: 16, icon: 'ac', label: 'AC vent' },
       { kind: 'icon', x: 300, y: 112, icon: 'speakerHigh', label: 'Speaker' },
-      { kind: 'icon', x: 300, y: 368, icon: 'arrowUpRight', label: 'Exit' },
+      { kind: 'icon', x: 300, y: 368, icon: 'arrowUpRight', label: '' },
     ],
   },
   Bar: {
     tables: [
-      T(18, 16, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Bright', 'Temp · Cool, by the counter vent', 'Bar stools'], { ac: true, sunny: true, bar: true }),
-      T(19, 147, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Bright', 'Temp · Cool', 'Bar stools'], { ac: true, sunny: true, bar: true }),
-      T(20, 278, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Bright', 'Temp · Cool', 'Bar stools', 'Close to speaker'], { speaker: true, sunny: true, bar: true }),
-      T(21, 16, 300, 98, 44, 0, 2, ['Sound · Easy to talk', 'Light · Natural, window', 'Temp · Mild', 'Window bar'], { bar: true, exit: true }),
-      T(22, 147, 300, 98, 44, 0, 2, ['Sound · Easy to talk', 'Light · Natural, window', 'Temp · Mild', 'Window bar'], { bar: true }),
-      T(23, 278, 300, 98, 44, 0, 2, ['Sound · Easy to talk', 'Light · Natural, window', 'Temp · Mild', 'Window bar'], { bar: true }),
+      T(18, 16, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Bright', 'Temp · Cool'], { ac: true, sunny: true, bar: true }),
+      T(19, 147, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Bright', 'Temp · Cool'], { ac: true, sunny: true, bar: true }),
+      T(20, 278, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Bright', 'Temp · Cool'], { speaker: true, sunny: true, bar: true }),
+      T(21, 16, 300, 98, 44, 0, 2, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { bar: true, exit: true }),
+      T(22, 147, 300, 98, 44, 0, 2, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { bar: true }),
+      T(23, 278, 300, 98, 44, 0, 2, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { bar: true }),
     ],
     marks: [
-      { kind: 'block', x: 20, y: 196, w: 352, h: 48, text: 'Bar counter' },
-      { kind: 'block', x: 20, y: 404, w: 352, h: 24, text: 'Window', thin: true },
+      { kind: 'block', x: 20, y: 196, w: 352, h: 48, text: '' },
+      { kind: 'block', x: 20, y: 404, w: 352, h: 24, text: '', thin: true },
     ],
   },
 };
@@ -116,7 +114,7 @@ const takenSet = (date, time) => {
   return s;
 };
 
-export const COMFORT = ['Away from speakers', 'Near the exit', 'Step-free access', 'Softer lighting', 'Space for a stroller'];
+export const COMFORT = ['Away from speakers', 'Step-free access', 'Softer lighting', 'Space for a stroller'];
 const RULES = {
   'Away from speakers': [(tb) => !tb.speaker, 'close to the speaker'],
   'Near the exit': [(tb) => tb.exit, 'not near an exit'],
@@ -252,7 +250,7 @@ function StepWhen({ draft, set, refs, ctl }) {
       </motion.div>
 
       <motion.div ref={refs.time} animate={ctl.time}>
-        <Section icon="clock" title="Time" note={date == null ? 'Pick a date first' : undefined}>
+        <Section icon="clock" title="Time" >
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 122px)', columnGap: 12, rowGap: 14, justifyContent: 'space-between' }}>
             {slots.map((s, i) => {
               const on = time === s.time && s.ok;
@@ -317,7 +315,7 @@ function Mark({ m, onGo }) {
     return (
       <div className="abs" style={{ left: m.x, top: m.y, width: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
         <div style={{ width: 48, height: 48, borderRadius: 24, background: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <VIcon name={m.icon} size={m.icon === 'arrowUpRight' ? 22 : 26} />
+          {m.icon === 'speakerHigh' ? <SpeakerWaves size={26} /> : <VIcon name={m.icon} size={m.icon === 'arrowUpRight' ? 22 : 26} />}
         </div>
         <span className="nowrap" style={t(12, 500)}>{m.label}</span>
       </div>
@@ -548,7 +546,7 @@ export default function BookTable({ draft, setDraft, step, setStep, onClose, onB
 
   const cta = step === 1 ? { label: 'Next · Where to sit', ok: ok1, go: () => go(2) }
     : step === 2 ? { label: 'Next · Booking for', ok: ok2, go: () => go(3) }
-    : { label: existing ? 'Update booking' : 'Confirm booking', ok: ok2, go: confirm };
+    : { label: 'Confirm booking', ok: ok2, go: confirm };
 
   return (
     <div className="abs" style={{ inset: 0, background: '#f7f5f1' }}>
@@ -570,7 +568,7 @@ export default function BookTable({ draft, setDraft, step, setStep, onClose, onB
           </div>
         </motion.div>
       </AnimatePresence>
-      <PrimaryCTA label={cta.label} enabled={!!cta.ok} onClick={cta.go} onBlocked={blocked} busy={busy ? 'Booking…' : null} />
+      <PrimaryCTA label={cta.label} enabled={!!cta.ok} onClick={cta.go} onBlocked={blocked} busy={busy ? cta.label : null} />
     </div>
   );
 }

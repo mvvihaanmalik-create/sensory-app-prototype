@@ -45,3 +45,16 @@
 .s-place-art{height:120px;border-radius:20px;margin-top:16px;display:flex;align-items:center;justify-content:center}.s-place-art img{width:120px;height:120px;object-fit:contain}
 .s-place-senses{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}.s-place-senses div{display:flex;flex-direction:column;gap:4px}.s-place-senses span{font-size:13px;color:#5e5a7e}.s-place-senses strong{font-size:16px;font-weight:600}
 .s-sheet-footer{flex:none;margin-top:20px}.s-sheet-footer>.s-pill{width:100%}
+.s-recent{position:absolute;left:0;right:0;top:128px;bottom:0;background:#f7f5f1;padding:0 24px;z-index:6;overflow:auto}
+.s-recent h2{font-size:21px;font-weight:600;line-height:26px;color:#14181f;margin:12px 0 14px}
+.s-recent-list{display:flex;flex-direction:column;gap:8px}
+.s-recent-list button{display:flex;align-items:center;gap:8px;width:392px;height:46px;padding:0 16px 0 14px;border-radius:16px;background:#fff;font:500 16px Figtree,sans-serif;color:#14181f;text-align:left}
+.s-recent-list button span{flex:1 0 0}
+.s-sugg-h{margin-top:36px!important}
+.s-sugg{display:grid;grid-template-columns:192px 192px;gap:8px}
+.s-sugg button{height:46px;border-radius:12px;background:#d9eae0;color:#2b5d4c;font:600 15px Figtree,sans-serif;text-align:left;padding:0 14px}
+/* Category illustrations: a gentle wiggle on hover / press */
+@keyframes s-wiggle{0%{transform:translate(0,0) rotate(0)}22%{transform:translate(-1.5px,-3px) rotate(-3.5deg)}48%{transform:translate(1px,-1.5px) rotate(2.8deg)}72%{transform:translate(-.5px,-.5px) rotate(-1.4deg)}100%{transform:translate(0,0) rotate(0)}}
+.s-category img{transform-origin:70% 85%}
+.s-category:hover img,.s-category:active img,.s-category:focus-visible img{animation:s-wiggle .7s cubic-bezier(.36,.07,.19,.97) both}
+@media (prefers-reduced-motion:reduce){.s-category:hover img,.s-category:active img{animation:none}}

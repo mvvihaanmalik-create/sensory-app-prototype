@@ -1,7 +1,7 @@
 // Shared building blocks for the Venue page and its flows (Figma section 789:3120).
 // v2 palette: all venue text, icons and accents use #5e5a7e.
 import { useState, useRef, useEffect } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/react';
 import { GENTLE, Icon } from './ui.jsx';
 import { paths } from './svgs.js';
 import { VIcon, vi } from './venueIcons.jsx';
@@ -333,6 +333,13 @@ export function DayChart({ icon, title, week, nowIdx = 11, liveText, info, descr
   const [sel, setSel] = useState(null);
   const bars = week[day];
   const live = day === 'Sun';
+  // Bars rise from empty like a thermometer the first time the chart scrolls into view.
+  const chartRef = useRef(null);
+  const inView = useInView(chartRef, { once: true, amount: 0.5 });
+  const reduce = useReducedMotion();
+  const [intro, setIntro] = useState(true);
+  useEffect(() => { if (!inView) return; const id = setTimeout(() => setIntro(false), 2200); return () => clearTimeout(id); }, [inView]);
+  const grown = reduce || inView;
   const status = sel != null ? `${hourLabel(sel)} · ${describe(bars[sel], sel)}` : live ? liveText : `Usually on ${day}s · tap a bar`;
   return (
     <G r={28} style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16, zIndex: menu ? 5 : 1 }}>
@@ -378,13 +385,15 @@ export function DayChart({ icon, title, week, nowIdx = 11, liveText, info, descr
         </motion.span>
       </AnimatePresence>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <div style={{ width: 318, height: 104, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+        <div ref={chartRef} style={{ width: 318, height: 104, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
           {bars.map((h, i) => {
             const hot = sel != null ? sel === i : live && i === nowIdx;
             return (
               <button key={i} aria-label={hourLabel(i)} onClick={() => setSel(sel === i ? null : i)} style={{ width: 14, height: 104, display: 'flex', alignItems: 'flex-end', padding: 0 }}>
-                <motion.div initial={{ height: 0 }} animate={{ height: h, backgroundColor: hot ? NAVY : 'rgba(94,90,126,0.16)' }}
-                  transition={{ ...GENTLE, delay: i * 0.015 }} style={{ width: 14, borderRadius: 7 }} />
+                <motion.div initial={{ height: reduce ? h : 0 }} animate={{ height: grown ? h : 0, backgroundColor: hot ? NAVY : 'rgba(94,90,126,0.16)' }}
+                  transition={intro && !reduce
+                    ? { height: { duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.15 + i * 0.055 }, backgroundColor: { duration: 0.5, delay: 0.15 + i * 0.055 + 0.7 } }
+                    : { ...GENTLE, delay: i * 0.015 }} style={{ width: 14, borderRadius: 7 }} />
               </button>
             );
           })}
