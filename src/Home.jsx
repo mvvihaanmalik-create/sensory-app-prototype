@@ -197,6 +197,10 @@ function ForYouStack({ onOpenVenue }) {
   const scale = useScale();
   const drag = useRef(null);
   const [dx, setDx] = useState(0);
+  // Cards are painted once at full size (scale 1), then settle into their roles. The browser keeps that sharp full-size
+  // raster for the card's layer, so shrinking and growing never swaps in a blurry low-res copy.
+  const [ready, setReady] = useState(false);
+  useEffect(() => { let a = requestAnimationFrame(() => { a = requestAnimationFrame(() => setReady(true)); }); return () => cancelAnimationFrame(a); }, []);
   const fi = KEYS.indexOf(front);
   const n = KEYS.length;
   const roleOf = (k) => { const o = (KEYS.indexOf(k) - fi + n) % n; return o === 0 ? 'front' : o === 1 ? 'right' : o === n - 1 ? 'left' : 'hidden'; };
@@ -226,10 +230,10 @@ function ForYouStack({ onOpenVenue }) {
         const isFront = role === 'front';
         return (
           <motion.div key={k} className="abs"
-            style={{ left: 90, top: 0, width: 260, height: 350, zIndex: Z[role], transformOrigin: '50% 50%', cursor: isFront ? 'grab' : 'pointer', pointerEvents: role === 'hidden' ? 'none' : 'auto', touchAction: 'pan-y' }}
+            style={{ left: 90, top: 0, width: 260, height: 350, zIndex: Z[role], transformOrigin: '50% 50%', willChange: 'transform', cursor: isFront ? 'grab' : 'pointer', pointerEvents: role === 'hidden' ? 'none' : 'auto', touchAction: 'pan-y' }}
             initial={false}
-            animate={{ ...ROLE[role], x: ROLE[role].x + (isFront ? dx : 0), rotate: ROLE[role].rotate + (isFront ? dx / 40 : 0) }}
-            transition={isFront && dx !== 0 ? { type: 'spring', stiffness: 600, damping: 40 } : GENTLE}
+            animate={{ ...ROLE[role], scale: ready ? ROLE[role].scale : 1, x: ROLE[role].x + (isFront ? dx : 0), rotate: ROLE[role].rotate + (isFront ? dx / 40 : 0) }}
+            transition={!ready ? { duration: 0 } : isFront && dx !== 0 ? { type: 'spring', stiffness: 600, damping: 40 } : GENTLE}
             onClick={() => { if (dragged.current) return; if (!isFront) setFront(k); else if (k === 'A') onOpenVenue?.(); }}
             onPointerDown={isFront ? onDown : undefined} onPointerMove={isFront ? onMove : undefined}
             onPointerUp={isFront ? onUp : undefined} onPointerCancel={isFront ? onUp : undefined}
