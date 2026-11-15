@@ -1,3 +1,9 @@
+## Morphing ticket gradients - November 15, 2026
+
+- TicketArtwork now uses TicketFluid: a spatially varying shader bends the artwork within fixed panel bounds. Removed the whole-image drift/rotation animation. Ticket text stays outside the canvas.
+- Green and purple use a soft sampling kernel and stationary fine grain to match the brown ticket's finish. All three wallet cards and the confirmation front share the effect.
+- Rendering is capped at 30fps and 2.5x pixel density, pauses offscreen/in hidden tabs, and freezes for app or OS reduced motion. The source image remains as a fallback if WebGL is unavailable.
+
 ## Photo-only screenshots and onboarding completion - November 15, 2026
 
 - Ten captured screenshots now have SVG viewports that clip the original JPEG pixels to the photo. Menu, gallery, review reuse and the full-screen viewer share those assets. Original JPEGs remain available.

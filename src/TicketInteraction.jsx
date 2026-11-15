@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef } from 'react';
 import { MotionConfigContext, useReducedMotion } from 'motion/react';
 import { useScale } from './ui.jsx';
 import './ticketInteraction.css';
+import TicketFluid from './TicketFluid.jsx';
 
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 const rest = () => ({ x: 0, y: 0, rx: 0, ry: 0, rz: 0, z: 0, vx: 0, vy: 0, vrx: 0, vry: 0, vrz: 0, vz: 0 });
@@ -132,9 +133,9 @@ export default function TicketInteraction({ children, color, mask, back }) {
   </div>;
 }
 
-export function TicketArtwork({ src }) {
+export function TicketArtwork({ src, tone = 'fern' }) {
   const osReduced = useReducedMotion();
   const config = useContext(MotionConfigContext);
   const reduced = config.reducedMotion === 'always' || osReduced;
-  return <div aria-hidden="true" className="abs ticket-artwork" style={{ inset: '-12%', background: `url(${src}) center / cover`, pointerEvents: 'none', ...(reduced ? { animation: 'none' } : {}) }} />;
+  return <div aria-hidden="true" className="abs ticket-artwork" style={{ inset: 0, background: `url("${src}") center / cover`, pointerEvents: 'none' }}><TicketFluid src={src} reduced={reduced} tone={tone} /></div>;
 }

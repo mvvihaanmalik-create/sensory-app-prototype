@@ -607,7 +607,7 @@ export function Ticket({ name = VENUE.name, when, guests, seat, held, theme = 'f
     <motion.div {...motionProps} style={{ alignSelf: 'center', width: 340, height: 468, filter: 'drop-shadow(0 24px 30px rgba(27,42,68,0.1))', ...motionProps?.style }}>
       <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: 26, background: th.bg, WebkitMask: NOTCH, mask: NOTCH }}>
         <div className="abs" style={{ left: 14, top: 14, width: 312, height: 290, borderRadius: 18, overflow: 'hidden', background: `#6b5a4e url(${art ?? th.art}) center / cover` }}>
-          {animatedArt && <TicketArtwork src={th.art} />}
+          {animatedArt && <TicketArtwork src={th.art} tone={theme} />}
           {showArtText && (th.big ? <>
             <span className="abs nowrap" style={{ left: 0, right: 0, top: 26, textAlign: 'center', ...t(11, 700, '#fcfcfb'), letterSpacing: '0.14em' }}>TABLE FOR {guests}</span>
             <span className="abs nowrap" style={{ left: 41, top: 108, ...t(34, 600, '#fcfcfb'), letterSpacing: '-0.03em', lineHeight: '41px' }}>{name}</span>
