@@ -187,7 +187,7 @@ function Slider({ cfg, value, onChange }) {
   const tone = cfg.colors[i] || INDIGO; // the same colours the map uses for each level
   const pos = useMotionValue(stepX(i, n));
   const fill = useTransform(pos, (v) => Math.max(0, v));
-  const tipX = useTransform(pos, (v) => v - 9);
+  const tipX = useTransform(pos, (v) => v - 11);
   const thumbX = useTransform(pos, (v) => v - 18);
   const bubbleX = useTransform(pos, (v) => v - 52);
   const ref = useRef(null);
@@ -226,8 +226,9 @@ function Slider({ cfg, value, onChange }) {
           <span className="nowrap" style={t(14, 600, NAVY, { lineHeight: 1.2 })}>{cfg.steps[i]}</span>
         </motion.div>
       </motion.div>
-      <motion.svg className="abs" width="18" height="9" viewBox="0 0 18 9" initial={false} animate={{ opacity: any ? 0 : 1 }} style={{ left: 0, top: -7, x: tipX, pointerEvents: 'none' }}>
-        <path d="M0 0H18L10.6 7.6a2.2 2.2 0 0 1-3.2 0L0 0Z" fill="rgba(255,255,255,0.96)" />
+      <motion.svg className="abs" width="22" height="12" viewBox="0 0 22 12" initial={false} style={{ left: 0, top: -8.5, x: tipX, pointerEvents: 'none', overflow: 'visible' }}>
+        <path d="M1.2 0H20.8V2.6L13.1 9.9a2.8 2.8 0 0 1-4.2 0L1.2 2.6Z" fill="rgba(255,255,255,0.96)" />
+        <motion.path d="M0.6 1.9L8.9 9.9a2.8 2.8 0 0 0 4.2 0L21.4 1.9" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" initial={false} animate={{ stroke: tone }} transition={{ duration: 0.2 }} />
       </motion.svg>
     </div>
   );
