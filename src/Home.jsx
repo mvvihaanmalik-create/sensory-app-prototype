@@ -236,7 +236,7 @@ function ForYouStack({ onOpenVenue }) {
           </motion.div>
         );
       })}
-      <div className="abs" style={{ left: 196, top: 364, display: 'flex', gap: 6 }}>
+      <div className="abs" style={{ left: 196, top: 354, display: 'flex', gap: 6 }}>
         {[0, 1, 2].map((i) => {
           const on = DOT_FOR[front] === i;
           return <motion.div key={i} initial={false} animate={{ width: on ? 22 : 7, backgroundColor: on ? '#14181f' : '#c9d2de' }} transition={GENTLE}
