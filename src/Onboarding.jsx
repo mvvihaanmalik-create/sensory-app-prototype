@@ -219,7 +219,7 @@ function Slider({ cfg, value, onChange }) {
         style={{ left: 0, top: 4, width: 36, height: 36, x: thumbX, borderRadius: 18, background: '#fff', border: '3px solid', boxShadow: '0 4px 12px rgba(42,38,80,0.22)', boxSizing: 'border-box' }} />
       <motion.div className="abs" initial={false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}
         style={{ left: 0, top: -98, pointerEvents: 'none', x: bubbleX, width: 104 }}>
-        <motion.div initial={false} animate={{ borderColor: tone }} transition={{ duration: 0.2 }} style={{ position: 'relative', minHeight: 92, width: 104, borderRadius: 20, background: 'rgba(255,255,255,0.96)', border: '2.5px solid', boxSizing: 'border-box',
+        <motion.div initial={false} animate={{ borderColor: tone }} transition={{ duration: 0.2 }} style={{ position: 'relative', minHeight: 92, width: 104, borderRadius: 20, background: '#fff', border: '2.5px solid', boxSizing: 'border-box',
           WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)', boxShadow: '0 10px 28px rgba(42,38,80,0.16)', padding: '14px 8px 12px',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
           <SenseGlyph k={cfg.icon} size={32} one />
@@ -227,7 +227,7 @@ function Slider({ cfg, value, onChange }) {
         </motion.div>
       </motion.div>
       <motion.svg className="abs" width="22" height="12" viewBox="0 0 22 12" initial={false} style={{ left: 0, top: -8.5, x: tipX, pointerEvents: 'none', overflow: 'visible' }}>
-        <path d="M1.2 0H20.8V2.6L13.1 9.9a2.8 2.8 0 0 1-4.2 0L1.2 2.6Z" fill="rgba(255,255,255,0.96)" />
+        <path d="M1.2 -0.4H20.8V2.6L13.1 9.9a2.8 2.8 0 0 1-4.2 0L1.2 2.6Z" fill="#fff" />
         <motion.path d="M0.6 1.9L8.9 9.9a2.8 2.8 0 0 0 4.2 0L21.4 1.9" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" initial={false} animate={{ stroke: tone }} transition={{ duration: 0.2 }} />
       </motion.svg>
     </div>
