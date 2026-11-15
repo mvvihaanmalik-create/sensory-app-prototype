@@ -1,4 +1,5 @@
 // Figma: Home mode selector and inline preference controls.
+import { Ph } from './phosphor.jsx';
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { GENTLE, INK, Glass } from './ui.jsx';
@@ -27,13 +28,13 @@ function ModeCard({ mode, active, onPick, onEdit }) {
 }
 export function ModesSheet({ modes, activeId, onPick, onEdit, onAdd, onClose }) {
   const builtins = modes.filter(m => !m.custom), custom = modes.filter(m => m.custom);
-  return <SheetFrame top={470} onClose={onClose} sheetStyle={{ borderRadius: '24px 24px 0 0', border: 0 }}>
-    <p className="abs nowrap" style={{ left: 24, top: 42, fontSize: 24, fontWeight: 600, lineHeight: '28px', letterSpacing: -.36, color: INK }}>Your modes</p>
+  return <SheetFrame top={470} onClose={onClose} sheetStyle={{ borderRadius: '24px 24px 0 0', border: 0, borderTop: '1.5px solid rgba(255,255,255,0.95)', background: 'rgba(250,249,252,0.9)', backdropFilter: 'blur(30px)', WebkitBackdropFilter: 'blur(30px)' }}>
+    <p className="abs nowrap" style={{ left: 24, top: 42, fontSize: 24, fontWeight: 600, lineHeight: '28px', letterSpacing: -.36, color: '#2a2650' }}>Your modes</p>
     <motion.button className="abs" aria-label="Close" onClick={onClose} whileTap={{ scale: .88 }} transition={TAP} style={{ right: 24, top: 30, width: 44, height: 44, display: 'grid', placeItems: 'center', borderRadius: 22 }}><img src={A.close} alt="" /></motion.button>
     <div className="abs hide-sb" data-modes-sheet style={{ left: 0, right: 0, top: 74, bottom: 32, overflowY: 'auto', padding: '16px 24px 12px', display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div className="mode-choice-section"><p className="mode-section-title">Choose your mode</p>{builtins.map(m => <ModeCard key={m.id} mode={m} active={m.id === activeId} onPick={onPick} onEdit={onEdit} />)}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}><p className="mode-section-title">Custom modes</p>{custom.map(m => <ModeCard key={m.id} mode={m} active={m.id === activeId} onPick={onPick} onEdit={onEdit} />)}
-        <motion.button className="mode-add" onClick={onAdd} whileTap={{ scale: .97 }} transition={TAP}><img src={A.plus} alt="" /><span>Add custom mode</span></motion.button>
+        <motion.button className="mode-add" onClick={onAdd} whileTap={{ scale: .97 }} transition={TAP}><Ph n="plus" size={16} fill="#2a2650" /><span>Add custom mode</span></motion.button>
       </div>
     </div>
   </SheetFrame>;

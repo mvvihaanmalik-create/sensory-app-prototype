@@ -9,6 +9,8 @@ import { VIcon, SpeakerWaves } from './venueIcons.jsx';
 import { G, CircleBtn, TopBar, Section, Chip, ChipGroup, PrimaryCTA, InfoList, Pill, NAVY, DIV, TAP, t } from './flow.jsx';
 import { VENUE } from './Venue.jsx';
 import ticketArt from './assets/ticket/panel.jpg';
+import greyArt from './assets/ticket/grey.jpg';
+import willowArt from './assets/ticket/willow.jpg';
 
 // ---------- Data ----------
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -581,34 +583,43 @@ const fmt = (m) => { const h = Math.floor(m / 60), mm = m % 60; return `${h % 12
 // Ticket (Figma 1000:15090): 340 x 468, side notches at the perforation line.
 const BARS = [[26,2],[31,3],[35,1],[38,1],[42,2],[45,3],[50,1],[54,4],[59,3],[64,2],[69,2],[72,4],[78,3],[84,1],[86,2],[90,1],[94,3],[98,1],[101,3],[107,2],[110,1],[113,1],[117,4],[122,4],[128,1],[132,2],[135,4],[141,1],[145,2],[148,3],[153,3],[159,2],[162,1],[165,4],[172,2],[175,1],[178,3],[184,2],[187,1],[190,4],[197,2],[200,2],[204,1],[208,4],[213,1],[216,4],[223,2],[226,1],[229,3],[235,2],[238,4],[244,3],[250,1],[252,1],[255,2],[260,1],[262,1],[265,2],[270,3],[274,3],[279,4],[286,2],[289,2],[293,2],[298,2],[301,4],[307,2],[312,2]];
 const NOTCH = 'radial-gradient(circle 16px at 0 318px, transparent 15.5px, #000 16px) left / 51% 100% no-repeat, radial-gradient(circle 16px at 100% 318px, transparent 15.5px, #000 16px) right / 51% 100% no-repeat';
-function Ticket({ b }) {
-  const when = `${b.dayLong.replace('Today, ', '').replace(/^(\w{3}) /, '$1, ')} · ${b.time}`;
-  const ink = '#f6f4f0';
+export const TICKET_THEMES = {
+  fern: { bg: '#a18a7a', art: ticketArt, ink: '#f6f4f0', perf: '#fff', bar: '#f4f3ef', big: true },
+  grey: { bg: '#e9ddf2', art: greyArt, ink: '#2a2650', perf: '#2a2650', bar: 'rgba(42,38,80,0.8)' },
+  willow: { bg: '#c2e8d9', art: willowArt, ink: '#2a2650', perf: '#45b6a2', bar: 'rgba(42,38,80,0.8)' },
+};
+export const bookingWhen = (b) => `${b.dayLong.replace('Today, ', '').replace(/^(\w{3}) /, '$1, ')} · ${b.time}`;
+export function Ticket({ name = VENUE.name, when, guests, seat, held, theme = 'fern', motionProps }) {
+  const th = TICKET_THEMES[theme];
   const field = (x, label, value) => (
     <div className="abs" style={{ left: x, top: 338, display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <span style={t(12, 500, ink)}>{label}</span>
-      <span className="nowrap" style={t(17, 700, ink)}>{value}</span>
+      <span style={t(12, 500, th.ink)}>{label}</span>
+      <span className="nowrap" style={t(17, 700, th.ink)}>{value}</span>
     </div>
   );
   return (
-    <motion.div initial={{ opacity: 0, y: 28, scale: 0.94, rotate: -2 }} animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
-      transition={{ type: 'spring', stiffness: 170, damping: 20, delay: 0.15 }}
-      style={{ alignSelf: 'center', width: 340, height: 468, filter: 'drop-shadow(0 24px 30px rgba(27,42,68,0.1))' }}>
-      <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: 26, background: '#a18a7a', WebkitMask: NOTCH, mask: NOTCH }}>
-        <div className="abs" style={{ left: 14, top: 14, width: 312, height: 290, borderRadius: 18, overflow: 'hidden', background: `#6b5a4e url(${ticketArt}) center / cover` }}>
-          <span className="abs nowrap" style={{ left: 0, right: 0, top: 26, textAlign: 'center', ...t(11, 700, '#fcfcfb'), letterSpacing: '0.14em' }}>TABLE FOR {b.guests}</span>
-          <span className="abs nowrap" style={{ left: 41, top: 108, ...t(34, 600, '#fcfcfb'), letterSpacing: '-0.03em', lineHeight: '41px' }}>{VENUE.name}</span>
-          <span className="abs nowrap" style={{ left: 90, top: 156, ...t(15, 500, '#fcfcfb') }}>{when}</span>
+    <motion.div {...motionProps} style={{ alignSelf: 'center', width: 340, height: 468, filter: 'drop-shadow(0 24px 30px rgba(27,42,68,0.1))', ...motionProps?.style }}>
+      <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: 26, background: th.bg, WebkitMask: NOTCH, mask: NOTCH }}>
+        <div className="abs" style={{ left: 14, top: 14, width: 312, height: 290, borderRadius: 18, overflow: 'hidden', background: `#6b5a4e url(${th.art}) center / cover` }}>
+          {th.big ? <>
+            <span className="abs nowrap" style={{ left: 0, right: 0, top: 26, textAlign: 'center', ...t(11, 700, '#fcfcfb'), letterSpacing: '0.14em' }}>TABLE FOR {guests}</span>
+            <span className="abs nowrap" style={{ left: 41, top: 108, ...t(34, 600, '#fcfcfb'), letterSpacing: '-0.03em', lineHeight: '41px' }}>{name}</span>
+            <span className="abs nowrap" style={{ left: 90, top: 156, ...t(15, 500, '#fcfcfb') }}>{when}</span>
+          </> : <>
+            <span className="abs nowrap" style={{ left: 14, top: 7, ...t(19, 600, '#fefeff'), lineHeight: '23px' }}>{name}</span>
+            <span className="abs nowrap" style={{ left: 14, top: 30, ...t(13, 500, '#fefeff') }}>{when}</span>
+          </>}
         </div>
-        <div className="abs" style={{ left: 24, right: 21, top: 318, height: 2, backgroundImage: 'linear-gradient(90deg, #fff 5px, transparent 5px)', backgroundSize: '10px 2px' }} />
-        {field(26, 'Seat', `${b.zone} · Table ${b.table}`)}
-        {field(150, 'Party', b.guests)}
-        {field(232, 'Held Until', fmt(mins(b.time) + 15))}
-        {BARS.map(([x, w]) => <div key={x} className="abs" style={{ left: x, top: 404, width: w, height: 44, background: '#f4f3ef' }} />)}
+        <div className="abs" style={{ left: 24, right: 21, top: 318, height: 2, backgroundImage: `linear-gradient(90deg, ${th.perf} 5px, transparent 5px)`, backgroundSize: '10px 2px' }} />
+        {field(26, 'Seat', seat)}
+        {field(150, 'Party', guests)}
+        {field(232, 'Held Until', held)}
+        {BARS.map(([x, w]) => <div key={x} className="abs" style={{ left: x, top: 404, width: w, height: 44, background: th.bar }} />)}
       </div>
     </motion.div>
   );
 }
+export const ticketFor = (b) => ({ when: bookingWhen(b), guests: b.guests, seat: `${b.zone} · Table ${b.table}`, held: fmt(mins(b.time) + 15) });
 
 export function BookingConfirmed({ booking, onClose, onChange }) {
   const [scrolled, setScrolled] = useState(false);
@@ -626,7 +637,7 @@ export function BookingConfirmed({ booking, onClose, onChange }) {
             <motion.p {...rise(1)} style={t(15, 400)}>We sent the details to {b.phone}</motion.p>
           </div>
 
-          <Ticket b={b} />
+          <Ticket {...ticketFor(b)} motionProps={{ initial: { opacity: 0, y: 28, scale: 0.94, rotate: -2 }, animate: { opacity: 1, y: 0, scale: 1, rotate: 0 }, transition: { type: 'spring', stiffness: 170, damping: 20, delay: 0.15 } }} />
 
           <motion.div {...rise(4)} style={{ display: 'flex', gap: 12 }}>
             <G as="button" r={26} on={added} onClick={() => setAdded(true)} whileTap={{ scale: 0.96 }} transition={TAP}
