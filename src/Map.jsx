@@ -6,7 +6,7 @@ import { Glass, GENTLE, NAVY, useScale } from './ui.jsx';
 import { TAP, t } from './flow.jsx';
 import { Ph } from './phosphor.jsx';
 import { FSeg, FSwitch, FRow, FHead, FCard, Any } from './settingsKit.jsx';
-import { VP } from './venuePhotos.js';
+import { PHOTO } from './remainingPhotos.js';
 import mapTiles from './assets/map-tiles.jpg';
 
 const INK = '#2a2650', SUB = '#5e5a7e';
@@ -16,9 +16,9 @@ const SNAPS = [SNAP.full, SNAP.tall, SNAP.half, SNAP.peek];
 const ALIAS = { hidden: 'peek' };
 
 const RECS = [
-  { id: 'foxy', title: 'Fern & Fable', meta: 'Level 2 · 0.5 mi · Updated 1h ago', reason: 'Fits you · Quiet · natural light', photo: VP.garden },
-  { id: 'sentient', title: 'The Sentient', meta: 'Level 2 · 0.5 mi · Updated 1h ago', reason: 'Fits you · Quiet · natural light', photo: VP.bar },
-  { id: 'gallery', title: 'Juniper Coffee', meta: 'Level 3 · 0.5 mi · Updated 1h ago', reason: 'Mostly fits · More crowded', photo: VP.indoor },
+  { id: 'foxy', title: 'Fern & Fable', meta: 'Level 2 · 0.5 mi · Updated 1h ago', reason: 'Fits you · Quiet · natural light', photo: PHOTO.p0602 },
+  { id: 'sentient', title: 'The Sentient', meta: 'Level 2 · 0.5 mi · Updated 1h ago', reason: 'Fits you · Quiet · natural light', photo: PHOTO.p0607 },
+  { id: 'gallery', title: 'Juniper Coffee', meta: 'Level 3 · 0.5 mi · Updated 1h ago', reason: 'Mostly fits · More crowded', photo: PHOTO.p0608 },
 ];
 
 function Recommendation({ r, onOpen, saved, onToggleSaved }) {

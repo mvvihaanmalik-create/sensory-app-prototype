@@ -8,6 +8,7 @@ import { VIcon } from './venueIcons.jsx';
 import { PAGES } from './listData.js';
 import { SENSE_VALUES } from './Venue.jsx';
 import { discoverAssets as A } from './discoverAssets.js';
+import { PHOTO } from './remainingPhotos.js';
 import './discover.css';
 import { SOUND_W, LIGHT_W, CROWD_W, metaOf, rankPlaces } from './discoverData.js';
 
@@ -123,6 +124,7 @@ function CardFace({ p }) {
   return <div className="abs" data-discover-face={p.id} style={{ inset: 0, borderRadius: 48.32, overflow: 'hidden', background: 'rgba(255,255,255,.85)', border: '1.51px solid rgba(20,24,31,.08)', boxShadow: '0 18.12px 48.32px rgba(27,42,68,.06)', userSelect: 'none' }}>
     <div className="abs" style={{ left: -1.51, top: 434.49, width: 393, height: 192, borderRadius: 25, background: 'rgba(20,24,31,.06)' }} />
     <div className="abs" style={{ left: -1.51, top: -1.51, width: 393, height: 628, overflow: 'hidden', background: 'rgba(20,24,31,.06)' }}>
+      {p.id === 'sentient' && <img src={PHOTO.p0609} alt="" draggable={false} className="abs" style={{ left: 0, top: 0, width: 393, height: 434.49, objectFit: 'cover', pointerEvents: 'none' }} />}
       <div className="abs" style={{ left: 18, top: 451, width: 355, display: 'flex', flexDirection: 'column', gap: 8, color: MUTED, textAlign: 'left' }}>
         <p className="nowrap" style={{ fontSize: 28, fontWeight: 600, lineHeight: 'normal', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</p>
         <p className="nowrap" style={{ fontSize: 14, fontWeight: 400, lineHeight: 'normal', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.id === 'foxy' ? '4.6 ★ · 2,600 reviews · $ · Café · Tex-Mex' : p.event ? `${metaOf(p)} · ${p.event}` : metaOf(p)}</p>

@@ -1,10 +1,10 @@
-## Current photo pass · November 15, 2026
+## Current photo updates - November 15, 2026
 
-- `src/venueFinalPhotos.js` maps 22 supplied JPG exports to the venue carousel (5), menu (4), highlights (5), and Photos grid (8). Crop transforms and grid heights come from Final flow frames 789:3335 and 789:3725.
-- The venue header uses carousel photo 1, matching the Figma screenshot. `01-06-venue-big-photo-img-5796.jpg` is not wired because there is no corresponding current display slot.
-- Shared `venuePhotos.js` assets are unchanged, so Home, Map, booking zones, reviews and Profile retain their prior images pending their own photo pass.
-- Both production builds passed. Checked all menu/highlight/grid photo opening, carousel next/close, image decoding, and booking entry; no browser runtime errors.
-- Remaining uploaded groups: Review and Explore; Home cards, map and discover; Dining and Nightlife; Events and More. People/avatars and reservation tickets were not supplied in these seven ZIPs.
+- Venue pass: `src/venueFinalPhotos.js` maps 22 exports to carousel, menu, highlights and Photos grid, with Final flow crops.
+- Remaining pass: `src/remainingPhotos.js` maps 34 more exports to Home cards/rankings/Explore, Map recommendations, Saved and Liked, category lists, Discover's Sentient photo, and sensory review photos. Existing venue-grid images are reused for matching sensory reviews.
+- All 59 JPGs in the seven supplied ZIPs are accounted for: 56 placed; three left unused because their layers are hidden or have no current equivalent: `01-06-venue-big-photo-img-5796.jpg`, `04-09-review-photo-placeholder.jpg` (older standalone Explore layout), and `06-01-home-for-you-card-a.jpg` (hidden full-card image behind the outlined card's visible `06-04` inset).
+- People/avatars and reservation ticket photo ZIPs were not supplied. Those assets and unrelated screens remain unchanged.
+- This pass preserves all existing copy, card dimensions, event handlers, state, routing and motion. Figma has other pre-existing copy/layout differences; they are outside this photo-only update.
 
 # Sensory app (UXDG 370): coded prototype handoff
 

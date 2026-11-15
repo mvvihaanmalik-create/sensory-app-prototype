@@ -1,17 +1,18 @@
+import { PHOTO } from './remainingPhotos.js';
 // Data behind the Home-linked list pages (Figma section 905:17958).
 // Each venue has a hidden sense profile so the Sound / Lighting / Crowd / Temperature / Seating
 // chips can really sort the list. null = unknown, and unknown always sorts last.
 // s sound (1 quiet - 5 loud), l light (1 dim - 5 bright), c crowd (1 calm - 5 packed), t temp (1 cool - 5 warm)
-import e1 from './assets/lists/event1.png';
-import e2 from './assets/lists/event2.png';
-import e3 from './assets/lists/event3.png';
-import e4 from './assets/lists/event4.png';
-import m1 from './assets/lists/more1.png';
-import m2 from './assets/lists/more2.png';
-import m3 from './assets/lists/more3.png';
-import m4 from './assets/lists/more4.png';
-import m5 from './assets/lists/more5.png';
-import m6 from './assets/lists/more6.png';
+const e1 = PHOTO.p0901;
+const e2 = PHOTO.p0902;
+const e3 = PHOTO.p0903;
+const e4 = PHOTO.p0904;
+const m1 = PHOTO.p0905;
+const m2 = PHOTO.p0906;
+const m3 = PHOTO.p0907;
+const m4 = PHOTO.p0908;
+const m5 = PHOTO.p0909;
+const m6 = PHOTO.p0910;
 
 export const SORTS = {
   sound: { label: 'Sound', any: 'Any sound', minW: 111, opts: [['quiet', 'Quietest first'], ['talk', 'Easy to talk first'], ['lively', 'Liveliest first'], ['loud', 'Loud first']] },

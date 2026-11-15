@@ -9,6 +9,8 @@ import { usePullDown } from './Discover.jsx';
 import { H } from './homeUpdateAssets.js';
 import { RippleIcon } from './venueIcons.jsx';
 import { VP } from './venuePhotos.js';
+import { PHOTO } from './remainingPhotos.js';
+import { photoBackground } from './venueFinalPhotos.js';
 import { ExploreFeed } from './Explore.jsx';
 
 const lightGlass = {
@@ -152,9 +154,9 @@ function SectionHeader({ top, title, onSeeAll }) {
 
 /* ---------- For you stack (component 685:328, variants Front=A/B/C) ---------- */
 const VENUES = {
-  A: { name: 'Fern & Fable', meta: 'Café · 0.5 mi', level: 'Level 2', photo: VP.garden },
-  B: { name: 'Gallery Espresso', meta: 'Café · 1.1 mi', level: 'Level 1', photo: VP.indoor },
-  C: { name: 'The Sentient', meta: 'Café · 0.8 mi', level: 'Level 2' , photo: VP.bar },
+  A: { name: 'Fern & Fable', meta: 'Café · 0.5 mi', level: 'Level 2', photo: PHOTO.p0604, crop: [.6787142158,.9074382186,.2869078517,.0925617218] },
+  B: { name: 'Gallery Espresso', meta: 'Café · 1.1 mi', level: 'Level 1', photo: PHOTO.p0602 },
+  C: { name: 'The Sentient', meta: 'Café · 0.8 mi', level: 'Level 2' , photo: PHOTO.p0603 },
 };
 const KEYS = ['A', 'B', 'C'];
 const ROLE = {
@@ -169,7 +171,7 @@ const DOT_FOR = { A: 1, B: 2, C: 0 };
 function VenueCard({ v }) {
   return (
     <>
-      <img src={v.photo} alt="" className="abs" style={{ left: 8, top: 9, width: 244, height: 222, objectFit: 'cover', borderRadius: 25 }} />
+      <div className="abs" style={{ left: 8, top: 9, width: 244, height: 222, borderRadius: 25, ...photoBackground(v.photo, v.crop) }} />
       <div className="abs" style={{ left: 14, top: 15, height: 32, display: 'flex', alignItems: 'center', gap: 2, padding: '0 12px 0 4px', borderRadius: 999,
         background: 'rgba(255,248,240,0.2)', boxShadow: '0 4px 14px rgba(27,42,68,0.05)', WebkitBackdropFilter: 'blur(16px)', backdropFilter: 'blur(16px)' }}>
         <RippleIcon k="rippleCard" size={28} color="#fff" />
@@ -252,7 +254,7 @@ function RankingRow({ top, n, name, meta, level, onClick, photo, wordmark }) {
     <motion.button className="abs" onClick={onClick} whileTap={{ scale: 0.985 }} transition={GENTLE}
       style={{ left: 24, top, width: 392, height: 92, borderRadius: 24, ...cardGlass, display: 'flex', alignItems: 'center', gap: 16, padding: '0 20px', textAlign: 'left' }}>
       <span style={{ ...h2, width: 22 }}>{n}</span>
-      {wordmark ? <div style={{width:56,height:56,borderRadius:28,background:'#fff8ef',color:'#c62f29',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',fontWeight:700,flex:'none'}}><span style={{fontSize:11,lineHeight:'11px',textAlign:'center'}}>FOXY<br/>LOXY</span><span style={{fontSize:6}}>CAFÉ</span></div> : <img src={photo} alt="" style={{width:56,height:56,objectFit:'cover',borderRadius:12,display:'block'}}/>}
+      {wordmark ? <div style={{width:56,height:56,borderRadius:28,background:'#fff8ef',color:'#c62f29',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',fontWeight:700,flex:'none'}}><span style={{fontSize:11,lineHeight:'11px',textAlign:'center'}}>FOXY<br/>LOXY</span><span style={{fontSize:6}}>CAFÉ</span></div> : <span style={{width:56,height:56,borderRadius:12,display:'block',...photoBackground(photo, n === 3 ? [.8695651889,.8695651889,.0652174279,.0652174279] : null)}}/>}
       <span style={{ flex: '1 0 0', display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
         <span className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: INK }}>{name}</span>
         <span className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: INK2 }}>{meta}</span>
@@ -303,9 +305,9 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
         <ForYouStack onOpenVenue={onOpenVenue} />
 
         <SectionHeader top={964} title="Popular around you" onSeeAll={() => onOpenPage?.('popular')} />
-        <RankingRow top={1016} n={1} photo={H.himgPhotoSlot} name="Gallery Espresso" meta="Café · 1.1 mi" level={1} />
+        <RankingRow top={1016} n={1} photo={PHOTO.p0605} name="Gallery Espresso" meta="Café · 1.1 mi" level={1} />
         <RankingRow top={1124} n={2} wordmark name="Fern & Fable" meta="Café · 0.5 mi" level={2} onClick={onOpenVenue} />
-        <RankingRow top={1232} n={3} photo={H.himgPhotoSlot2} name="The Sentient" meta="Café · 0.8 mi" level={2} />
+        <RankingRow top={1232} n={3} photo={PHOTO.p0606} name="The Sentient" meta="Café · 0.8 mi" level={2} />
 
         <div className="abs" style={{ left: 24, top: 1364, width: 392, height: 138 + off, borderRadius: 24, overflow: 'hidden', background: '#c2ddd2', boxShadow: '0 12px 32px rgba(27,42,68,0.06)' }}>
           <span className="abs nowrap" style={{ left: 24, top: 24, padding: '4px 12px', borderRadius: 999, background: INK, color: '#fff', fontSize: 13, fontWeight: 700, boxShadow: '0 6px 18px rgba(27,42,68,0.12)' }}>{promo.tag}</span>

@@ -7,6 +7,8 @@ import { G, TAP } from './flow.jsx';
 import { VIcon } from './venueIcons.jsx';
 import { SheetFrame, CloseX, DarkCTA, TextBtn } from './sheets.jsx';
 import { PAGES, SORTS, SORT_ORDER, chipText, sortRows } from './listData.js';
+import { PHOTO } from './remainingPhotos.js';
+const VENUE_THUMBS = { foxy: PHOTO.p0602, sentient: PHOTO.p0607, gallery: PHOTO.p0608, grey: PHOTO.p0610, husk: PHOTO.p0801, cotton: PHOTO.p0802, kitchen: PHOTO.p0803, rocks: PHOTO.p0804, lanie: PHOTO.p0805, alligator: PHOTO.p0806, treehouse: PHOTO.p0807 };
 
 const cardRow = { background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(20,24,31,0.08)', boxShadow: '0 12px 32px rgba(27,42,68,0.06)' };
 const TONES = {
@@ -36,7 +38,7 @@ function Row({ h, r = 28, pad = 16, gap = 16, shadow, onClick, children }) {
 function VenueRow({ v, onOpen }) {
   return (
     <Row h={112} onClick={() => onOpen(v)}>
-      <Thumb />
+      <Thumb src={VENUE_THUMBS[v.id]} />
       <span style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
         <span className="nowrap" style={nm}>{v.name}</span>
         <span className="nowrap" style={mt}>{v.meta}</span>
@@ -103,7 +105,7 @@ function RankRow({ v, n, onOpen }) {
     <Row h={120} onClick={() => onOpen(v)}>
       <span style={{ width: 36, height: 36, borderRadius: 18, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 700,
         background: n === 1 ? INK : 'rgba(20,24,31,0.06)', color: n === 1 ? '#fff' : INK }}>{n}</span>
-      <Thumb size={64} r={12} />
+      <Thumb size={64} r={12} src={VENUE_THUMBS[v.id]} />
       <span style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
         <span className="nowrap" style={nm}>{v.name}</span>
         <span className="nowrap" style={mt}>{v.meta}</span>

@@ -9,6 +9,7 @@ import { Ph } from './phosphor.jsx';
 import { FSeg, FSwitch, FRow, FHead, FCard, IconBtn } from './settingsKit.jsx';
 import { Ticket, ticketFor, BookingConfirmed } from './BookTable.jsx';
 import { VP } from './venuePhotos.js';
+import { PHOTO } from './remainingPhotos.js';
 import nora from './assets/people/nora.jpg';
 
 const INK = '#2a2650', SUB = '#5e5a7e';
@@ -84,10 +85,10 @@ function MyModes({ modes, activeId, onPick, onEdit, onAdd }) {
 
 // ---------- Posts you liked ----------
 const LIKED = [
-  { id: 'maya', photo: VP.garden, text: 'My favorite courtyard reset. Coffee, shade, and room to breathe.', who: 'maya.sav', when: '1 day ago', likes: 128 },
-  { id: 'jules', photo: VP.patio, text: 'A sunny seat for a slow morning.', who: 'jules.jpg', when: '4 days ago', likes: 94 },
-  { id: 'eli', photo: VP.indoor, text: 'Dinner with a cozy corner booth.', who: 'eli.explores', when: '3 days ago', likes: 76 },
-  { id: 'nina', photo: VP.store, text: 'An afternoon of clay, color, and a little creative reset.', who: 'nina.makes', when: '1 wk ago', likes: 53 },
+  { id: 'maya', photo: PHOTO.p0404, text: 'My favorite courtyard reset. Coffee, shade, and room to breathe.', who: 'maya.sav', when: '1 day ago', likes: 128 },
+  { id: 'jules', photo: PHOTO.p0406, text: 'A sunny seat for a slow morning.', who: 'jules.jpg', when: '4 days ago', likes: 94 },
+  { id: 'eli', photo: PHOTO.p0405, text: 'Dinner with a cozy corner booth.', who: 'eli.explores', when: '3 days ago', likes: 76 },
+  { id: 'nina', photo: PHOTO.p0407, text: 'An afternoon of clay, color, and a little creative reset.', who: 'nina.makes', when: '1 wk ago', likes: 53 },
 ];
 function LikedCard({ p, onOpen }) {
   const [on, setOn] = useState(true);
@@ -117,10 +118,10 @@ function LikedCard({ p, onOpen }) {
 
 // ---------- Saved ----------
 const PLACES = {
-  fern: { name: 'Fern & Fable', meta: 'Café · 0.5 mi', note: 'Back patio', photo: VP.garden, venue: true },
-  sentient: { name: 'The Sentient', meta: 'Café · 0.8 mi', note: 'Natural light', photo: VP.bar },
-  juniper: { name: 'Juniper Coffee', meta: 'Café · 1.1 mi', note: 'Art gallery', photo: VP.indoor },
-  willow: { name: 'Willow Table', meta: 'American · 0.7 mi', photo: VP.counter },
+  fern: { name: 'Fern & Fable', meta: 'Café · 0.5 mi', note: 'Back patio', photo: PHOTO.p0602, venue: true },
+  sentient: { name: 'The Sentient', meta: 'Café · 0.8 mi', note: 'Natural light', photo: PHOTO.p0607 },
+  juniper: { name: 'Juniper Coffee', meta: 'Café · 1.1 mi', note: 'Art gallery', photo: PHOTO.p0608 },
+  willow: { name: 'Willow Table', meta: 'American · 0.7 mi', photo: PHOTO.p0610 },
 };
 const COLLECTIONS = [
   { id: 'all', name: 'All saved', items: ['fern', 'sentient', 'juniper', 'willow'] },

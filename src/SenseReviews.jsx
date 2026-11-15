@@ -7,6 +7,8 @@ import { VIcon } from './venueIcons.jsx';
 import { G, TopBar, PrimaryCTA, RESERVE_TOP, DayChart, weekFrom, SENSES, NAVY, DIV, TAP, t } from './flow.jsx';
 import { CROWD_SUN, crowdWord } from './Venue.jsx';
 import { REVIEW_PICS } from './venuePhotos.js';
+import { PHOTO } from './remainingPhotos.js';
+import { PHOTO_GRID, GRID_CROPS, photoBackground } from './venueFinalPhotos.js';
 import Lightbox, { useLightbox } from './Lightbox.jsx';
 
 const ICON = Object.fromEntries(SENSES.map((s) => [s.k, s.icon]));
@@ -120,7 +122,22 @@ function MostSay({ sense, d, filter, setFilter }) {
   );
 }
 
-const picFor = (text) => REVIEW_PICS[[...text].reduce((a, c) => a + c.charCodeAt(0), 0) % REVIEW_PICS.length];
+// Stable image assignments from the matching Final flow review layers.
+const REVIEW_PHOTOS = {
+  'The espresso machine and chatter made the counter area lively.': [PHOTO.p0401],
+  'The grinder drowned us out for a moment while we waited at the counter.': [PHOTO_GRID[0][2], GRID_CROPS[0][2]],
+  'We could talk at the window table without raising our voices.': [PHOTO_GRID[1][1]],
+  'The wall lights felt soft, and it was a little cool by the booth.': [PHOTO.p0406],
+  'The glass-block wall softened the daylight by our table.': [PHOTO_GRID[0][0], GRID_CROPS[0][0]],
+  'The tiled entry was dimmer than the main seating area.': [PHOTO_GRID[0][3], GRID_CROPS[0][3]],
+  'Grabbed a croissant before the line built up.': [PHOTO.p0402],
+  'A few people were waiting for coffee, but there were still open tables.': [PHOTO_GRID[0][1], GRID_CROPS[0][1]],
+  'We could still find a table, but the aisle felt tight when people passed.': [PHOTO.p0403],
+  'The window table had room for my laptop and coffee, and the spot felt mild.': [PHOTO_GRID[1][3], GRID_CROPS[1][3]],
+  'The entrance felt warm in the afternoon sun.': [PHOTO_GRID[1][2]],
+  'The long bench had enough room for the three of us.': [PHOTO_GRID[1][0], GRID_CROPS[1][0]],
+};
+const picFor = (text) => REVIEW_PHOTOS[text]?.[0] ?? REVIEW_PICS[[...text].reduce((a, c) => a + c.charCodeAt(0), 0) % REVIEW_PICS.length];
 function PhotoReview({ p, onPhoto }) {
   const [h, tag, text, who, when, likes] = p;
   const [liked, setLiked] = useState(false);
@@ -128,7 +145,7 @@ function PhotoReview({ p, onPhoto }) {
   return (
     <motion.div layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }} transition={GENTLE}>
       <G r={24} whileTap={{ scale: 0.98 }} style={{ padding: '6px 6px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div role="button" aria-label="Open photo" onClick={onPhoto} style={{ position: 'relative', height: h, borderRadius: 18, background: `#dbdbde url(${pic}) center / cover`, cursor: 'pointer' }}>
+        <div role="button" aria-label="Open photo" onClick={onPhoto} style={{ position: 'relative', height: h, borderRadius: 18, ...photoBackground(pic, REVIEW_PHOTOS[text]?.[1]), cursor: 'pointer' }}>
           <span className="abs nowrap" style={{ left: 8, top: 8, height: 24, padding: '0 10px', borderRadius: 13, background: 'rgba(255,255,255,0.92)', display: 'flex', alignItems: 'center', ...t(12, 600) }}>{tag}</span>
         </div>
         <div style={{ padding: '0 8px', display: 'flex', flexDirection: 'column', gap: 12 }}>
