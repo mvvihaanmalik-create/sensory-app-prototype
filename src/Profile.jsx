@@ -223,19 +223,23 @@ export const COMFORT_DEFAULT = { theme: 'Light', text: 'Default', colors: 'Soft'
 let COMFORT_SAVED = COMFORT_DEFAULT; // survives leaving and re-opening the Profile tab
 function AppComfort({ value, onChange }) {
   const set = (k) => (v) => onChange({ ...value, [k]: v });
+  const z = { Default: 1, Large: 1.12, Larger: 1.26 }[value.text] || 1;
+  const un = (n) => <div style={{ zoom: 1 / z }}>{n}</div>; // labels grow with Text size; the controls keep their size so rows never overflow
   return (
-    <div style={{ padding: '206px 24px 60px', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ padding: '206px 24px 60px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', zoom: z }}>
       <FHead>DISPLAY</FHead><div style={{ height: 24 }} />
       <FCard>
-        <FRow icon="sun-dim" label="Theme"><FSeg options={['Light', 'Dark', 'System']} value={value.theme} onChange={set('theme')} /></FRow>
-        <FRow icon="text-aa" label="Text size"><FSeg options={['Default', 'Large', 'Larger']} value={value.text} onChange={set('text')} /></FRow>
-        <FRow icon="palette" label="Colors" last><FSeg options={['Soft', 'Vivid']} value={value.colors} onChange={set('colors')} /></FRow>
+        <FRow icon="sun-dim" label="Theme">{un(<FSeg options={['Light', 'Dark', 'System']} value={value.theme} onChange={set('theme')} />)}</FRow>
+        <FRow icon="text-aa" label="Text size">{un(<FSeg options={['Default', 'Large', 'Larger']} value={value.text} onChange={set('text')} />)}</FRow>
+        <FRow icon="palette" label="Colors" last>{un(<FSeg options={['Soft', 'Vivid']} value={value.colors} onChange={set('colors')} />)}</FRow>
       </FCard>
       <div style={{ height: 24 }} /><FHead>FEEL</FHead><div style={{ height: 24 }} />
       <FCard>
-        <FRow icon="sparkle" label="Motion"><FSeg options={['Standard', 'Reduced']} value={value.motion} onChange={set('motion')} /></FRow>
-        <FRow icon="vibrate" label="Haptics" last><FSwitch on={value.haptics} onChange={set('haptics')} /></FRow>
+        <FRow icon="sparkle" label="Motion">{un(<FSeg options={['Standard', 'Reduced']} value={value.motion} onChange={set('motion')} />)}</FRow>
+        <FRow icon="vibrate" label="Haptics" last>{un(<FSwitch on={value.haptics} onChange={set('haptics')} />)}</FRow>
       </FCard>
+    </div>
     </div>
   );
 }
