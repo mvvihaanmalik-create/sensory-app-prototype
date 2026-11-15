@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useTransform } from 'motion/react';
 import { uri } from './svgs.js';
 import { drops, ripples, toTransition, LOOP } from './fountain.js';
@@ -20,6 +20,7 @@ const lightGlass = {
 const cardGlass = {
   background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(20,24,31,0.08)', boxShadow: '0 4px 14px rgba(27,42,68,0.05)',
 };
+const DK = createContext(false); // Settings > App comfort > Theme > Dark: the whole Home goes dark, not just the hero
 const h2 = { fontSize: 24, fontWeight: 600, lineHeight: '28px', letterSpacing: -0.36, color: INK };
 
 function Layer({ l }) {
@@ -141,14 +142,16 @@ const CATS = [
   {k:'More',label:'More',page:'more',x:2.76,y:3.98,size:60.031},
 ];
 function Categories({onOpen}) {
- return <div className="abs" style={{left:24,top:322,width:392,display:'flex',justifyContent:'space-between'}}>{CATS.map(c=><motion.button key={c.k} onClick={()=>onOpen?.(c.page)} whileTap={{scale:.92}} transition={GENTLE} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:7.685}}><div style={{width:68,height:68,position:'relative',overflow:'hidden'}}><div style={{position:'absolute',left:c.x,top:c.y,width:c.size,height:c.size,overflow:'hidden'}}><img src={H['himg'+c.k+'TransparentPng']} alt="" style={{position:'absolute',width:c.k==='Cafe'?'110%':'100%',height:c.k==='Cafe'?'110%':'100%',left:c.k==='Cafe'?'-5%':c.k==='Events'?'0.15%':0,top:c.k==='Cafe'?'-5%':c.k==='Events'?'10.26%':0,objectFit:'contain'}}/></div></div><span style={{fontSize:12,color:INK2,lineHeight:'normal'}}>{c.label}</span></motion.button>)}</div>;
+ const dk = useContext(DK);
+ return <div className="abs" style={{left:24,top:322,width:392,display:'flex',justifyContent:'space-between'}}>{CATS.map(c=><motion.button key={c.k} onClick={()=>onOpen?.(c.page)} whileTap={{scale:.92}} transition={GENTLE} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:7.685}}><div style={{width:68,height:68,position:'relative',overflow:'hidden'}}><div style={{position:'absolute',left:c.x,top:c.y,width:c.size,height:c.size,overflow:'hidden'}}><img src={H['himg'+c.k+'TransparentPng']} alt="" style={{position:'absolute',width:c.k==='Cafe'?'110%':'100%',height:c.k==='Cafe'?'110%':'100%',left:c.k==='Cafe'?'-5%':c.k==='Events'?'0.15%':0,top:c.k==='Cafe'?'-5%':c.k==='Events'?'10.26%':0,objectFit:'contain'}}/></div></div><span style={{fontSize:12,color:dk?'rgba(244,245,249,0.75)':INK2,lineHeight:'normal'}}>{c.label}</span></motion.button>)}</div>;
 }
 
 function SectionHeader({ top, title, onSeeAll }) {
+  const dk = useContext(DK);
   return (
     <div className="abs" style={{ left: 24, top, width: 392, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      <p className="nowrap" style={h2}>{title}</p>
-      {onSeeAll && <button className="nowrap" onClick={onSeeAll} style={{ fontSize: 13, fontWeight: 700, color: INK }}>See all</button>}
+      <p className="nowrap" style={dk ? { ...h2, color: '#f4f5f9' } : h2}>{title}</p>
+      {onSeeAll && <button className="nowrap" onClick={onSeeAll} style={{ fontSize: 13, fontWeight: 700, color: dk ? '#f4f5f9' : INK }}>See all</button>}
     </div>
   );
 }
@@ -172,6 +175,7 @@ const Z = { front: 3, right: 2, left: 1, hidden: 0 };
 
 // Venue card / Feature, outlined version (Figma 1275:7232): cream card, inset photo, navy text below
 function VenueCard({ v }) {
+  const dk = useContext(DK);
   return (
     <>
       <div className="abs" style={{ left: 8, top: 9, width: 244, height: 222, borderRadius: 25, ...photoBackground(v.photo, v.crop) }} />
@@ -181,11 +185,11 @@ function VenueCard({ v }) {
         <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{v.level}</span>
       </div>
       <div className="abs" style={{ left: 14, top: 248, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
-        <p className="nowrap" style={{ fontSize: 17, fontWeight: 700, lineHeight: '20px', color: '#2a2650' }}>{v.name}</p>
-        <p className="nowrap" style={{ fontSize: 13, fontWeight: 500, lineHeight: '16px', color: '#2a2650' }}>{v.meta}</p>
+        <p className="nowrap" style={{ fontSize: 17, fontWeight: 700, lineHeight: '20px', color: dk ? '#fff' : '#2a2650' }}>{v.name}</p>
+        <p className="nowrap" style={{ fontSize: 13, fontWeight: 500, lineHeight: '16px', color: dk ? 'rgba(255,255,255,0.85)' : '#2a2650' }}>{v.meta}</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '2px 0' }}>
-          <span style={{ width: 8, height: 8, borderRadius: 4, background: '#5e5a7e', display: 'block' }} />
-          <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: '#5e5a7e' }}>Fits you</span>
+          <span style={{ width: 8, height: 8, borderRadius: 4, background: dk ? '#fff' : '#5e5a7e', display: 'block' }} />
+          <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: dk ? '#fff' : '#5e5a7e' }}>Fits you</span>
         </div>
       </div>
     </>
@@ -193,6 +197,7 @@ function VenueCard({ v }) {
 }
 
 function ForYouStack({ onOpenVenue }) {
+  const dk = useContext(DK);
   const [front, setFront] = useState('A');
   const scale = useScale();
   const drag = useRef(null);
@@ -238,8 +243,8 @@ function ForYouStack({ onOpenVenue }) {
             onPointerDown={isFront ? onDown : undefined} onPointerMove={isFront ? onMove : undefined}
             onPointerUp={isFront ? onUp : undefined} onPointerCancel={isFront ? onUp : undefined}
             whileTap={!isFront ? { scale: 0.78 } : undefined}>
-            <div className="abs" style={{ inset: 0, borderRadius: 32, overflow: 'hidden', background: '#f7f5f1',
-              boxShadow: `0 0 0 1px rgba(94,90,126,0.22), ${isFront ? '0 16px 40px rgba(27,42,68,0.12)' : '0 12px 32px rgba(27,42,68,0.06)'}`, transition: 'box-shadow 0.3s',
+            <div className="abs" style={{ inset: 0, borderRadius: 32, overflow: 'hidden', background: dk ? '#171a26' : '#f7f5f1',
+              boxShadow: `0 0 0 1px ${dk ? 'rgba(255,255,255,0.22)' : 'rgba(94,90,126,0.22)'}, ${isFront ? `0 16px 40px rgba(${dk ? '0,0,0,0.45' : '27,42,68,0.12'})` : `0 12px 32px rgba(${dk ? '0,0,0,0.3' : '27,42,68,0.06'})`}`, transition: 'box-shadow 0.3s',
               isolation: 'isolate', transform: 'translateZ(0)', WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
               <VenueCard v={VENUES[k]} />
             </div>
@@ -249,7 +254,7 @@ function ForYouStack({ onOpenVenue }) {
       <div className="abs" style={{ left: 183, top: 364, display: 'flex', gap: 6 }}>
         {KEYS.map((_, i) => {
           const on = fi === i;
-          return <motion.div key={i} initial={false} animate={{ width: on ? 22 : 7, backgroundColor: on ? '#14181f' : '#c9d2de' }} transition={GENTLE}
+          return <motion.div key={i} initial={false} animate={{ width: on ? 22 : 7, backgroundColor: on ? (dk ? '#fff' : '#14181f') : (dk ? 'rgba(255,255,255,0.28)' : '#c9d2de') }} transition={GENTLE}
             style={{ height: 7, borderRadius: 4 }} />;
         })}
       </div>
@@ -258,23 +263,24 @@ function ForYouStack({ onOpenVenue }) {
 }
 
 function RankingRow({ top, n, name, meta, level, onClick, photo, wordmark }) {
+  const dk = useContext(DK);
   return (
     <motion.button className="abs" onClick={onClick} whileTap={{ scale: 0.985 }} transition={GENTLE}
-      style={{ left: 24, top, width: 392, height: 92, borderRadius: 24, ...cardGlass, display: 'flex', alignItems: 'center', gap: 16, padding: '0 20px', textAlign: 'left' }}>
-      <span style={{ ...h2, width: 22 }}>{n}</span>
+      style={{ left: 24, top, width: 392, height: 92, borderRadius: 24, ...(dk ? { background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.12)', boxShadow: 'none' } : cardGlass), display: 'flex', alignItems: 'center', gap: 16, padding: '0 20px', textAlign: 'left' }}>
+      <span style={{ ...h2, width: 22, color: dk ? '#f4f5f9' : INK }}>{n}</span>
       {wordmark ? <div style={{width:56,height:56,borderRadius:28,background:'#fff8ef',color:'#c62f29',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',fontWeight:700,flex:'none'}}><span style={{fontSize:11,lineHeight:'11px',textAlign:'center'}}>FOXY<br/>LOXY</span><span style={{fontSize:6}}>CAFÉ</span></div> : <span style={{width:56,height:56,borderRadius:12,display:'block',...photoBackground(photo, n === 3 ? [.8695651889,.8695651889,.0652174279,.0652174279] : null)}}/>}
       <span style={{ flex: '1 0 0', display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
-        <span className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: INK }}>{name}</span>
-        <span className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: INK2 }}>{meta}</span>
+        <span className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: dk ? '#fff' : INK }}>{name}</span>
+        <span className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: dk ? 'rgba(255,255,255,0.75)' : INK2 }}>{meta}</span>
       </span>
       <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <RippleIcon k={level === 1 ? 'ripple1' : 'ripple2'} size={36} />
+        <RippleIcon k={level === 1 ? 'ripple1' : 'ripple2'} size={36} color={dk ? '#fff' : undefined} />
       </span>
     </motion.button>
   );
 }
 
-export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, scrollTopKey, reduceMotion, pull, onDiscover, pullOn = true, onOpenExplore, exploreLiked, scene = 'morning', onStepScene }) {
+export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, scrollTopKey, reduceMotion, pull, onDiscover, pullOn = true, onOpenExplore, exploreLiked, scene = 'morning', dark = false, onStepScene }) {
   const sc = SCENES.find((x) => x.id === scene) || SCENES[0];
   const sub = sc.sub, left = sub ? 24 : 23;
   const promo = sc.promo || { tag: 'Quiet hour', title: 'The Sentient', detail: '2 – 4 pm · 10% off pastries' };
@@ -288,9 +294,10 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
   const r = useTransform(pull, [0, 24], [0, 32]);
   const sh = useTransform(pull, [0, 24], ['0 -10px 28px rgba(42,38,80,0)', '0 -10px 28px rgba(42,38,80,0.12)']);
   return (
-    <motion.div className="abs" style={{ inset: 0, y: pull, overflow: 'hidden', background: '#f7f5f1', borderTopLeftRadius: r, borderTopRightRadius: r, boxShadow: sh, zIndex: 1, userSelect: 'none', WebkitUserSelect: 'none' }} onDragStart={(e) => e.preventDefault()}>
-    <div ref={scrollRef} className="scroll" style={{ background: '#f7f5f1' }} onScroll={(e) => onScroll?.(e.currentTarget.scrollTop)}>
-      <div style={{ position: 'relative', width: 440, height: 2681 + off }}>
+    <motion.div className="abs" style={{ inset: 0, y: pull, overflow: 'hidden', background: dark ? '#0e1119' : '#f7f5f1', borderTopLeftRadius: r, borderTopRightRadius: r, boxShadow: sh, zIndex: 1, userSelect: 'none', WebkitUserSelect: 'none' }} onDragStart={(e) => e.preventDefault()}>
+    <div ref={scrollRef} className="scroll" style={{ background: dark ? '#0e1119' : '#f7f5f1' }} onScroll={(e) => onScroll?.(e.currentTarget.scrollTop)}>
+      <DK.Provider value={dark}>
+      <div className={dark ? 'home-dk' : undefined} style={{ position: 'relative', width: 440, height: 2681 + off }}>
         <Hero reduce={reduceMotion} pull={pull} scene={sc} />
         <p className="abs nowrap" style={{ left: 24, top: 59, fontSize: 15, fontWeight: 500, color: sc.dark ? 'rgba(255,255,255,0.8)' : INK2 }}>Savannah, GA</p>
         <motion.button className="abs nowrap" onClick={onOpenModes} whileTap={{ scale: 0.95 }} transition={GENTLE}
@@ -317,23 +324,24 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
         <RankingRow top={1124} n={2} wordmark name="Fern & Fable" meta="Café · 0.5 mi" level={2} onClick={onOpenVenue} />
         <RankingRow top={1232} n={3} photo={PHOTO.p0606} name="The Sentient" meta="Café · 0.8 mi" level={2} />
 
-        <div className="abs" style={{ left: 24, top: 1364, width: 392, height: 138 + off, borderRadius: 24, overflow: 'hidden', background: '#c2ddd2', boxShadow: '0 12px 32px rgba(27,42,68,0.06)' }}>
-          <span className="abs nowrap" style={{ left: 24, top: 24, padding: '4px 12px', borderRadius: 999, background: INK, color: '#fff', fontSize: 13, fontWeight: 700, boxShadow: '0 6px 18px rgba(27,42,68,0.12)' }}>{promo.tag}</span>
-          <p className="abs nowrap" style={{ ...h2, left: 24, top: 60 }}>{promo.title}</p>
-          <p className="abs nowrap" style={{ left: 24, top: 96, fontSize: 15, fontWeight: 500, color: INK2 }}>{promo.detail}</p>
-          {promo.cta && <button className="abs nowrap" style={{ left: 24, top: 122, fontSize: 13, fontWeight: 700, color: INK }}>{promo.cta}</button>}
+        <div className="abs" style={{ left: 24, top: 1364, width: 392, height: 138 + off, borderRadius: 24, overflow: 'hidden', background: dark ? '#24402f' : '#c2ddd2', boxShadow: '0 12px 32px rgba(27,42,68,0.06)' }}>
+          <span className="abs nowrap" style={{ left: 24, top: 24, padding: '4px 12px', borderRadius: 999, background: dark ? '#fff' : INK, color: dark ? INK : '#fff', fontSize: 13, fontWeight: 700, boxShadow: '0 6px 18px rgba(27,42,68,0.12)' }}>{promo.tag}</span>
+          <p className="abs nowrap" style={{ ...h2, left: 24, top: 60, color: dark ? '#fff' : INK }}>{promo.title}</p>
+          <p className="abs nowrap" style={{ left: 24, top: 96, fontSize: 15, fontWeight: 500, color: dark ? 'rgba(255,255,255,0.8)' : INK2 }}>{promo.detail}</p>
+          {promo.cta && <button className="abs nowrap" style={{ left: 24, top: 122, fontSize: 13, fontWeight: 700, color: dark ? '#fff' : INK }}>{promo.cta}</button>}
         </div>
 
         <img src={H.himgIllustrationCatchup} alt="" className="abs" style={{left:267,top:1364,width:164,height:164,objectFit:'contain',pointerEvents:'none'}}/>
         <ExploreFeed onOpen={onOpenExplore} liked={exploreLiked} top={1662 + off}/>
         <div className="abs" style={{ left: 24, top: 1542 + off, width: 392, height: 47, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <p className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: INK }}>Rather see a map?</p>
+          <p className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: dark ? '#f4f5f9' : INK }}>Rather see a map?</p>
           <motion.button className="nowrap" onClick={onOpenMap} whileTap={{ scale: 0.97 }} transition={GENTLE}
-            style={{ width: 156, height: 47, borderRadius: 999, border: '1.5px solid rgba(20,24,31,0.08)', fontSize: 13, fontWeight: 700, color: INK, whiteSpace: 'pre' }}>
+            style={{ width: 156, height: 47, borderRadius: 999, border: dark ? '1.5px solid rgba(255,255,255,0.7)' : '1.5px solid rgba(20,24,31,0.08)', fontSize: 13, fontWeight: 700, color: dark ? '#fff' : INK, whiteSpace: 'pre' }}>
             {'Open map  →'}
           </motion.button>
         </div>
       </div>
+      </DK.Provider>
     </div>
     </motion.div>
   );

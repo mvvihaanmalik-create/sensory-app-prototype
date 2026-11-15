@@ -49,10 +49,10 @@ export function AmbioMark({ color = MUTED, size = 24 }) {
   );
 }
 
-export function TabBar({ active, onNav, top, yMV }) {
+export function TabBar({ active, onNav, top, yMV, dark = false }) {
   return (
     <motion.div className="abs tabbar-wrap" style={{ left: 84, width: 273, height: 64, zIndex: 40, y: yMV }} initial={false} animate={{ top }} transition={GENTLE}>
-      <Glass radius={32} angle="166.8deg" style={{ inset: 0 }} contentStyle={{ padding: 7 - 1.5 }}>
+      <Glass radius={32} angle="166.8deg" className={dark ? 'glass-dk' : ''} style={{ inset: 0 }} contentStyle={{ padding: 7 - 1.5 }}>
         {TABS.map((t, i) => {
           const on = active === t.key;
           return (
@@ -60,10 +60,10 @@ export function TabBar({ active, onNav, top, yMV }) {
               style={{ position: 'relative', flex: '1 0 0', height: 50, marginRight: i < 3 ? -4 : 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 25 }}>
               {on && (
                 <motion.div layoutId="tab-pill" transition={GENTLE}
-                  style={{ position: 'absolute', inset: 0, borderRadius: 25, background: 'rgba(255,255,255,0.85)', boxShadow: '0 2px 8px rgba(42,38,80,0.06)' }} />
+                  style={{ position: 'absolute', inset: 0, borderRadius: 25, background: dark ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.85)', boxShadow: '0 2px 8px rgba(42,38,80,0.06)' }} />
               )}
               <motion.div style={{ position: 'relative' }} whileTap={{ scale: 0.88 }}>
-                {t.key === 'home' ? <AmbioMark color={on ? NAVY : MUTED} /> : <Icon d={t.d} fill={on ? NAVY : MUTED} />}
+                {t.key === 'home' ? <AmbioMark color={dark ? (on ? '#fff' : 'rgba(255,255,255,0.6)') : on ? NAVY : MUTED} /> : <Icon d={t.d} fill={dark ? (on ? '#fff' : 'rgba(255,255,255,0.6)') : on ? NAVY : MUTED} />}
               </motion.div>
             </button>
           );

@@ -26,3 +26,10 @@
 .ep-place{border:1.5px solid rgba(255,255,255,.95);border-radius:24px;background:linear-gradient(140.5deg,rgba(255,255,255,.55) 14%,rgba(255,255,255,.08) 86%),rgba(255,255,255,.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 14px 36px rgba(42,38,80,.1),inset 0 1px 0 rgba(255,255,255,.9)}
 .ep-place h2{color:#2a2650}.ep-place p{color:#5e5a7e}.explore-place-card.ep-place span{color:#2a2650}
 .explore-replies h2,.explore-reply strong,.explore-reply p{color:#2a2650}.explore-replies header span,.explore-reply small{color:#5e5a7e}.explore-all-replies{color:#2a2650}
+
+/* Dark theme (Settings > App comfort): Home explore feed */
+.home-dk .explore-feed h2{color:#f4f5f9!important}
+.home-dk .explore-feed-card.ef-outline{background:#171a26;border-color:rgba(255,255,255,.18);box-shadow:0 12px 32px rgba(0,0,0,.35)}
+.home-dk .ef-text{color:#fff!important}
+.home-dk .ef-meta{color:rgba(255,255,255,.75)}
+.home-dk .ef-meta svg{fill:rgba(255,255,255,.75)}

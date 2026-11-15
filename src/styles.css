@@ -71,3 +71,8 @@ textarea.field::placeholder{color:#5e5a7e;opacity:1}
 
 img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
 
+
+/* Dark theme: tab bar over the dark Home */
+.glass.glass-dk{border-color:rgba(255,255,255,.22);box-shadow:0 14px 24px rgba(0,0,0,.4)}
+.glass.glass-dk>.g-bg{background:rgba(40,44,60,.72)!important}
+.glass.glass-dk>.g-in{box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
