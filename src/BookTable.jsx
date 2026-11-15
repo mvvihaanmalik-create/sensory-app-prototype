@@ -9,7 +9,8 @@ import { VIcon, SpeakerWaves } from './venueIcons.jsx';
 import { G, CircleBtn, TopBar, Section, Chip, ChipGroup, PrimaryCTA, RESERVE_TOP, InfoList, Pill, NAVY, DIV, TAP, t } from './flow.jsx';
 import { VENUE } from './Venue.jsx';
 import ticketArt from './assets/ticket/panel.jpg';
-import TicketInteraction from './TicketInteraction.jsx';
+import TicketInteraction, { TicketArtwork } from './TicketInteraction.jsx';
+import { CAROUSEL } from './venueFinalPhotos.js';
 import greyArt from './assets/ticket/grey.jpg';
 import willowArt from './assets/ticket/willow.jpg';
 
@@ -594,7 +595,7 @@ export const TICKET_THEMES = {
   willow: { bg: '#c2e8d9', art: willowArt, ink: '#2a2650', perf: '#45b6a2', bar: 'rgba(42,38,80,0.8)' },
 };
 export const bookingWhen = (b) => `${b.dayLong.replace('Today, ', '').replace(/^(\w{3}) /, '$1, ')} · ${b.time}`;
-export function Ticket({ name = VENUE.name, when, guests, seat, held, theme = 'fern', motionProps }) {
+export function Ticket({ name = VENUE.name, when, guests, seat, held, theme = 'fern', motionProps, animatedArt = false, art, showArtText = true }) {
   const th = TICKET_THEMES[theme];
   const field = (x, label, value) => (
     <div className="abs" style={{ left: x, top: 338, display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -605,15 +606,16 @@ export function Ticket({ name = VENUE.name, when, guests, seat, held, theme = 'f
   return (
     <motion.div {...motionProps} style={{ alignSelf: 'center', width: 340, height: 468, filter: 'drop-shadow(0 24px 30px rgba(27,42,68,0.1))', ...motionProps?.style }}>
       <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: 26, background: th.bg, WebkitMask: NOTCH, mask: NOTCH }}>
-        <div className="abs" style={{ left: 14, top: 14, width: 312, height: 290, borderRadius: 18, overflow: 'hidden', background: `#6b5a4e url(${th.art}) center / cover` }}>
-          {th.big ? <>
+        <div className="abs" style={{ left: 14, top: 14, width: 312, height: 290, borderRadius: 18, overflow: 'hidden', background: `#6b5a4e url(${art ?? th.art}) center / cover` }}>
+          {animatedArt && <TicketArtwork src={th.art} />}
+          {showArtText && (th.big ? <>
             <span className="abs nowrap" style={{ left: 0, right: 0, top: 26, textAlign: 'center', ...t(11, 700, '#fcfcfb'), letterSpacing: '0.14em' }}>TABLE FOR {guests}</span>
             <span className="abs nowrap" style={{ left: 41, top: 108, ...t(34, 600, '#fcfcfb'), letterSpacing: '-0.03em', lineHeight: '41px' }}>{name}</span>
             <span className="abs nowrap" style={{ left: 90, top: 156, ...t(15, 500, '#fcfcfb') }}>{when}</span>
           </> : <>
             <span className="abs nowrap" style={{ left: 14, top: 7, ...t(19, 600, '#fefeff'), lineHeight: '23px' }}>{name}</span>
             <span className="abs nowrap" style={{ left: 14, top: 30, ...t(13, 500, '#fefeff') }}>{when}</span>
-          </>}
+          </>)}
         </div>
         <div className="abs" style={{ left: 24, right: 21, top: 318, height: 2, backgroundImage: `linear-gradient(90deg, ${th.perf} 5px, transparent 5px)`, backgroundSize: '10px 2px' }} />
         {field(26, 'Seat', seat)}
@@ -636,14 +638,14 @@ export function BookingConfirmed({ booking, onClose, onDone, onChange }) {
     <div className="abs" style={{ inset: 0, background: '#f7f5f1' }}>
       <TopBar title="Booking confirmed" onClose={onClose} scrolled={scrolled} right={<CircleBtn icon="export" label="Share booking" />} />
       <div className="scroll" onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 8)}>
-        <div style={{ padding: '146px 24px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ padding: '132px 24px 36px', display: 'flex', flexDirection: 'column', gap: 18 }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '12px 0 8px' }}>
             <motion.h2 {...rise(0)} style={t(28, 600, NAVY, { letterSpacing: -0.4 })}>You're booked</motion.h2>
             <motion.p {...rise(1)} style={t(15, 400)}>We sent the details to {b.phone}</motion.p>
           </div>
 
-          <TicketInteraction color={TICKET_THEMES.fern.bg} mask={NOTCH}>
-          <Ticket {...ticketFor(b)} motionProps={{ initial: { opacity: 0, y: 28, scale: 0.94, rotate: -2 }, animate: { opacity: 1, y: 0, scale: 1, rotate: 0 }, transition: { type: 'spring', stiffness: 170, damping: 20, delay: 0.15 } }} />
+          <TicketInteraction color={TICKET_THEMES.fern.bg} mask={NOTCH} back={<Ticket {...ticketFor(b)} art={CAROUSEL[0]} showArtText={false} motionProps={{ style: { filter: 'none' } }} />}>
+          <Ticket {...ticketFor(b)} animatedArt motionProps={{ initial: { opacity: 0, y: 28, scale: 0.94, rotate: -2 }, animate: { opacity: 1, y: 0, scale: 1, rotate: 0 }, transition: { type: 'spring', stiffness: 170, damping: 20, delay: 0.15 }, style: { filter: 'none' } }} />
           </TicketInteraction>
 
           <motion.div {...rise(4)} style={{ display: 'flex', gap: 12 }}>

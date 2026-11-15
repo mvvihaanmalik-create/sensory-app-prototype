@@ -1,3 +1,10 @@
+## Status bar and confirmation spacing - November 15, 2026
+
+- Final flow audit: all 87 full-screen UI designs have one visible iOS/iPadOS 26 Status bar - iPhone instance, component key `51ddb19de206b67eae2d554b1d20c018feb754f4`. Eight gradient-only background variants are not screens.
+- Added six missing bars on Save/Share overlay frames and Modes selection; hid the older clock/battery inside the Modes background instance. Dark standalone overlays reuse the existing light-ink variant.
+- Both Figma confirmation frames (884:694, 1466:11440) now fit 956px, with tighter content gaps and safe bottom spacing. Ticket and touch-target sizes remain unchanged.
+- `src/assets/status-ios26.svg` is exported directly from the existing Figma component with outlined text. The laptop preview uses it across all 38 routes, retaining light/dark ink. The phone build retains the device's actual native status bar to avoid duplicate system chrome.
+
 ## Interactive confirmation ticket
 
 - BookingConfirmed wraps its existing Ticket in TicketInteraction. The stacked wallet tickets retain their tap/reorder behavior.
