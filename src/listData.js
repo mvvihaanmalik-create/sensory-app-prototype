@@ -1,4 +1,12 @@
 import { PHOTO } from './remainingPhotos.js';
+import cafeFern from './assets/share/cafe-fern.png';
+import cafeSentient from './assets/share/cafe-sentient.png';
+import cafeJuniper from './assets/share/cafe-juniper.png';
+import cafeCopper from './assets/share/cafe-copper.png';
+import popFern from './assets/share/pop-fern.png';
+import popSentient from './assets/share/pop-sentient.png';
+import popJuniper from './assets/share/pop-juniper.png';
+import popWillow from './assets/share/pop-willow.png';
 // Data behind the Home-linked list pages (Figma section 905:17958).
 // Each venue has a hidden sense profile so the Sound / Lighting / Crowd / Temperature / Seating
 // chips can really sort the list. null = unknown, and unknown always sorts last.
@@ -15,7 +23,7 @@ const m5 = PHOTO.p0909;
 const m6 = PHOTO.p0910;
 
 export const SORTS = {
-  sound: { label: 'Sound', any: 'Any sound', minW: 111, opts: [['quiet', 'Quietest first'], ['talk', 'Easy to talk first'], ['lively', 'Liveliest first'], ['loud', 'Loud first']] },
+  sound: { label: 'Sound', any: 'Default order', minW: 111, opts: [['quiet', 'Quietest first'], ['talk', 'Easy to talk first'], ['lively', 'Liveliest first'], ['loud', 'Loudest first']] },
   light: { label: 'Lighting', any: 'Any lighting', minW: 115, opts: [['dim', 'Dimmest first'], ['bright', 'Brightest first'], ['natural', 'Natural light first']] },
   crowd: { label: 'Crowd', any: 'Any crowd', minW: 107, opts: [['calm', 'Calmest first'], ['busy', 'Busiest first']] },
   temp: { label: 'Temperature', any: 'Any temperature', minW: 137, opts: [['cool', 'Coolest first'], ['warm', 'Warmest first']] },
@@ -69,10 +77,10 @@ export const PAGES = {
   cafes: {
     title: 'Cafés', sub: 'Savannah, GA', chips: true, kind: 'venue',
     rows: [
-      { ...FOXY, meta: 'Café · 0.5 mi', tags: [['blue', 'Lively inside'], ['blue', 'Patio available']] },
-      { ...SENTIENT, meta: 'Café · 0.8 mi', tags: [['grey', 'Seating unknown']] },
-      { ...GALLERY, meta: 'Café · 1.1 mi', tags: [['grey', 'Sound unknown']] },
-      { id: 'bean', name: 'Sentient Bean', meta: 'Café · 1.4 mi · illustrative', tags: [['blue', 'Calm atmosphere']], s: 1, l: 3, c: 1, t: 3, seat: ['booth'] },
+      { ...FOXY, thumb: cafeFern, meta: 'Café · 0.5 mi', tags: [['blue', 'Lively inside'], ['blue', 'Patio available']] },
+      { ...SENTIENT, thumb: cafeSentient, meta: 'Café · 0.8 mi', tags: [['grey', 'No seating info yet']] },
+      { ...GALLERY, name: 'Juniper Coffee', thumb: cafeJuniper, meta: 'Café · 1.1 mi', tags: [['grey', 'No sound info yet']] },
+      { id: 'copper', name: 'Copper Window Café', thumb: cafeCopper, meta: 'Café · 1.4 mi', tags: [['blue', 'Relaxed']], s: 1, l: 3, c: 1, t: 3, seat: ['booth'] },
     ],
   },
   dining: {
@@ -125,10 +133,10 @@ export const PAGES = {
   popular: {
     title: 'Popular Around You', sub: 'Savannah, GA', kind: 'rank', back: 71, head: 75, listTop: 161,
     rows: [
-      { ...FOXY, meta: 'Café · 0.5 mi', line: 'Busiest café in the area' },
-      { ...SENTIENT, meta: 'Café · 0.8 mi', line: 'Popular for patio dining' },
-      { ...GALLERY, meta: 'Café · 1.1 mi', line: 'Trending in Midtown · illustrative' },
-      { id: 'grey', name: 'The Grey', meta: 'American · 0.7 mi · illustrative', line: 'High visits this week · illustrative' },
+      { ...FOXY, thumb: popFern, meta: 'Café · 0.5 mi', line: 'Busiest café in the area' },
+      { ...SENTIENT, thumb: popSentient, meta: 'Café · 0.8 mi', line: 'Popular for patio dining' },
+      { ...GALLERY, name: 'Juniper Coffee', thumb: popJuniper, meta: 'Café · 1.1 mi', line: 'Trending in Midtown' },
+      { id: 'willow', name: 'Willow Table', thumb: popWillow, meta: 'American · 0.7 mi', line: 'High visits this week', s: 2, l: 2, c: 2, t: 3, seat: ['indoor'] },
     ],
   },
 };

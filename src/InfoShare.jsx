@@ -16,6 +16,9 @@ import kevin from './assets/share/kevin.png';
 import sandyKevin from './assets/share/sandy-kevin.png';
 import juliana from './assets/share/juliana.png';
 import greg from './assets/share/greg.png';
+import coverAll from './assets/share/cover-all.png';
+import coverCoffee from './assets/share/cover-coffee.png';
+import coverDinner from './assets/share/cover-dinner.png';
 
 const INK = '#2a2650', MUTED = '#5e5a7e';
 const GLASS = { background: 'linear-gradient(170deg,rgba(255,255,255,.9),rgba(255,255,255,.55))', border: '1.5px solid rgba(255,255,255,.95)', boxShadow: '0 12px 32px rgba(42,38,80,.08)' };
@@ -51,8 +54,8 @@ const CONTACTS = [['Sandy Wilder Cheng', sandy, -1], ['Kevin Leong', kevin, -1],
 const APPS = [['AirDrop', airdrop], ['Messages', messages], ['Mail', mail], ['Notes', notes], ['Reminders', reminders]];
 const LABEL = { position: 'absolute', left: -8, right: -8, top: 67, textAlign: 'center', fontSize: 11, lineHeight: '13px', letterSpacing: .06, color: '#000', fontFamily: '-apple-system, "SF Pro", system-ui, sans-serif' };
 const Row = ({ children, border }) => <div style={{ width: 393, boxSizing: 'border-box', display: 'flex', gap: 26, padding: '21px 16px 28px', borderBottom: border ? '.333px solid rgba(84,84,86,.34)' : 0, overflow: 'hidden', flex: 'none' }}>{children}</div>;
-export function ShareSheet({ name = 'Fern & Fable', sub = 'Café · Savannah, GA', photo = CAROUSEL[0], onClose }) {
-  const copy = () => { try { navigator.clipboard?.writeText(location.href); } catch (e) { /* clipboard unavailable */ } };
+export function ShareSheet({ name = 'Fern & Fable', sub = 'Café · Savannah, GA', photo = CAROUSEL[0], onClose, onCopied }) {
+  const copy = () => { try { navigator.clipboard?.writeText(location.href); } catch (e) { /* clipboard unavailable */ } onCopied?.(); };
   return <SheetFrame top={379} onClose={onClose} sheetStyle={SHEET}>
     <div className="abs" style={{ left: 24, right: 16, top: 33, bottom: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
       <p style={{ ...t(22, 600, INK), lineHeight: '27px', margin: 0 }}>Share place</p>
@@ -72,12 +75,54 @@ export function ShareSheet({ name = 'Fern & Fable', sub = 'Café · Savannah, GA
   </SheetFrame>;
 }
 
-// Provider: renders the "How we know" sheet for any DayChart below it, and exposes the share sheet opener.
-export function InfoShareHost({ venue = 'Fern & Fable', shareOpen, onShareClose, children }) {
+const COLLECTIONS = [['All saved', '4 saved places', coverAll], ['Coffee spots', '3 saved places', coverCoffee], ['Dinner plans', '1 saved place', coverDinner]];
+const ROW = { width: 392, height: 78, flex: 'none', borderRadius: 28, padding: '0 16px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left', background: 'rgba(255,255,255,.85)', border: '1px solid rgba(20,24,31,.08)', boxShadow: '0 12px 32px rgba(27,42,68,.06)' };
+export function SaveSheet({ onPick, onNew, onClose }) {
+  return <SheetFrame top={582} onClose={onClose} sheetStyle={SHEET}>
+    <div className="abs" style={{ left: 24, right: 24, top: 29, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: 44 }}>
+        <p style={{ ...t(22, 600, INK), margin: 0 }}>Save to collection</p>
+        <button onClick={onNew} style={{ minHeight: 44, padding: '0 5px', ...t(15, 500, MUTED) }}>+ New collection</button></div>
+      {COLLECTIONS.map(([n, c, img]) => <motion.button key={n} style={ROW} whileTap={{ scale: .98 }} transition={TAP} onClick={() => onPick(n)}>
+        <img src={img} alt="" style={{ width: 56, height: 56, borderRadius: 16 }} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}><span style={t(17, 700, INK)}>{n}</span><span style={t(13, 500, MUTED)}>{c}</span></div></motion.button>)}
+    </div>
+  </SheetFrame>;
+}
+export function NewCollectionSheet({ onBack, onCreate, onClose }) {
+  const [name, setName] = useState('Weekend cafés');
+  return <SheetFrame top={705} onClose={onClose} sheetStyle={SHEET}>
+    <div className="abs" style={{ left: 24, right: 24, top: 29, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: 44 }}>
+        <p style={{ ...t(24, 600, INK), margin: 0 }}>New collection</p>
+        <button onClick={onBack} style={{ minHeight: 44, padding: '0 12px', ...t(15, 500, MUTED) }}>Back</button></div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <label htmlFor="coll-name" style={t(14, 600, INK)}>Collection name</label>
+        <input id="coll-name" value={name} onChange={e => setName(e.target.value)} maxLength={40} style={{ all: 'unset', boxSizing: 'border-box', width: '100%', padding: '15px 16px', borderRadius: 16, background: 'rgba(255,255,255,.85)', border: '1px solid rgba(20,24,31,.08)', ...t(16, 500, MUTED) }} /></div>
+      <motion.button onClick={() => onCreate(name.trim())} disabled={!name.trim()} whileTap={{ scale: .97 }} transition={TAP} style={{ width: 392, padding: '15px 16px', borderRadius: 999, ...GLASS, boxShadow: '0 14px 18px rgba(42,38,80,.1)', ...t(16, 600, MUTED), opacity: name.trim() ? 1 : .5 }}>Create &amp; save</motion.button>
+    </div>
+  </SheetFrame>;
+}
+function ConfirmToast({ text }) {
+  return <AnimatePresence>{text && <motion.div key={text} className="abs" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} transition={{ duration: .22 }}
+    style={{ left: 24, top: 852, width: 392, height: 52, borderRadius: 26, padding: '0 18px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', gap: 10, zIndex: 60, pointerEvents: 'none', ...GLASS, boxShadow: '0 12px 32px rgba(42,38,80,.1)' }}>
+    <span style={{ ...t(17, 500, MUTED) }}>✓</span><span style={t(15, 500, MUTED)}>{text}</span></motion.div>}</AnimatePresence>;
+}
+
+// Provider: renders the "How we know" sheet for any DayChart below it, plus the share and save-to-collection sheets.
+export function InfoShareHost({ venue = 'Fern & Fable', shareOpen, onShareClose, saveOpen, onSaveClose, onSaved, children }) {
   const [info, setInfo] = useState(null);
+  const [newColl, setNewColl] = useState(false);
+  const [toast, setToast] = useState(null);
   const open = useCallback((title) => setInfo(title), []);
+  const flash = (text) => { setToast(text); setTimeout(() => setToast(null), 2200); };
+  const closeSave = () => { setNewColl(false); onSaveClose?.(); };
+  const saved = () => { closeSave(); onSaved?.(); flash('Saved to collection'); };
   return <InfoContext.Provider value={open}>{children}
     <AnimatePresence>{info && <HowWeKnow key="info" title={info} venue={venue} onClose={() => setInfo(null)} />}</AnimatePresence>
-    <AnimatePresence>{shareOpen && <ShareSheet key="share" name={venue} onClose={onShareClose} />}</AnimatePresence>
+    <AnimatePresence>{shareOpen && <ShareSheet key="share" name={venue} onClose={onShareClose} onCopied={() => { onShareClose(); flash('Link copied'); }} />}</AnimatePresence>
+    <AnimatePresence>{saveOpen && !newColl && <SaveSheet key="save" onPick={saved} onNew={() => setNewColl(true)} onClose={closeSave} />}</AnimatePresence>
+    <AnimatePresence>{saveOpen && newColl && <NewCollectionSheet key="new" onBack={() => setNewColl(false)} onCreate={saved} onClose={closeSave} />}</AnimatePresence>
+    <ConfirmToast text={toast} />
   </InfoContext.Provider>;
 }
