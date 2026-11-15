@@ -4,7 +4,8 @@ import { AnimatePresence, motion, useMotionValue, useTransform } from 'motion/re
 import { GENTLE, Icon } from './ui.jsx';
 import { paths } from './svgs.js';
 import { VIcon } from './venueIcons.jsx';
-import { VP, ZONES, GRID } from './venuePhotos.js';
+import { VP, ZONES } from './venuePhotos.js';
+import { CAROUSEL, MENU, HIGHLIGHT_PHOTOS, PHOTO_GRID as GRID, MENU_CROPS, GRID_CROPS, photoBackground } from './venueFinalPhotos.js';
 import Lightbox, { useLightbox } from './Lightbox.jsx';
 import { G, CircleBtn, Chip, SenseTiles, InfoList, ReviewSummary, AISummary, ReviewCard, KEYWORDS, H, PrimaryCTA, RESERVE_TOP, Toast, DayChart, weekFrom, NAVY, MUTED, PURPLE, DIV, TAP, t } from './flow.jsx';
 
@@ -62,8 +63,8 @@ function Overview({ onReviews, firstReview }) {
   );
 }
 
-const MENU_PHOTOS = [[128, VP.counter], [188, VP.pie], [199, VP.tacos], [199, VP.store]];
-const HIGHLIGHTS = [[VP.patio, 'Iced Strawberry and Matcha Latte'], [VP.indoor, 'Iced Americano'], [VP.garden], [VP.bar], [VP.hero]];
+const MENU_PHOTOS = [[128, MENU[0]], [188, MENU[1]], [199, MENU[2]], [199, MENU[3]]];
+const HIGHLIGHTS = [[HIGHLIGHT_PHOTOS[0], 'Iced Strawberry and Matcha Latte'], [HIGHLIGHT_PHOTOS[1], 'Iced Americano'], [HIGHLIGHT_PHOTOS[2]], [HIGHLIGHT_PHOTOS[3]], [HIGHLIGHT_PHOTOS[4]]];
 function Menu({ onPhoto }) {
   const tile = (src, label, i) => (
     <motion.button key={i} type="button" aria-label="Open photo" onClick={() => onPhoto(HIGHLIGHTS.map((h) => h[0]), i)} whileTap={{ scale: 0.97 }} transition={TAP} style={{ position: 'relative', display: 'block', width: '100%', height: 251, borderRadius: 16, overflow: 'hidden', background: `#dbdbde url(${src}) center / cover` }}>
@@ -75,7 +76,7 @@ function Menu({ onPhoto }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <H>Menu photos</H>
       <div className="hscroll" style={{ margin: '0 -24px', padding: '0 24px', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-        {MENU_PHOTOS.map(([w, src], i) => <motion.button key={i} type="button" aria-label="Open photo" onClick={() => onPhoto(MENU_PHOTOS.map((m) => m[1]), i)} whileTap={{ scale: 0.97 }} transition={TAP} style={{ width: w, height: i ? 266 : 262, flex: 'none', borderRadius: 16, background: `#dbdbde url(${src}) center / cover` }} />)}
+        {MENU_PHOTOS.map(([w, src], i) => <motion.button key={i} type="button" aria-label="Open photo" onClick={() => onPhoto(MENU_PHOTOS.map((m) => m[1]), i)} whileTap={{ scale: 0.97 }} transition={TAP} style={{ width: w, height: i ? 266 : 262, flex: 'none', borderRadius: 16, ...photoBackground(src, MENU_CROPS[i]) }} />)}
         <motion.button whileTap={{ scale: 0.97 }} transition={TAP} style={{ width: 156, height: 266, flex: 'none', borderRadius: 16, background: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
           <VIcon name="plusBold" size={24} />
           <span className="nowrap" style={t(14, 600)}>Add menu photos</span>
@@ -143,7 +144,7 @@ function Reviews({ onWrite, mine }) {
 }
 
 const PHOTO_CHIPS = ['All', 'Latest', 'Food & drink', 'Vibe', 'Menu', 'By owner'];
-const COLS = [[240, 180, 260, 200], [180, 260, 200, 240]];
+const COLS = [[250.6667, 333.8044, 334.3065, 281.8282], [250.6667, 250.7561, 183.4084, 250.6667]];
 function Photos({ onPhoto }) {
   const [c, setC] = useState('All');
   const k = PHOTO_CHIPS.indexOf(c);
@@ -160,7 +161,7 @@ function Photos({ onPhoto }) {
           <div key={ci} style={{ width: 188, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {col.map((h, i) => (
               <motion.button key={`${ci}-${i}`} aria-label="Open photo" onClick={() => onPhoto(flat, ci * 4 + i)} layout initial={false} animate={{ height: h }} transition={GENTLE} whileTap={{ scale: 0.97 }}
-                style={{ display: 'block', width: '100%', borderRadius: 24, background: `#dbdbde url(${shown[ci][i]}) center / cover` }} />
+                style={{ display: 'block', width: '100%', borderRadius: 24, ...photoBackground(shown[ci][i], GRID_CROPS[(ci + (k % 2)) % 2][i]) }} />
             ))}
           </div>
         ))}
@@ -192,7 +193,7 @@ export default function Venue({ tab, setTab, onBack, backLabel = 'Back', saved =
   return (
     <div className="abs" style={{ inset: 0, background: '#f7f5f1' }}>
       <div ref={scroller} className="scroll" onScroll={(e) => { sy.set(e.currentTarget.scrollTop); onScroll?.(e.currentTarget.scrollTop); }}>
-        <motion.div style={{ height: 320, background: `#dbdbde url(${VP.hero}) center / cover`, y: heroY, scale: heroScale, transformOrigin: '50% 0' }} />
+        <motion.div style={{ height: 320, background: `#dbdbde url(${CAROUSEL[0]}) center / cover`, y: heroY, scale: heroScale, transformOrigin: '50% 0' }} />
         <div style={{ position: 'relative', background: '#f7f5f1', padding: '24px 24px 140px', display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <h1 style={t(28, 600, NAVY, { letterSpacing: -0.4 })}>{VENUE.name}</h1>
@@ -200,9 +201,9 @@ export default function Venue({ tab, setTab, onBack, backLabel = 'Back', saved =
           </div>
           <SenseTiles values={SENSE_VALUES} onOpen={onSense} />
           <div className="hscroll" style={{ margin: '0 -24px', padding: '0 24px', display: 'flex', gap: 12 }}>
-            {[[220, VP.hero], [210, VP.patio], [210, VP.indoor], [210, VP.bar], [210, VP.garden]].map(([w, src], i) => (
-              <motion.button key={i} aria-label="Open photo" onClick={() => lb.open([VP.hero, VP.patio, VP.indoor, VP.bar, VP.garden], i)} whileTap={{ scale: 0.97 }} transition={TAP}
-                style={{ width: w, height: 280, borderRadius: 24, background: `#dbdbde url(${src}) center / cover`, flex: 'none' }} />
+            {CAROUSEL.map((src, i) => [i ? 210 : 220, src]).map(([w, src], i) => (
+              <motion.button key={i} aria-label="Open photo" onClick={() => lb.open(CAROUSEL, i)} whileTap={{ scale: 0.97 }} transition={TAP}
+                style={{ width: w, height: 280, borderRadius: 24, ...photoBackground(src, i === 1 ? [.9094933867,.9094933867,.0883013532,.0568433367] : null), flex: 'none' }} />
             ))}
           </div>
           <div style={{ height: 104 }} />

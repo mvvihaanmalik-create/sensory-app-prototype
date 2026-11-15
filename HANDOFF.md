@@ -1,3 +1,11 @@
+## Current photo pass · November 15, 2026
+
+- `src/venueFinalPhotos.js` maps 22 supplied JPG exports to the venue carousel (5), menu (4), highlights (5), and Photos grid (8). Crop transforms and grid heights come from Final flow frames 789:3335 and 789:3725.
+- The venue header uses carousel photo 1, matching the Figma screenshot. `01-06-venue-big-photo-img-5796.jpg` is not wired because there is no corresponding current display slot.
+- Shared `venuePhotos.js` assets are unchanged, so Home, Map, booking zones, reviews and Profile retain their prior images pending their own photo pass.
+- Both production builds passed. Checked all menu/highlight/grid photo opening, carousel next/close, image decoding, and booking entry; no browser runtime errors.
+- Remaining uploaded groups: Review and Explore; Home cards, map and discover; Dining and Nightlife; Events and More. People/avatars and reservation tickets were not supplied in these seven ZIPs.
+
 # Sensory app (UXDG 370): coded prototype handoff
 
 React + Vite prototype of the finalised Figma screens (Home, Map, Profile) inside an iPhone 18 Pro Max frame (440 Ã— 956 pt screen). The code prototype is now the main prototype. Figma remains the design source; the Figma click-through prototype is no longer being maintained.
