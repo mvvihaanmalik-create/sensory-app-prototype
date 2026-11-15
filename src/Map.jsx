@@ -52,9 +52,9 @@ const SLOTS = [[83, 228], [278, 223], [218, 368], [73, 553]];
 const LAYERS = {
   None: [['coffee', null, 'Juniper Coffee', 51], ['fork-knife', null, 'Willow Table', 256], ['martini', null, "Lanie's", 203], ['ticket', null, 'Art Walk', 53]],
   Sound: [['speaker-none', '#3fa06b', 'Juniper Coffee', 51, 0], ['speaker-high', '#d84b43', "Lanie's", 263, 2], ['speaker-high', '#f29a3a', 'Fern & Fable', 186, 1], ['speaker-low', '#3fa06b', 'Willow Table', 51, 0]],
-  Light: [['sun-horizon', '#ddb65c', 'Copper Window Café', 45, 1], ['sun-dim', '#8e89a8', 'Husk', 269, 0], ['sun', '#f4d77a', 'Page & Co.', 190, 2], ['lamp', '#b79a72', 'Fern & Fable', 41, 1]],
+  Light: [['sun-horizon', '#ddb65c', 'Copper Window Café', 45, 1], ['sun-dim', '#b08a4f', 'Husk', 269, 0], ['sun', '#f4d77a', 'Page & Co.', 190, 2], ['lamp', '#ddb65c', 'Fern & Fable', 41, 1]],
   Crowd: [['user', '#3fa06b', 'Cotton & Rye', 47, 0], ['users-three', '#d84b43', 'Treehouse', 252, 2], ['users', '#f29a3a', 'The Sentient', 184, 1], ['user', '#3fa06b', 'Juniper Coffee', 41, 0]],
-  Temperature: [['thermometer', '#b9b4cc', 'Willow Table', 61, 0], ['snowflake', '#8db8e8', 'Copper Window Café', 240, 1], ['sun', '#f2a65a', 'The Sentient', 184, 1], ['snowflake', '#3e73c9', 'Juniper Coffee', 41, 2]],
+  Temperature: [['thermometer', '#a7d3b5', 'Willow Table', 61, 0], ['snowflake', '#8db8e8', 'Copper Window Café', 240, 1], ['sun', '#f2a65a', 'The Sentient', 184, 1], ['snowflake', '#3e73c9', 'Juniper Coffee', 41, 2]],
 };
 const PULSE = [3.2, 2.2, 1.4];
 
@@ -128,9 +128,9 @@ const EXTRAS = (() => {
 // Same icons and colours as the sense layers on the original pins.
 const SENSE_LOOK = {
   Sound: [['speaker-low', '#3fa06b'], ['speaker-high', '#f29a3a'], ['speaker-high', '#d84b43']],
-  Light: [['sun-dim', '#8e89a8'], ['lamp', '#b79a72'], ['sun', '#f4d77a']],
+  Light: [['sun-dim', '#b08a4f'], ['lamp', '#ddb65c'], ['sun', '#f4d77a']],
   Crowd: [['user', '#3fa06b'], ['users', '#f29a3a'], ['users-three', '#d84b43']],
-  Temperature: [['snowflake', '#3e73c9'], ['snowflake', '#8db8e8'], ['thermometer', '#b9b4cc'], ['sun', '#f2a65a']],
+  Temperature: [['snowflake', '#3e73c9'], ['snowflake', '#8db8e8'], ['thermometer', '#a7d3b5'], ['sun', '#f2a65a']],
 };
 const SENSE_KEY = { Sound: 'sound', Light: 'light', Crowd: 'crowd', Temperature: 'temp' };
 

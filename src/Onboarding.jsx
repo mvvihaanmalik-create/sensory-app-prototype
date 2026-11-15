@@ -30,11 +30,11 @@ export const ONBOARDING_STEPS = ['welcome', 'sound', 'light', 'crowd', 'temp', '
 const SLIDERS = {
   sound: { title: 'How loud do you like it?', name: 'Sound', icon: 'sound', steps: ['Any', 'Quiet', 'Low', 'Moderate', 'Lively'], colors: [null, '#3fa06b', '#3fa06b', '#f29a3a', '#d84b43'], def: 0,
     titleTop: 150, card: { top: 303, h: 481, hy: 173.5, sy: 233.5, sl: 385.5, ey: 445.5 }, art: { src: soundImg, left: 173, top: 177 } },
-  light: { title: 'What light do you like?', name: 'Light', icon: 'light', steps: ['Any', 'Dim', 'Soft', 'Moderate', 'Bright'], colors: [null, '#8e89a8', '#b79a72', '#ddb65c', '#f4d77a'], def: 0,
+  light: { title: 'What light do you like?', name: 'Light', icon: 'light', steps: ['Any', 'Dim', 'Soft', 'Moderate', 'Bright'], colors: [null, '#b08a4f', '#c9a152', '#ddb65c', '#f4d77a'], def: 0,
     titleTop: 150, card: { top: 250, h: 515, hy: 21.5, sy: 81.5, sl: 233.5, ey: 293.5 }, art: { src: lightImg, left: 176, top: 591 } },
   crowd: { title: 'How busy is comfortable?', name: 'Crowd', icon: 'crowd', steps: ['Any', 'Empty', 'Light', 'Moderate', 'Busy'], colors: [null, '#3fa06b', '#3fa06b', '#f29a3a', '#d84b43'], def: 0,
     titleTop: 161, card: { top: 327, h: 506, hy: 157.5, sy: 217.5, sl: 369.5, ey: 429.5 }, art: { src: catchupImg, left: 143, top: 181 } },
-  temp: { title: 'How warm do you like it?', name: 'Temperature', icon: 'temp', steps: ['Any', 'Cold', 'Cool', 'Mild', 'Warm'], colors: [null, '#3e73c9', '#8db8e8', '#b9b4cc', '#f2a65a'], def: 0,
+  temp: { title: 'How warm do you like it?', name: 'Temperature', icon: 'temp', steps: ['Any', 'Cold', 'Cool', 'Mild', 'Warm'], colors: [null, '#3e73c9', '#8db8e8', '#a7d3b5', '#f2a65a'], def: 0,
     titleTop: 165, card: { top: 263, h: 502, hy: 21.5, sy: 81.5, sl: 233.5, ey: 293.5 }, art: { src: cozyImg, left: 176, top: 591 } },
 };
 const SEATS = ['Booth', 'Corner seat', 'Table with space', 'Bar seat', 'Couch or lounge', 'Communal table', 'Outdoor'];
