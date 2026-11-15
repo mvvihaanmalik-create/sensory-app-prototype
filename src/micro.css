@@ -68,3 +68,6 @@ body:has([data-app-comfort]) .tabbar-wrap { display: none; }
 @keyframes mpBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.5px); } }
 @keyframes mpSway { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
 @media (prefers-reduced-motion: reduce) { .mp-ping, .mp-ico { animation: none; } }
+
+/* Wallet tickets stay rigid while their positions animate. */
+[data-wallet-ticket],[data-wallet-ticket]:active,[data-wallet-ticket]:hover{scale:1!important;translate:none!important;filter:none!important;transition:none!important}

@@ -130,10 +130,10 @@ const COLLECTIONS = [
 ];
 const count = (n) => `${n} saved place${n === 1 ? '' : 's'}`;
 
-function Collections({ onOpen }) {
+function Collections({ onOpen, collections }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {COLLECTIONS.map((c, i) => (
+      {collections.map((c, i) => (
         <motion.button key={c.id} onClick={() => onOpen(c)} whileTap={{ scale: 0.98 }} transition={TAP}
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} style={{ width: 392, height: 170, borderRadius: 28, background: 'rgba(255,255,255,0.85)', padding: 17, textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 12 }}>
           <span style={{ display: 'flex', alignItems: 'center', width: '100%', height: 44 }}>
@@ -156,6 +156,7 @@ function Collections({ onOpen }) {
 }
 
 function SavedGrid({ items, onOpenVenue }) {
+  if (!items.length) return <p style={{ ...t(16, 400, SUB), padding: '32px 0', textAlign: 'center' }}>No saved places yet</p>;
   // Two columns, left cards a little taller (Figma "Saved place grid").
   const cols = [[], []];
   items.forEach((id, i) => cols[i % 2].push([id, i % 2 ? 188 : 206]));
@@ -208,7 +209,7 @@ function Wallet({ booking, onOpenBooking }) {
             initial={false} animate={{ y: i * 76 }} transition={{ type: 'spring', stiffness: 300, damping: 36 }}
             onAnimationComplete={() => { if (id === front) moving.current = false; }} onClick={() => tap(id)}
             onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tap(id); } }}
-            data-wallet-ticket={id} className="abs" style={{ left: 0, top: 0, zIndex: i, cursor: 'pointer', touchAction: 'pan-y' }}>
+            data-wallet-ticket={id} className="abs" style={{ left: 0, top: 0, zIndex: i, cursor: 'pointer', touchAction: 'pan-y', scale: '1', translate: 'none', filter: 'none', transition: 'none' }}>
             <Ticket {...data} />
           </motion.div>
         );
@@ -260,6 +261,17 @@ export default function Profile({ onScroll, modes, activeId, onPickMode, onEditM
   const [stack, setStack] = useState([]);
   const viewportRef = useRef(null);
   const [collection, setCollection] = useState(COLLECTIONS[0]);
+  const [collections, setCollections] = useState(() => {
+    try { const saved = JSON.parse(localStorage.getItem('sensory-custom-collections') || '[]'); return [...COLLECTIONS, ...saved.filter(c => typeof c.id === 'string' && typeof c.name === 'string' && Array.isArray(c.items))]; }
+    catch { return COLLECTIONS; }
+  });
+  const [creatingCollection, setCreatingCollection] = useState(false);
+  const createCollection = name => {
+    const next = [...collections, { id: `collection-${Date.now()}`, name, items: [] }];
+    setCollections(next);
+    try { localStorage.setItem('sensory-custom-collections', JSON.stringify(next.filter(c => !COLLECTIONS.some(seed => seed.id === c.id)))); } catch {}
+    setCreatingCollection(false);
+  };
   const [comfort, setComfort] = useState(COMFORT_DEFAULT);
   const [alerts, setAlerts] = useState(false);
   const top = stack[stack.length - 1];
@@ -275,7 +287,7 @@ export default function Profile({ onScroll, modes, activeId, onPickMode, onEditM
     r.dataset.vivid = comfort.colors === 'Vivid' ? 'on' : 'off';
   }, [comfort]);
   // App comfort and the booking screen cover the tab bar, as in Figma.
-  useEffect(() => { onOverlay(top === 'comfort' || top === 'booking'); }, [top]);
+  useEffect(() => { onOverlay(top === 'comfort' || top === 'booking' || creatingCollection); }, [top, creatingCollection]);
   useEffect(() => () => onOverlay(false), []);
 
   return (
@@ -321,8 +333,8 @@ export default function Profile({ onScroll, modes, activeId, onPickMode, onEditM
           </div>
         </Page>}
         {stack.includes('collections') && <Page key="collections" title="Saved Collections" top={150} onBack={pop}
-          right={<IconBtn icon="plus" label="New collection" right={24} />}>
-          <Collections onOpen={(c) => { setCollection(c); push('allsaved'); }} />
+          right={<IconBtn icon="plus" label="New collection" onClick={() => setCreatingCollection(true)} right={24} />}>
+          <Collections collections={collections} onOpen={(c) => { setCollection(c); push('allsaved'); }} />
         </Page>}
         {stack.includes('allsaved') && <Page key="allsaved" title={collection.name} sub={count(collection.items.length)} onBack={pop}
           right={<IconBtn icon="export" label="Share collection" right={24} />}>
@@ -340,6 +352,38 @@ export default function Profile({ onScroll, modes, activeId, onPickMode, onEditM
           <BookingConfirmed booking={booking} onClose={pop} onChange={pop} />
         </motion.div>}
       </AnimatePresence>
+      {creatingCollection && <CreateCollection onClose={() => setCreatingCollection(false)} onCreate={createCollection} />}
     </div>
   );
+}
+
+function CreateCollection({ onClose, onCreate }) {
+  const [name, setName] = useState('');
+  const form = useRef(null);
+  useEffect(() => {
+    const previous = document.activeElement;
+    form.current?.querySelector('input')?.focus();
+    return () => previous?.focus();
+  }, []);
+  return <div className="abs" style={{ inset: 0, zIndex: 20, background: 'rgba(42,38,80,.25)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', paddingTop: 180 }} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+    <form ref={form} role="dialog" aria-modal="true" aria-labelledby="collection-title" onSubmit={e => { e.preventDefault(); if (name.trim()) onCreate(name.trim()); }}
+      onKeyDown={e => {
+        if (e.key === 'Escape') { e.stopPropagation(); onClose(); }
+        if (e.key === 'Tab') {
+          const controls = [...form.current.querySelectorAll('input, button:not(:disabled)')];
+          const first = controls[0], last = controls[controls.length - 1];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      }} style={{ width: 392, padding: 24, borderRadius: 28, background: '#f7f5f1', boxShadow: '0 20px 50px rgba(42,38,80,.2)', display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <h2 id="collection-title" style={t(24, 600, INK)}>New collection</h2>
+      <label style={{ ...t(15, 500, SUB), display: 'flex', flexDirection: 'column', gap: 10 }}>Collection name
+        <input value={name} onChange={e => setName(e.target.value)} maxLength={60} placeholder="e.g. Quiet coffee spots" style={{ width: '100%', boxSizing: 'border-box', border: '1px solid rgba(94,90,126,.2)', borderRadius: 16, padding: '14px 16px', background: '#fff', ...t(17, 400, INK) }} />
+      </label>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+        <button type="button" onClick={onClose} style={{ padding: '12px 20px', borderRadius: 24, ...t(16, 600, SUB) }}>Cancel</button>
+        <button type="submit" disabled={!name.trim()} style={{ padding: '12px 20px', borderRadius: 24, background: INK, opacity: name.trim() ? 1 : .4, ...t(16, 600, '#fff') }}>Create</button>
+      </div>
+    </form>
+  </div>;
 }
