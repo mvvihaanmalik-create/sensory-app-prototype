@@ -58,6 +58,103 @@ const LAYERS = {
 };
 const PULSE = [3.2, 2.2, 1.4];
 
+
+// ---------- Live map tiles + extra places ----------
+// Map space = pixels at tile zoom 16, with (0,0) at the top-left of the default screen. Pins live in this space.
+const Z0 = 16, WORLD = 256 * 2 ** Z0, CENTER = [32.0735, -81.094];
+const mercPx = (lat, lng) => [((lng + 180) / 360) * WORLD, ((1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2) * WORLD];
+const [CPX, CPY] = mercPx(CENTER[0], CENTER[1]);
+const ORIGIN = [CPX - 220, CPY - 478];
+const TILE_HOSTS = ['a', 'b', 'c', 'd'];
+const tileUrl = (z, x, y) => `https://${TILE_HOSTS[(x + y) % 4]}.basemaps.cartocdn.com/light_all/${z}/${x}/${y}@2x.png`;
+const MINZ = 0.3, MAXZ = 3.2, REACH = 2600;
+const bounds = (s) => ({ minX: 220 - s * (220 + REACH), maxX: 220 + s * (REACH - 220), minY: 478 - s * (478 + REACH), maxY: 478 + s * (REACH - 478) });
+
+function Tiles({ view, onLoaded }) {
+  const [set, setSet] = useState({ z: Z0, x0: 0, x1: -1, y0: 0, y1: -1 });
+  useEffect(() => {
+    const calc = () => {
+      const s = view.s.get(), vx = view.x.get(), vy = view.y.get();
+      const z = Math.max(13, Math.min(19, Math.round(Z0 + Math.log2(s))));
+      const size = 256 * 2 ** (Z0 - z); // tile edge in map px
+      const wx0 = -vx / s + ORIGIN[0] - size, wy0 = -vy / s + ORIGIN[1] - size;
+      const wx1 = (440 - vx) / s + ORIGIN[0], wy1 = (956 - vy) / s + ORIGIN[1];
+      const next = { z, x0: Math.floor(wx0 / size), x1: Math.floor(wx1 / size), y0: Math.floor(wy0 / size), y1: Math.floor(wy1 / size) };
+      setSet((cur) => (cur.z === next.z && cur.x0 === next.x0 && cur.x1 === next.x1 && cur.y0 === next.y0 && cur.y1 === next.y1 ? cur : next));
+    };
+    calc();
+    const offs = [view.x.on('change', calc), view.y.on('change', calc), view.s.on('change', calc)];
+    return () => offs.forEach((o) => o());
+  }, []);
+  const layers = [];
+  for (const z of [Math.max(13, set.z - 2), set.z]) {
+    const k = 2 ** (set.z - z); // coarser underlay covers the same ground with bigger tiles
+    const size = 256 * 2 ** (Z0 - z);
+    const x0 = Math.floor(set.x0 / k), x1 = Math.floor(set.x1 / k), y0 = Math.floor(set.y0 / k), y1 = Math.floor(set.y1 / k);
+    for (let tx = x0; tx <= x1; tx++) for (let ty = y0; ty <= y1; ty++) {
+      layers.push(<img key={`${z}/${tx}/${ty}`} className="mp-tile abs" alt="" draggable={false} src={tileUrl(z, tx, ty)} onLoad={(e) => { e.currentTarget.style.opacity = 1; onLoaded(); }}
+        style={{ opacity: 0, transition: 'opacity .25s', left: tx * size - ORIGIN[0], top: ty * size - ORIGIN[1], width: size + 0.6, height: size + 0.6, pointerEvents: 'none' }} />);
+    }
+  }
+  return <motion.div className="abs" style={{ left: 0, top: 0, width: 0, height: 0, transformOrigin: '0 0', x: view.x, y: view.y, scale: view.s, pointerEvents: 'none' }}>{layers}</motion.div>;
+}
+
+// Made-up places around the default screen. Sense values 0 calm .. 2 intense (temperature 0 cold .. 3 warm).
+const EXTRA_NAMES = {
+  Cafés: ['Moon River Coffee', 'Tide & Tin', 'Sugar Maple Café', 'Little Owl Roasters', 'Chatham Bean', 'Marigold Café', 'Oak & Ember Coffee', 'The Quiet Cup', 'Bay Leaf Bakery', 'Pelican Espresso', 'Sable Coffee Co.', 'Verbena Café', 'Daybreak Roasters', 'Linden Tea House'],
+  Dining: ['Harbor Table', 'Magnolia Kitchen', 'The Lantern Room', 'Saltmarsh Supper Club', 'Olive & Oak', 'Cedar Hearth', 'Bluebird Bistro', 'Camellia Dining', 'The Garden Gate', 'Rosemary & Rye', 'Tybee Tide Kitchen', 'Orchard Street Eatery', 'Fig & Thistle', 'Lowcountry Pantry'],
+  Nightlife: ['Velvet Anchor', 'The Copper Door', 'Lamplight Lounge', 'Nightjar', 'Dockside Social', 'Gaslight Bar', 'The Low Tide', 'Juniper & Rye', 'Starboard', 'The Blue Heron', 'Palmetto Room', 'Amber Hour', 'Crescent Club', 'Whistle Stop'],
+  Events: ['Riverfront Art Walk', 'Square Jazz Evening', 'Sunday Makers Market', 'Poetry in the Park', 'Lantern Walk', 'Quiet Morning Yoga', 'Harbor Film Night', 'Farmers Market', 'Gallery Late Hours', 'Storytelling Circle', 'Garden Open Day', 'Acoustic on the Green', 'Craft Fair', 'Book Swap Social'],
+};
+const CAT_ICON = { Cafés: 'coffee', Dining: 'fork-knife', Nightlife: 'martini', Events: 'ticket' };
+const EXTRAS = (() => {
+  let seed = 7; const rnd = () => ((seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296);
+  const out = [], taken = [];
+  const inDefault = (x, y) => x > -50 && x < 490 && y > 20 && y < 1000; // keep the default screen exactly as designed
+  const nearForsyth = (x, y) => x > 90 && x < 360 && y > 660 && y < 1060; // park
+  for (const cat of Object.keys(EXTRA_NAMES)) EXTRA_NAMES[cat].forEach((name) => {
+    let x, y, tries = 0;
+    do { x = -700 + rnd() * 1900; y = 230 + rnd() * 1500; tries++; }
+    while (tries < 60 && (inDefault(x, y) || nearForsyth(x, y) || taken.some(([a, b]) => Math.hypot(a - x, b - y) < 70)));
+    taken.push([x, y]);
+    const sound = Math.floor(rnd() * 3), light = Math.floor(rnd() * 3), crowd = Math.floor(rnd() * 3), temp = Math.floor(rnd() * 4);
+    out.push({ id: `x-${out.length}`, name, cat, x, y, sound, light, crowd, temp, level: 1 + Math.round((sound + light + crowd) / 3) });
+  });
+  return out;
+})();
+// Same icons and colours as the sense layers on the original pins.
+const SENSE_LOOK = {
+  Sound: [['speaker-low', '#3fa06b'], ['speaker-high', '#f29a3a'], ['speaker-high', '#d84b43']],
+  Light: [['sun-dim', '#8e89a8'], ['lamp', '#b79a72'], ['sun', '#f4d77a']],
+  Crowd: [['user', '#3fa06b'], ['users', '#f29a3a'], ['users-three', '#d84b43']],
+  Temperature: [['snowflake', '#3e73c9'], ['snowflake', '#8db8e8'], ['thermometer', '#b9b4cc'], ['sun', '#f2a65a']],
+};
+const SENSE_KEY = { Sound: 'sound', Light: 'light', Crowd: 'crowd', Temperature: 'temp' };
+
+function ExtraPin({ v, sense, view, selected, onSelect }) {
+  const look = sense === 'None' ? null : SENSE_LOOK[sense][v[SENSE_KEY[sense]]];
+  const icon = look ? look[0] : CAT_ICON[v.cat], ring = look ? look[1] : null;
+  const small = useTransform(view.s, [0.55, 0.9], [0.68, 1], { clamp: true });
+  const lvl = look ? (sense === 'Temperature' ? Math.min(2, v.temp) : v[SENSE_KEY[sense]]) : 0;
+  const showLabel = useTransform(view.s, (s) => (s >= 1.25 ? 1 : 0));
+  return (
+    <Anchored wx={v.x} wy={v.y} view={view}>
+      <motion.div className="abs" style={{ left: -22, top: -22, width: 44, height: 44, scale: small, zIndex: selected ? 5 : 1, pointerEvents: 'auto', cursor: 'pointer' }}
+        initial={{ opacity: 0, scale: 0.4 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onPointerDown={(e) => e.stopPropagation()} onClick={() => onSelect(selected ? null : v.id)} whileTap={{ scale: 0.9 }}>
+        {ring && <span className="mp-ping" style={{ '--c': ring, '--d': `${PULSE[lvl]}s`, animationDelay: `${-(v.x % 7) * 0.3}s` }} />}
+        <div className="abs" style={{ inset: 0, borderRadius: 22, background: '#fff', border: `2.5px solid ${ring || 'rgba(42,38,80,0.25)'}`, boxShadow: selected ? '0 6px 16px rgba(20,26,38,0.32)' : '0 4px 10px rgba(20,26,38,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: selected ? 'scale(1.12)' : undefined, transition: 'transform .15s' }}>
+          <span className={ring ? `mp-ico mp-${sense.toLowerCase()}` : ''} style={{ '--d': `${PULSE[lvl]}s`, display: 'flex' }}><Ph n={icon} size={22} fill={INK} /></span>
+        </div>
+      </motion.div>
+      <motion.div className="abs" style={{ left: 0, top: 30, opacity: selected ? 1 : showLabel, pointerEvents: 'none', x: '-50%' }}>
+        <Glass radius={22} angle="166deg" style={{ position: 'relative', height: 36 }} contentStyle={{ padding: '0 13px' }}>
+          <span className="nowrap" style={t(13, 500, INK)}>{v.name}{selected ? ` · Level ${v.level}` : ''}</span>
+        </Glass>
+      </motion.div>
+    </Anchored>
+  );
+}
+
 // Pins and labels live in map space: they follow pan and zoom but keep their size.
 function Anchored({ wx, wy, view, children }) {
   const x = useTransform([view.x, view.s], ([vx, s]) => wx * s + vx);
@@ -66,8 +163,10 @@ function Anchored({ wx, wy, view, children }) {
 }
 
 function Pin({ icon, ring, level, i, layer, view }) {
+  const small = useTransform(view.s, [0.55, 0.9], [0.68, 1], { clamp: true });
   return (
     <Anchored wx={SLOTS[i][0]} wy={SLOTS[i][1]} view={view}>
+    <motion.div className="abs" style={{ left: 0, top: 0, width: 44, height: 44, scale: small }}>
     <motion.div className="abs" style={{ left: 0, top: 0, width: 44, height: 44 }}
       initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0, transition: { duration: 0.15 } }}
       transition={{ type: 'spring', stiffness: 420, damping: 20, delay: 0.04 + i * 0.05 }}>
@@ -76,18 +175,22 @@ function Pin({ icon, ring, level, i, layer, view }) {
         <span className={ring ? `mp-ico mp-${layer.toLowerCase()}` : ''} style={{ '--d': `${PULSE[level ?? 0]}s`, display: 'flex' }}><Ph n={icon} size={22} fill={INK} /></span>
       </div>
     </motion.div>
+    </motion.div>
     </Anchored>
   );
 }
 
 function PinLabel({ i, name, lx, sense, view }) {
+  const vis = useTransform(view.s, [0.6, 0.8], [0, 1], { clamp: true });
   return (
     <Anchored wx={SLOTS[i][0]} wy={SLOTS[i][1]} view={view}>
-      <motion.div className="abs" style={{ left: lx - SLOTS[i][0], top: 48 }}
+      <motion.div className="abs" style={{ left: lx - SLOTS[i][0], top: 48, opacity: vis }}>
+      <motion.div className="abs" style={{ left: 0, top: 0 }}
         initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.12 } }} transition={{ ...GENTLE, delay: 0.1 + i * 0.05 }}>
         <Glass radius={22} angle="166deg" style={{ position: 'relative', height: 44 }} contentStyle={{ padding: '0 15px' }}>
           <span className="nowrap" style={t(14, 500, INK)}>{name}</span>
         </Glass>
+      </motion.div>
       </motion.div>
     </Anchored>
   );
@@ -216,6 +319,8 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
   const [state, setState] = useState('peek');
   const [chip, setChip] = useState('All');
   const [sense, setSense] = useState('None');
+  const [tilesOk, setTilesOk] = useState(false);
+  const [picked, setPicked] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState(F_DEFAULT);
   const listRef = useRef(null);
@@ -226,13 +331,13 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
   const mapRef = useRef(null);
   const pts = useRef(new Map());
   const gest = useRef({ pan: null, pinch: null, anims: [], lastTap: 0 });
-  const MW = 440, MH = 956, MAXZ = 2.5;
+  const MW = 440, MH = 956;
   const SNAPPY = { type: 'spring', stiffness: 260, damping: 32 };
-  const clampXY = (x, y, s) => [Math.min(0, Math.max(MW - MW * s, x)), Math.min(0, Math.max(MH - MH * s, y))];
+  const clampXY = (x, y, s) => { const b = bounds(s); return [Math.min(b.maxX, Math.max(b.minX, x)), Math.min(b.maxY, Math.max(b.minY, y))]; };
   const stopAnims = () => { gest.current.anims.forEach((a) => a.stop()); gest.current.anims = []; };
   const local = (e) => { const r = mapRef.current.getBoundingClientRect(); const k = r.width / MW; return [(e.clientX - r.left) / k, (e.clientY - r.top) / k]; };
   const zoomAt = (fx, fy, s2, animated) => {
-    const s = view.s.get(); s2 = Math.min(MAXZ, Math.max(1, s2));
+    const s = view.s.get(); s2 = Math.min(MAXZ, Math.max(MINZ, s2));
     const [nx, ny] = clampXY(fx - (fx - view.x.get()) * (s2 / s), fy - (fy - view.y.get()) * (s2 / s), s2);
     stopAnims();
     if (animated) gest.current.anims = [animate(view.s, s2, SNAPPY), animate(view.x, nx, SNAPPY), animate(view.y, ny, SNAPPY)];
@@ -241,6 +346,7 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
   const recenterMap = () => { stopAnims(); gest.current.anims = [animate(view.s, 1, SNAPPY), animate(view.x, 0, SNAPPY), animate(view.y, 0, SNAPPY)]; };
   const startPan = (id) => { const [x, y] = [pts.current.get(id).x, pts.current.get(id).y]; gest.current.pan = { x, y, tx: view.x.get(), ty: view.y.get(), moved: false, samples: [{ t: performance.now(), x: view.x.get(), y: view.y.get() }] }; };
   const mapDown = (e) => {
+    setPicked(null);
     stopAnims();
     const [x, y] = local(e); pts.current.set(e.pointerId, { x, y });
     try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
@@ -258,7 +364,7 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
     const G = gest.current;
     if (G.pinch && pts.current.size >= 2) {
       const [a, b] = [...pts.current.values()]; const P = G.pinch;
-      const s2 = Math.min(MAXZ, Math.max(1, P.s * (Math.hypot(a.x - b.x, a.y - b.y) / P.d)));
+      const s2 = Math.min(MAXZ, Math.max(MINZ, P.s * (Math.hypot(a.x - b.x, a.y - b.y) / P.d)));
       const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
       const wx = (P.mx - P.tx) / P.s, wy = (P.my - P.ty) / P.s;
       const [nx, ny] = clampXY(mx - wx * s2, my - wy * s2, s2);
@@ -285,8 +391,9 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
     const a = P.samples[0], b = P.samples[P.samples.length - 1];
     const dt = Math.max(1, b.t - a.t); if (performance.now() - b.t > 80) return;
     const s = view.s.get();
-    const fly = (mv, v, min) => animate(mv, mv.get(), { type: 'inertia', velocity: v, min, max: 0, power: 0.6, timeConstant: 260, bounceStiffness: 400, bounceDamping: 40 });
-    G.anims = [fly(view.x, ((b.x - a.x) / dt) * 1000, MW - MW * s), fly(view.y, ((b.y - a.y) / dt) * 1000, MH - MH * s)];
+    const bd = bounds(s);
+    const fly = (mv, v, min, max) => animate(mv, mv.get(), { type: 'inertia', velocity: v, min, max, power: 0.6, timeConstant: 260, bounceStiffness: 400, bounceDamping: 40 });
+    G.anims = [fly(view.x, ((b.x - a.x) / dt) * 1000, bd.minX, bd.maxX), fly(view.y, ((b.y - a.y) / dt) * 1000, bd.minY, bd.maxY)];
   };
   useEffect(() => {
     const el = mapRef.current; if (!el) return;
@@ -360,7 +467,8 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
     <div className="abs" style={{ inset: 0, background: '#f7f5f1', overflow: 'hidden' }}>
       <div ref={mapRef} className="abs" aria-label="Map" onPointerDown={mapDown} onPointerMove={mapMove} onPointerUp={mapUp} onPointerCancel={mapUp}
         style={{ inset: 0, background: '#eef0ea', overflow: 'hidden', touchAction: 'none', cursor: 'grab', userSelect: 'none' }}>
-        <motion.img src={mapTiles} alt="" draggable={false} className="abs" style={{ left: 0, top: 0, width: 440, height: 956, objectFit: 'cover', transformOrigin: '0 0', x: view.x, y: view.y, scale: view.s, pointerEvents: 'none' }} />
+        <motion.img src={mapTiles} alt="" draggable={false} className="abs" animate={{ opacity: tilesOk ? 0 : 1 }} transition={{ duration: 0.3 }} style={{ left: 0, top: 0, width: 440, height: 956, objectFit: 'cover', transformOrigin: '0 0', x: view.x, y: view.y, scale: view.s, pointerEvents: 'none' }} />
+        <Tiles view={view} onLoaded={() => setTilesOk(true)} />
       </div>
 
       {/* Layer / pins: category pins by default, sense-coloured pins once a layer is on */}
@@ -369,6 +477,9 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
       </AnimatePresence>
       <AnimatePresence mode="popLayout">
         {pins.map(([, , name, lx], i) => (chip !== 'All' && SLOT_CHIP[i] !== chip) ? null : <PinLabel key={sense + 'l' + i} i={i} name={name} lx={lx} sense={sense} view={view} />)}
+      </AnimatePresence>
+      <AnimatePresence>
+        {EXTRAS.filter((v) => chip === 'All' || v.cat === chip).map((v) => <ExtraPin key={v.id + sense} v={v} sense={sense} view={view} selected={picked === v.id} onSelect={setPicked} />)}
       </AnimatePresence>
       <Anchored wx={154} wy={478} view={view}><img src={uri('you')} alt="" className="abs" style={{ left: 0, top: 0, width: 44, height: 44 }} /></Anchored>
 

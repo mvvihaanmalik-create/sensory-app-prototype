@@ -84,3 +84,5 @@ img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
 /* Same page colour as the dark Home (#0e1119) once the inversion is applied */
 .dk-screen [style*="247, 245, 241"]{background:#e9eef6!important}
 .dk-screen .s-page,.dk-screen .s-recent,.dk-screen .s-sheet,.dk-screen [data-map-sheet]{background:#e9eef6!important}
+
+.dk-screen img.mp-tile{filter:brightness(40%) invert(1) hue-rotate(180deg)}
