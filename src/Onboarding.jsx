@@ -187,7 +187,6 @@ function Slider({ cfg, value, onChange }) {
   const n = cfg.steps.length, { i, any } = value;
   const pos = useMotionValue(stepX(i, n));
   const fill = useTransform(pos, (v) => Math.max(0, v));
-  const tipX = useTransform(pos, (v) => v - 9);
   const thumbX = useTransform(pos, (v) => v - 18);
   const bubbleX = useTransform(pos, (v) => v - 52);
   const ref = useRef(null);
@@ -217,18 +216,19 @@ function Slider({ cfg, value, onChange }) {
       ))}
       <motion.div className="abs" initial={false} animate={{ opacity: any ? 0 : 1, scale: any ? 0.7 : 1 }} transition={{ duration: 0.2 }}
         style={{ left: 0, top: 4, width: 36, height: 36, x: thumbX, borderRadius: 18, background: '#fff', border: `3px solid ${INDIGO}`, boxShadow: '0 4px 12px rgba(42,38,80,0.22)', boxSizing: 'border-box' }} />
+      {/* bubble and tail share one shape, so the shadow wraps both and no seam shows where the tail meets the bubble */}
       <motion.div className="abs" initial={false} animate={{ opacity: any ? 0 : 1, y: any ? 8 : 0 }} transition={{ duration: 0.2 }}
-        style={{ left: 0, top: -98, pointerEvents: 'none', x: bubbleX, width: 104 }}>
-        <div style={{ position: 'relative', minHeight: 92, width: 104, borderRadius: 20, background: 'rgba(255,255,255,0.96)', border: '1.5px solid #fff', boxSizing: 'border-box',
-          WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)', boxShadow: '0 10px 28px rgba(42,38,80,0.16)', padding: '14px 8px 12px',
+        style={{ left: 0, top: -98, pointerEvents: 'none', x: bubbleX, width: 104, height: 101, filter: 'drop-shadow(0 10px 14px rgba(42,38,80,0.16))' }}>
+        <div style={{ position: 'absolute', left: 0, top: 0, minHeight: 92, width: 104, borderRadius: 20, background: 'rgba(255,255,255,0.96)', border: '1.5px solid #fff', boxSizing: 'border-box',
+          WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)', padding: '14px 8px 12px',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
           <SenseGlyph k={cfg.icon} size={32} one />
           <span className="nowrap" style={t(14, 600, NAVY, { lineHeight: 1.2 })}>{cfg.steps[i]}</span>
         </div>
+        <svg className="abs" width="18" height="9" viewBox="0 0 18 9" style={{ left: 43, top: 91 }}>
+          <path d="M0 0H18L10.6 7.6a2.2 2.2 0 0 1-3.2 0L0 0Z" fill="rgba(255,255,255,0.96)" />
+        </svg>
       </motion.div>
-      <motion.svg className="abs" width="18" height="9" viewBox="0 0 18 9" initial={false} animate={{ opacity: any ? 0 : 1 }} style={{ left: 0, top: -7, x: tipX, pointerEvents: 'none' }}>
-        <path d="M0 0H18L10.6 7.6a2.2 2.2 0 0 1-3.2 0L0 0Z" fill="rgba(255,255,255,0.96)" />
-      </motion.svg>
     </div>
   );
 }
