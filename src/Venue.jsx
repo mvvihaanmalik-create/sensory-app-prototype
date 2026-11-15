@@ -179,6 +179,7 @@ export default function Venue({ tab, setTab, onBack, backLabel = 'Back', saved =
   const tabsRef = useRef(null);
   const lb = useLightbox();
   const [shareOpen, setShareOpen] = useState(false);
+  const [saveOpen, setSaveOpen] = useState(false);
   const sy = useMotionValue(0);
   const heroY = useTransform(sy, (v) => (v > 0 ? v * 0.45 : 0));
   const heroScale = useTransform(sy, (v) => (v < 0 ? 1 - v / 320 : 1));
@@ -195,7 +196,7 @@ export default function Venue({ tab, setTab, onBack, backLabel = 'Back', saved =
 
   return (
     <div className="abs" style={{ inset: 0, background: '#f7f5f1' }}>
-      <InfoShareHost shareOpen={shareOpen} onShareClose={() => setShareOpen(false)}>
+      <InfoShareHost shareOpen={shareOpen} onShareClose={() => setShareOpen(false)} saveOpen={saveOpen} onSaveClose={() => setSaveOpen(false)} onSaved={() => { if (!saved) onToggleSaved(); }}>
       <div ref={scroller} className="scroll" onScroll={(e) => { sy.set(e.currentTarget.scrollTop); onScroll?.(e.currentTarget.scrollTop); }}>
         <motion.div style={{ height: 320, background: `#dbdbde url(${CAROUSEL[0]}) center / cover`, y: heroY, scale: heroScale, transformOrigin: '50% 0' }} />
         <div style={{ position: 'relative', background: '#f7f5f1', padding: '24px 24px 140px', display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -236,7 +237,7 @@ export default function Venue({ tab, setTab, onBack, backLabel = 'Back', saved =
       </div>
 
       <CircleBtn icon="caretLeft" label={backLabel} onClick={onBack} style={{ position: 'absolute', left: 24, top: 56, zIndex: 10 }} />
-      <CircleBtn label={saved ? 'Saved' : 'Save'} onClick={onToggleSaved} style={{ position: 'absolute', left: 316, top: 56, zIndex: 10 }}>
+      <CircleBtn label={saved ? 'Saved' : 'Save'} onClick={() => (saved ? onToggleSaved() : setSaveOpen(true))} style={{ position: 'absolute', left: 316, top: 56, zIndex: 10 }}>
         <motion.span key={saved ? 'on' : 'off'} initial={{ scale: 0.4 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 14 }}>
           <VIcon name={saved ? 'bookmarkFill' : 'bookmark'} size={22} fill={NAVY} />
         </motion.span>

@@ -318,10 +318,13 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
 
         <img src={H.himgIllustrationCatchup} alt="" className="abs" style={{left:267,top:1364,width:164,height:164,objectFit:'contain',pointerEvents:'none'}}/>
         <ExploreFeed onOpen={onOpenExplore} liked={exploreLiked} top={1662 + off}/>
-        <motion.button className="abs nowrap" onClick={onOpenMap} whileTap={{ scale: 0.98 }} transition={GENTLE}
-          style={{ left: 24, top: 1542 + off, width: 392, height: 47, borderRadius: 999, border: '1.5px solid rgba(20,24,31,0.08)', fontSize: 13, fontWeight: 700, color: INK, whiteSpace: 'pre' }}>
-          {'Open map  →'}
-        </motion.button>
+        <div className="abs" style={{ left: 24, top: 1542 + off, width: 392, height: 47, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: INK }}>Rather see a map?</p>
+          <motion.button className="nowrap" onClick={onOpenMap} whileTap={{ scale: 0.97 }} transition={GENTLE}
+            style={{ width: 156, height: 47, borderRadius: 999, border: '1.5px solid rgba(20,24,31,0.08)', fontSize: 13, fontWeight: 700, color: INK, whiteSpace: 'pre' }}>
+            {'Open map  →'}
+          </motion.button>
+        </div>
       </div>
     </div>
     </motion.div>
