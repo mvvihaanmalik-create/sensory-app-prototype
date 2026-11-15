@@ -191,15 +191,24 @@ const OTHER_TICKETS = {
 };
 function Wallet({ booking, onOpenBooking }) {
   const [order, setOrder] = useState(['grey', 'willow', 'fern']);
+  const moving = useRef(false);
   const front = order[order.length - 1];
-  const tap = (id) => { if (id === front) { if (id === 'fern') onOpenBooking(); return; } setOrder([...order.filter((x) => x !== id), id]); };
+  const tap = (id) => {
+    if (id === front) { if (id === 'fern' && !moving.current) onOpenBooking(); return; }
+    moving.current = true;
+    setOrder(current => [...current.filter(x => x !== id), id]);
+  };
   return (
     <div style={{ position: 'relative', width: 340, height: 620, margin: '0 auto' }}>
-      {order.map((id, i) => {
+      {['grey', 'willow', 'fern'].map(id => {
+        const i = order.indexOf(id);
         const data = id === 'fern' ? { theme: 'fern', ...ticketFor(booking) } : OTHER_TICKETS[id];
         return (
-          <motion.div key={id} layout transition={{ type: 'spring', stiffness: 260, damping: 28 }} onClick={() => tap(id)}
-            className="abs" style={{ left: 0, top: i * 76, zIndex: i, cursor: 'pointer' }} whileTap={{ scale: 0.985 }}>
+          <motion.div key={id} role="button" tabIndex={0} aria-label={`${data.name || 'Fern & Fable'} reservation`} aria-pressed={id === front}
+            initial={false} animate={{ y: i * 76 }} transition={{ type: 'spring', stiffness: 300, damping: 36 }}
+            onAnimationComplete={() => { if (id === front) moving.current = false; }} onClick={() => tap(id)}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tap(id); } }}
+            data-wallet-ticket={id} className="abs" style={{ left: 0, top: 0, zIndex: i, cursor: 'pointer', touchAction: 'pan-y' }}>
             <Ticket {...data} />
           </motion.div>
         );
