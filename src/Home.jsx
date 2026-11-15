@@ -12,6 +12,7 @@ import { VP } from './venuePhotos.js';
 import { PHOTO } from './remainingPhotos.js';
 import { photoBackground } from './venueFinalPhotos.js';
 import { ExploreFeed } from './Explore.jsx';
+import cafeCopper from './assets/share/cafe-copper.png';
 
 const lightGlass = {
   background: 'rgba(255,255,255,0.62)', border: '1px solid rgba(255,255,255,0.7)', boxShadow: '0 4px 14px rgba(27,42,68,0.1)',
@@ -147,7 +148,7 @@ function SectionHeader({ top, title, onSeeAll }) {
   return (
     <div className="abs" style={{ left: 24, top, width: 392, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <p className="nowrap" style={h2}>{title}</p>
-      <button className="nowrap" onClick={onSeeAll} style={{ fontSize: 13, fontWeight: 700, color: INK }}>See all</button>
+      {onSeeAll && <button className="nowrap" onClick={onSeeAll} style={{ fontSize: 13, fontWeight: 700, color: INK }}>See all</button>}
     </div>
   );
 }
@@ -157,15 +158,17 @@ const VENUES = {
   A: { name: 'Fern & Fable', meta: 'Café · 0.5 mi', level: 'Level 2', photo: PHOTO.p0604, crop: [.6787142158,.9074382186,.2869078517,.0925617218] },
   B: { name: 'Gallery Espresso', meta: 'Café · 1.1 mi', level: 'Level 1', photo: PHOTO.p0602 },
   C: { name: 'The Sentient', meta: 'Café · 0.8 mi', level: 'Level 2' , photo: PHOTO.p0603 },
+  D: { name: 'Juniper Coffee', meta: 'Café · 1.1 mi', level: 'Level 3', photo: PHOTO.p0608 },
+  E: { name: 'Copper Window Café', meta: 'Café · 1.4 mi', level: 'Level 1', photo: cafeCopper },
 };
-const KEYS = ['A', 'B', 'C'];
+const KEYS = ['A', 'B', 'D', 'E', 'C'];
 const ROLE = {
   front: { x: 0, y: 0, rotate: 0, scale: 1, opacity: 1 },
   right: { x: 99.53, y: 11.25, rotate: 3, scale: 0.8, opacity: 0.55 },
   left: { x: -99.82, y: 0.36, rotate: -3, scale: 0.8, opacity: 0.55 },
+  hidden: { x: 0, y: 11.25, rotate: 0, scale: 0.8, opacity: 0 },
 };
-const Z = { front: 3, right: 2, left: 1 };
-const DOT_FOR = { A: 1, B: 2, C: 0 };
+const Z = { front: 3, right: 2, left: 1, hidden: 0 };
 
 // Venue card / Feature, outlined version (Figma 1275:7232): cream card, inset photo, navy text below
 function VenueCard({ v }) {
@@ -195,7 +198,8 @@ function ForYouStack({ onOpenVenue }) {
   const drag = useRef(null);
   const [dx, setDx] = useState(0);
   const fi = KEYS.indexOf(front);
-  const roleOf = (k) => (k === front ? 'front' : k === KEYS[(fi + 1) % 3] ? 'right' : 'left');
+  const n = KEYS.length;
+  const roleOf = (k) => { const o = (KEYS.indexOf(k) - fi + n) % n; return o === 0 ? 'front' : o === 1 ? 'right' : o === n - 1 ? 'left' : 'hidden'; };
 
   const dragged = useRef(false);
   const onDown = (e) => { dragged.current = false; drag.current = { x: e.clientX, y: e.clientY, moved: false, id: e.pointerId }; };
@@ -211,7 +215,7 @@ function ForYouStack({ onOpenVenue }) {
   const onUp = () => {
     const d = drag.current; drag.current = null; if (!d) return;
     dragged.current = d.moved;
-    if (d.moved && Math.abs(dx) > 50) setFront(dx < 0 ? KEYS[(fi + 1) % 3] : KEYS[(fi + 2) % 3]);
+    if (d.moved && Math.abs(dx) > 50) setFront(dx < 0 ? KEYS[(fi + 1) % n] : KEYS[(fi + n - 1) % n]);
     setDx(0);
   };
 
@@ -222,7 +226,7 @@ function ForYouStack({ onOpenVenue }) {
         const isFront = role === 'front';
         return (
           <motion.div key={k} className="abs"
-            style={{ left: 90, top: 0, width: 260, height: 350, zIndex: Z[role], transformOrigin: '50% 50%', cursor: isFront ? 'grab' : 'pointer', touchAction: 'pan-y' }}
+            style={{ left: 90, top: 0, width: 260, height: 350, zIndex: Z[role], transformOrigin: '50% 50%', cursor: isFront ? 'grab' : 'pointer', pointerEvents: role === 'hidden' ? 'none' : 'auto', touchAction: 'pan-y' }}
             initial={false}
             animate={{ ...ROLE[role], x: ROLE[role].x + (isFront ? dx : 0), rotate: ROLE[role].rotate + (isFront ? dx / 40 : 0) }}
             transition={isFront && dx !== 0 ? { type: 'spring', stiffness: 600, damping: 40 } : GENTLE}
@@ -238,9 +242,9 @@ function ForYouStack({ onOpenVenue }) {
           </motion.div>
         );
       })}
-      <div className="abs" style={{ left: 196, top: 364, display: 'flex', gap: 6 }}>
-        {[0, 1, 2].map((i) => {
-          const on = DOT_FOR[front] === i;
+      <div className="abs" style={{ left: 183, top: 364, display: 'flex', gap: 6 }}>
+        {KEYS.map((_, i) => {
+          const on = fi === i;
           return <motion.div key={i} initial={false} animate={{ width: on ? 22 : 7, backgroundColor: on ? '#14181f' : '#c9d2de' }} transition={GENTLE}
             style={{ height: 7, borderRadius: 4 }} />;
         })}
@@ -301,7 +305,7 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
         </motion.button>
 
         <Categories onOpen={onOpenPage} />
-        <SectionHeader top={421.17} title="For you" onSeeAll={() => onOpenPage?.('foryou')} />
+        <SectionHeader top={421.17} title="For you" />
         <ForYouStack onOpenVenue={onOpenVenue} />
 
         <SectionHeader top={964} title="Popular around you" onSeeAll={() => onOpenPage?.('popular')} />

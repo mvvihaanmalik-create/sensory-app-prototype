@@ -28,13 +28,13 @@ export const ONBOARDING_STEPS = ['welcome', 'sound', 'light', 'crowd', 'temp', '
 
 /* ---------- Data ---------- */
 const SLIDERS = {
-  sound: { title: 'How loud do you like it?', name: 'Sound', icon: 'sound', steps: ['Quiet', 'Easy to talk', 'Lively', 'Loud'], ends: ['Quiet', 'Loud'], def: 1,
+  sound: { title: 'How loud do you like it?', name: 'Sound', icon: 'sound', steps: ['Any', 'Quiet', 'Low', 'Moderate', 'Lively'], def: 0,
     titleTop: 150, card: { top: 303, h: 481, hy: 173.5, sy: 233.5, sl: 385.5, ey: 445.5 }, art: { src: soundImg, left: 173, top: 177 } },
-  light: { title: 'What light do you like?', name: 'Light', icon: 'light', steps: ['Dim', 'Warm & cozy', 'Natural', 'Bright'], ends: ['Dim', 'Bright'], def: 1,
+  light: { title: 'What light do you like?', name: 'Light', icon: 'light', steps: ['Any', 'Dim', 'Soft', 'Moderate', 'Bright'], def: 0,
     titleTop: 150, card: { top: 250, h: 515, hy: 21.5, sy: 81.5, sl: 233.5, ey: 293.5 }, art: { src: lightImg, left: 176, top: 591 } },
-  crowd: { title: 'How busy is comfortable?', name: 'Crowd', icon: 'crowd', steps: ['Almost empty', 'Relaxed', 'Moderate', 'Busy', 'Packed'], ends: ['Almost empty', 'Packed'], def: 1,
+  crowd: { title: 'How busy is comfortable?', name: 'Crowd', icon: 'crowd', steps: ['Any', 'Empty', 'Light', 'Moderate', 'Busy'], def: 0,
     titleTop: 161, card: { top: 327, h: 506, hy: 157.5, sy: 217.5, sl: 369.5, ey: 429.5 }, art: { src: catchupImg, left: 143, top: 181 } },
-  temp: { title: 'How warm do you like it?', name: 'Temperature', icon: 'temp', steps: ['Cool', 'Mild', 'Warm'], ends: ['Cool', 'Warm'], def: 1,
+  temp: { title: 'How warm do you like it?', name: 'Temperature', icon: 'temp', steps: ['Any', 'Cold', 'Cool', 'Mild', 'Warm'], def: 0,
     titleTop: 165, card: { top: 263, h: 502, hy: 21.5, sy: 81.5, sl: 233.5, ey: 293.5 }, art: { src: cozyImg, left: 176, top: 591 } },
 };
 const SEATS = ['Booth', 'Corner seat', 'Table with space', 'Bar seat', 'Couch or lounge', 'Communal table', 'Outdoor'];
@@ -43,17 +43,16 @@ export const initialPicks = () => ({
   crowd: { i: SLIDERS.crowd.def, any: false }, temp: { i: SLIDERS.temp.def, any: false },
   seat: [],
 });
-const labelOf = (k, p) => (p[k].any ? 'Any' : SLIDERS[k].steps[p[k].i]);
+const labelOf = (k, p) => SLIDERS[k].steps[p[k].i];
 const seatLine = (seat) => (seat.length === 0 ? 'Any' : seat.length <= 2 ? seat.join(' · ') : `${seat.slice(0, 2).join(' · ')} +${seat.length - 2}`);
 
 // Onboarding picks -> the app's mode shape (Modes.jsx scales: sound Quiet / Easy to talk / Lively, light Dim / Soft / Bright,
 // crowd Relaxed / Moderate / Busy, temperature Cool / Mild / Warm). Picks past the end of a mode scale fold into its last value.
 export function toMode(p) {
-  const sound = p.sound.any ? null : ['Quiet', 'Low', 'Lively', 'Lively'][p.sound.i];
-  const light = p.light.any ? { b: null, tone: null, src: null }
-    : [{ b: 'Dim', tone: null, src: null }, { b: 'Soft', tone: 'Warm', src: null }, { b: 'Bright', tone: null, src: 'Natural daylight' }, { b: 'Bright', tone: null, src: null }][p.light.i];
-  const crowd = p.crowd.any ? null : ['Light', 'Light', 'Moderate', 'Busy', 'Busy'][p.crowd.i];
-  const temp = p.temp.any ? null : ['Cool', 'Mild', 'Warm'][p.temp.i];
+  const sound = [null, 'Quiet', 'Low', 'Moderate', 'Lively'][p.sound.i];
+  const light = [{ b: null, tone: null, src: null }, { b: 'Dim', tone: null, src: null }, { b: 'Soft', tone: null, src: null }, { b: 'Moderate', tone: null, src: null }, { b: 'Bright', tone: null, src: null }][p.light.i];
+  const crowd = [null, 'Empty', 'Light', 'Moderate', 'Busy'][p.crowd.i];
+  const temp = [null, 'Cold', 'Cool', 'Mild', 'Warm'][p.temp.i];
   const pos = ['Booth', 'Corner seat', 'Bar seat', 'Outdoor'].find((s) => p.seat.includes(s));
   const layout = ['Table with space', 'Communal table'].find((s) => p.seat.includes(s));
   const prefs = { sound, light, crowd, temp, seat: { pos: pos === 'Outdoor' ? 'Patio' : pos || null, layout: layout || null } };
@@ -184,7 +183,7 @@ const stepX = (i, n) => EDGE + (i * (TRACK - 2 * EDGE)) / (n - 1);
 const nearest = (x, n) => Math.max(0, Math.min(n - 1, Math.round(((x - EDGE) / (TRACK - 2 * EDGE)) * (n - 1))));
 
 function Slider({ cfg, value, onChange }) {
-  const n = cfg.steps.length, { i, any } = value;
+  const n = cfg.steps.length, { i } = value, any = false;
   const pos = useMotionValue(stepX(i, n));
   const fill = useTransform(pos, (v) => Math.max(0, v));
   const tipX = useTransform(pos, (v) => v - 9);
@@ -246,18 +245,13 @@ function SliderScreen({ k, picks, setPick, onNext, onBack, onSkip }) {
           <SenseGlyph k={cfg.icon} />
           <span className="nowrap" style={{ flex: '1 0 0', ...t(17, 600, NAVY, { lineHeight: 'normal' }) }}>{cfg.name}</span>
         </div>
-        <div className="abs" style={{ left: 20, top: c.sy - 1.5, width: 315, height: 26, overflow: 'hidden' }}>
-          <AnimatePresence mode="popLayout" initial={false}>
-            <motion.span key={labelOf(k, picks)} className="nowrap" style={{ display: 'block', ...t(22, 600, NAVY, { lineHeight: '26px' }) }}
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.16 }}>{labelOf(k, picks)}</motion.span>
-          </AnimatePresence>
-        </div>
         <div className="abs" style={{ left: 20, top: c.sl - 1.5, width: TRACK, height: 44 }}>
           <Slider cfg={cfg} value={v} onChange={(nv) => setPick(k, nv)} />
         </div>
-        <div className="abs" style={{ left: 20, top: c.ey - 1.5, width: 315, display: 'flex', justifyContent: 'space-between' }}>
-          <span className="nowrap" style={t(12, 400, MUTED, { lineHeight: '14px' })}>{cfg.ends[0]}</span>
-          <span className="nowrap" style={t(12, 400, MUTED, { lineHeight: '14px' })}>{cfg.ends[1]}</span>
+        <div className="abs" style={{ left: 20, top: c.ey - 1.5, width: TRACK, height: 14 }}>
+          {cfg.steps.map((lab, j) => (
+            <span key={lab} className="nowrap" style={{ position: 'absolute', left: stepX(j, cfg.steps.length), top: 0, transform: 'translateX(-50%)', ...t(12, 400, MUTED, { lineHeight: '14px' }) }}>{lab}</span>
+          ))}
         </div>
       </div>
       <img src={cfg.art.src} alt="" draggable={false} className="abs" style={{ left: cfg.art.left, top: cfg.art.top, width: 292, height: 292, objectFit: 'contain', pointerEvents: 'none' }} />

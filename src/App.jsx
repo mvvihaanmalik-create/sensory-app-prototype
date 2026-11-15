@@ -157,6 +157,13 @@ export default function App() {
   const [homeTop, setHomeTop] = useState(0); // resets Home on every Home tab tap
   const viewportRef = useRef(null);
   const [navigationRequest, setNavigationRequest] = useState(0);
+  const [typing, setTyping] = useState(false); // the keyboard is up: tuck the tab bar away so it does not ride above the keyboard
+  useEffect(() => {
+    const on = (e) => { if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) setTyping(true); };
+    const off = () => setTimeout(() => setTyping(/^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName || '')), 50);
+    document.addEventListener('focusin', on); document.addEventListener('focusout', off);
+    return () => { document.removeEventListener('focusin', on); document.removeEventListener('focusout', off); };
+  }, []);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [scene, setScene] = useState('morning');
   const stepScene = (d) => setScene((cur) => SCENES[(SCENES.findIndex((x) => x.id === cur) + d + SCENES.length) % SCENES.length].id);
@@ -407,7 +414,7 @@ export default function App() {
                 </AnimatePresence>
                 <div className="abs" style={{ inset: 0, zIndex: 60, pointerEvents: 'none' }}><Toast text={note} icon={note && /Only|later/.test(note) ? 'info' : 'check'} /></div>
                 {!PHONE && <StatusBar pull={pull} light={screen === 'home' && SCENES.find((x) => x.id === scene)?.dark && homeScroll <= 24 && !(venueOpen || exploreOpen || modesOpen || editing || flow || sense || page || onboarding)} shade={screen === 'search' && !venueOpen ? 0 : flow || sense ? 0 : venueOpen ? (venueScroll > 270 ? 1 : 0) : screen !== 'map' && homeScroll > 24 ? 1 : 0} />}
-                <TabBar active={screen} onNav={to => { nav(to); if (to === 'search') navigateSearch(searchRoute); }} top={exploreOpen || venueOpen || modesOpen || editing || (screen === 'map' && mapOverlay) || (screen === 'profile' && profileOverlay) || (screen === 'search' && ['search-filters','search-place'].includes(searchRoute)) ? 1000 : page ? TAB_TOP.home : TAB_TOP[screen]} yMV={screen === 'home' ? pull : undefined} />
+                <TabBar active={screen} onNav={to => { nav(to); if (to === 'search') navigateSearch(searchRoute); }} top={typing || exploreOpen || venueOpen || modesOpen || editing || (screen === 'map' && mapOverlay) || (screen === 'profile' && profileOverlay) || (screen === 'search' && ['search-filters','search-place'].includes(searchRoute)) ? 1000 : page ? TAB_TOP.home : TAB_TOP[screen]} yMV={screen === 'home' ? pull : undefined} />
                 {!PHONE && <div className="abs" style={{ left: 150, top: editing || (screen === 'home' && discoverOpen) ? 935 : 943, width: 140, height: 5, borderRadius: 3, background: screen === 'home' && discoverOpen ? '#2a2650' : screen === 'map' ? 'rgba(20,24,31,0.85)' : '#14181f', zIndex: 55 }} />}
                 {!PHONE && <div className="island" />}
               </div>

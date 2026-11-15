@@ -302,7 +302,6 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
   // Rail and recenter sit just above the peeking sheet; they fade once the sheet rises past them.
   const ctrl = useTransform(top, [560, 700], [0, 1], { clamp: true });
   const ctrlEvents = useTransform(ctrl, (v) => (v > 0.6 ? 'auto' : 'none'));
-  const credit = useTransform(top, (v) => Math.min(839, v - 21));
   const pad = useTransform(top, [SNAP.full, SNAP.tall], [42, 0], { clamp: true });
   const listTop = useTransform(pad, (v) => 80 + v);
   const titleTop = useTransform(pad, (v) => 36 + v);
@@ -399,7 +398,7 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
         </div>
       </div>
 
-      <motion.p className="abs nowrap" style={{ left: 24, top: credit, fontSize: 11, fontWeight: 500, color: SUB }}>Map: Esri, HERE, Garmin, OpenStreetMap contributors</motion.p>
+      <motion.p className="abs nowrap" style={{ left: 24, top: 839, fontSize: 11, fontWeight: 500, color: SUB }}>Map: Esri, HERE, Garmin, OpenStreetMap contributors</motion.p>
 
       {/* Sense layers rail + Recenter. Tap the active sense again to turn layers off. */}
       <motion.div className="abs" style={{ left: 364, top: 441, width: 67, opacity: ctrl, pointerEvents: ctrlEvents }}>
