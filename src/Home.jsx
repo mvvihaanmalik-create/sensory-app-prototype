@@ -12,7 +12,7 @@ import { VP } from './venuePhotos.js';
 import { PHOTO } from './remainingPhotos.js';
 import { photoBackground } from './venueFinalPhotos.js';
 import { ExploreFeed } from './Explore.jsx';
-import cafeCopper from './assets/share/cafe-copper.png';
+import cafeCopper from './assets/home-update/fy-copper.jpg';
 
 const lightGlass = {
   background: 'rgba(255,255,255,0.62)', border: '1px solid rgba(255,255,255,0.7)', boxShadow: '0 4px 14px rgba(27,42,68,0.1)',
