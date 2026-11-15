@@ -56,9 +56,17 @@ const LAYERS = {
 };
 const PULSE = [3.2, 2.2, 1.4];
 
-function Pin({ icon, ring, level, i, layer }) {
+// Pins and labels live in map space: they follow pan and zoom but keep their size.
+function Anchored({ wx, wy, view, children }) {
+  const x = useTransform([view.x, view.s], ([vx, s]) => wx * s + vx);
+  const y = useTransform([view.y, view.s], ([vy, s]) => wy * s + vy);
+  return <motion.div className="abs" style={{ left: 0, top: 0, width: 0, height: 0, x, y, pointerEvents: 'none' }}>{children}</motion.div>;
+}
+
+function Pin({ icon, ring, level, i, layer, view }) {
   return (
-    <motion.div className="abs" style={{ left: SLOTS[i][0], top: SLOTS[i][1], width: 44, height: 44 }}
+    <Anchored wx={SLOTS[i][0]} wy={SLOTS[i][1]} view={view}>
+    <motion.div className="abs" style={{ left: 0, top: 0, width: 44, height: 44 }}
       initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0, transition: { duration: 0.15 } }}
       transition={{ type: 'spring', stiffness: 420, damping: 20, delay: 0.04 + i * 0.05 }}>
       {ring && <span className="mp-ping" style={{ '--c': ring, '--d': `${PULSE[level]}s`, animationDelay: `${-i * 0.6}s` }} />}
@@ -66,6 +74,20 @@ function Pin({ icon, ring, level, i, layer }) {
         <span className={ring ? `mp-ico mp-${layer.toLowerCase()}` : ''} style={{ '--d': `${PULSE[level ?? 0]}s`, display: 'flex' }}><Ph n={icon} size={22} fill={INK} /></span>
       </div>
     </motion.div>
+    </Anchored>
+  );
+}
+
+function PinLabel({ i, name, lx, sense, view }) {
+  return (
+    <Anchored wx={SLOTS[i][0]} wy={SLOTS[i][1]} view={view}>
+      <motion.div className="abs" style={{ left: lx - SLOTS[i][0], top: 48 }}
+        initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.12 } }} transition={{ ...GENTLE, delay: 0.1 + i * 0.05 }}>
+        <Glass radius={22} angle="166deg" style={{ position: 'relative', height: 44 }} contentStyle={{ padding: '0 15px' }}>
+          <span className="nowrap" style={t(14, 500, INK)}>{name}</span>
+        </Glass>
+      </motion.div>
+    </Anchored>
   );
 }
 
@@ -156,6 +178,84 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
   const listRef = useRef(null);
   const g = useRef(null);
 
+  // ---- map pan and zoom: drag to pan, pinch / wheel / double tap to zoom ----
+  const view = { x: useMotionValue(0), y: useMotionValue(0), s: useMotionValue(1) };
+  const mapRef = useRef(null);
+  const pts = useRef(new Map());
+  const gest = useRef({ pan: null, pinch: null, anims: [], lastTap: 0 });
+  const MW = 440, MH = 956, MAXZ = 2.5;
+  const SNAPPY = { type: 'spring', stiffness: 260, damping: 32 };
+  const clampXY = (x, y, s) => [Math.min(0, Math.max(MW - MW * s, x)), Math.min(0, Math.max(MH - MH * s, y))];
+  const stopAnims = () => { gest.current.anims.forEach((a) => a.stop()); gest.current.anims = []; };
+  const local = (e) => { const r = mapRef.current.getBoundingClientRect(); const k = r.width / MW; return [(e.clientX - r.left) / k, (e.clientY - r.top) / k]; };
+  const zoomAt = (fx, fy, s2, animated) => {
+    const s = view.s.get(); s2 = Math.min(MAXZ, Math.max(1, s2));
+    const [nx, ny] = clampXY(fx - (fx - view.x.get()) * (s2 / s), fy - (fy - view.y.get()) * (s2 / s), s2);
+    stopAnims();
+    if (animated) gest.current.anims = [animate(view.s, s2, SNAPPY), animate(view.x, nx, SNAPPY), animate(view.y, ny, SNAPPY)];
+    else { view.s.set(s2); view.x.set(nx); view.y.set(ny); }
+  };
+  const recenterMap = () => { stopAnims(); gest.current.anims = [animate(view.s, 1, SNAPPY), animate(view.x, 0, SNAPPY), animate(view.y, 0, SNAPPY)]; };
+  const startPan = (id) => { const [x, y] = [pts.current.get(id).x, pts.current.get(id).y]; gest.current.pan = { x, y, tx: view.x.get(), ty: view.y.get(), moved: false, samples: [{ t: performance.now(), x: view.x.get(), y: view.y.get() }] }; };
+  const mapDown = (e) => {
+    stopAnims();
+    const [x, y] = local(e); pts.current.set(e.pointerId, { x, y });
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
+    const G = gest.current;
+    if (pts.current.size === 1) { startPan(e.pointerId); G.tapAt = [x, y]; }
+    else if (pts.current.size === 2) {
+      const [a, b] = [...pts.current.values()];
+      G.pan = null; G.tapAt = null;
+      G.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, s: view.s.get(), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2, tx: view.x.get(), ty: view.y.get() };
+    }
+  };
+  const mapMove = (e) => {
+    if (!pts.current.has(e.pointerId)) return;
+    const [x, y] = local(e); pts.current.set(e.pointerId, { x, y });
+    const G = gest.current;
+    if (G.pinch && pts.current.size >= 2) {
+      const [a, b] = [...pts.current.values()]; const P = G.pinch;
+      const s2 = Math.min(MAXZ, Math.max(1, P.s * (Math.hypot(a.x - b.x, a.y - b.y) / P.d)));
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      const wx = (P.mx - P.tx) / P.s, wy = (P.my - P.ty) / P.s;
+      const [nx, ny] = clampXY(mx - wx * s2, my - wy * s2, s2);
+      view.s.set(s2); view.x.set(nx); view.y.set(ny);
+    } else if (G.pan) {
+      const P = G.pan, dx = x - P.x, dy = y - P.y;
+      if (!P.moved && Math.hypot(dx, dy) < 4) return;
+      P.moved = true;
+      const [nx, ny] = clampXY(P.tx + dx, P.ty + dy, view.s.get());
+      view.x.set(nx); view.y.set(ny);
+      P.samples.push({ t: performance.now(), x: nx, y: ny }); if (P.samples.length > 6) P.samples.shift();
+    }
+  };
+  const mapUp = (e) => {
+    const G = gest.current; const had = pts.current.has(e.pointerId);
+    pts.current.delete(e.pointerId); if (!had) return;
+    if (G.pinch) { G.pinch = null; if (pts.current.size === 1) startPan([...pts.current.keys()][0]); G.tapAt = null; return; }
+    const P = G.pan; if (!P) return; G.pan = null;
+    if (!P.moved) {
+      const now = performance.now();
+      if (now - G.lastTap < 300) { const [fx, fy] = G.tapAt || [MW / 2, MH / 2]; zoomAt(fx, fy, view.s.get() > 1.5 ? 1 : 2.2, true); G.lastTap = 0; } else G.lastTap = now;
+      return;
+    }
+    const a = P.samples[0], b = P.samples[P.samples.length - 1];
+    const dt = Math.max(1, b.t - a.t); if (performance.now() - b.t > 80) return;
+    const s = view.s.get();
+    const fly = (mv, v, min) => animate(mv, mv.get(), { type: 'inertia', velocity: v, min, max: 0, power: 0.6, timeConstant: 260, bounceStiffness: 400, bounceDamping: 40 });
+    G.anims = [fly(view.x, ((b.x - a.x) / dt) * 1000, MW - MW * s), fly(view.y, ((b.y - a.y) / dt) * 1000, MH - MH * s)];
+  };
+  useEffect(() => {
+    const el = mapRef.current; if (!el) return;
+    const wheel = (e) => {
+      e.preventDefault();
+      const r = el.getBoundingClientRect(); const k = r.width / MW;
+      zoomAt((e.clientX - r.left) / k, (e.clientY - r.top) / k, view.s.get() * Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0018)), false);
+    };
+    el.addEventListener('wheel', wheel, { passive: false });
+    return () => el.removeEventListener('wheel', wheel);
+  }, []);
+
   // Rail and recenter sit just above the peeking sheet; they fade once the sheet rises past them.
   const ctrl = useTransform(top, [560, 700], [0, 1], { clamp: true });
   const ctrlEvents = useTransform(ctrl, (v) => (v > 0.6 ? 'auto' : 'none'));
@@ -168,7 +268,7 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
 
   const go = (name, velocity = 0) => {
     name = ALIAS[name] || name;
-    if (name !== 'full' && listRef.current) listRef.current.scrollTop = 0;
+    if ((name === 'peek' || name === 'half') && listRef.current) listRef.current.scrollTop = 0;
     setState(name);
     animate(top, SNAP[name], { ...GENTLE, velocity });
   };
@@ -185,7 +285,8 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
     const dy = (e.clientY - d.y) / scale;
     if (!d.moved) {
       if (Math.abs(dy) < 5) return;
-      if (d.source === 'list' && state === 'full' && (dy < 0 || (listRef.current?.scrollTop ?? 0) > 0)) { g.current = null; return; }
+      // Tall and full: the list scrolls; only a downward pull from its very top moves the sheet.
+      if (d.source === 'list' && (state === 'full' || state === 'tall') && (dy < 0 || (listRef.current?.scrollTop ?? 0) > 0)) { g.current = null; return; }
       d.moved = true;
       try { d.el.setPointerCapture(d.id); } catch (_) {}
     }
@@ -215,25 +316,19 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
   const pins = LAYERS[sense];
   return (
     <div className="abs" style={{ inset: 0, background: '#f7f5f1', overflow: 'hidden' }}>
-      <div className="abs" style={{ inset: 0, background: '#eef0ea' }}>
-        <img src={mapTiles} alt="" className="abs" style={{ left: 0, top: 0, width: 440, height: 956, objectFit: 'cover' }} />
+      <div ref={mapRef} className="abs" aria-label="Map" onPointerDown={mapDown} onPointerMove={mapMove} onPointerUp={mapUp} onPointerCancel={mapUp}
+        style={{ inset: 0, background: '#eef0ea', overflow: 'hidden', touchAction: 'none', cursor: 'grab', userSelect: 'none' }}>
+        <motion.img src={mapTiles} alt="" draggable={false} className="abs" style={{ left: 0, top: 0, width: 440, height: 956, objectFit: 'cover', transformOrigin: '0 0', x: view.x, y: view.y, scale: view.s, pointerEvents: 'none' }} />
       </div>
 
       {/* Layer / pins: category pins by default, sense-coloured pins once a layer is on */}
       <AnimatePresence mode="popLayout">
-        {pins.map(([icon, ring, , , lvl], i) => <Pin key={sense + i} i={i} icon={icon} ring={ring} level={lvl} layer={sense} />)}
+        {pins.map(([icon, ring, , , lvl], i) => <Pin key={sense + i} i={i} icon={icon} ring={ring} level={lvl} layer={sense} view={view} />)}
       </AnimatePresence>
       <AnimatePresence mode="popLayout">
-        {pins.map(([, , name, lx], i) => (
-          <motion.div key={sense + 'l' + i} className="abs" style={{ left: lx, top: SLOTS[i][1] + 48 }}
-            initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.12 } }} transition={{ ...GENTLE, delay: 0.1 + i * 0.05 }}>
-            <Glass radius={22} angle="166deg" style={{ position: 'relative', height: 44 }} contentStyle={{ padding: '0 15px' }}>
-              <span className="nowrap" style={t(14, 500, INK)}>{name}</span>
-            </Glass>
-          </motion.div>
-        ))}
+        {pins.map(([, , name, lx], i) => <PinLabel key={sense + 'l' + i} i={i} name={name} lx={lx} sense={sense} view={view} />)}
       </AnimatePresence>
-      <img src={uri('you')} alt="" className="abs" style={{ left: 154, top: 478, width: 44, height: 44 }} />
+      <Anchored wx={154} wy={478} view={view}><img src={uri('you')} alt="" className="abs" style={{ left: 0, top: 0, width: 44, height: 44 }} /></Anchored>
 
       {/* Search + filter */}
       <Glass radius={26} angle="170deg" style={{ left: 24, top: 80, width: 328, height: 52 }} contentStyle={{ gap: 12, padding: '0 16.5px' }}>
@@ -279,7 +374,7 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
           })}
         </Glass>
       </motion.div>
-      <motion.button aria-label="Recenter" className="abs" whileTap={{ scale: 0.9 }} transition={TAP} style={{ left: 373, top: 700, width: 48, height: 48, opacity: ctrl, pointerEvents: ctrlEvents }}>
+      <motion.button aria-label="Recenter" onClick={recenterMap} className="abs" whileTap={{ scale: 0.9 }} transition={TAP} style={{ left: 373, top: 700, width: 48, height: 48, opacity: ctrl, pointerEvents: ctrlEvents }}>
         <div className="glass" style={{ position: 'absolute', inset: 0, borderRadius: 24, border: 'none', boxShadow: '0 14px 36px rgba(42,38,80,0.1)' }}>
           <div className="g-bg" />
           <div className="g-c" style={{ justifyContent: 'center' }}><Ph n="navigation-arrow" size={22} fill={INK} /></div>
@@ -294,7 +389,7 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
           <motion.p className="abs nowrap" style={{ left: 20, top: titleTop, ...t(26, 700, INK) }}>Popular around you</motion.p>
         </motion.div>
         <motion.div ref={listRef} className="abs scroll" {...handlers('list')}
-          style={{ inset: 'auto', left: 0, top: listTop, opacity: listOp, bottom: 0, width: 440, overflowY: state === 'full' ? 'auto' : 'hidden', touchAction: state === 'full' ? 'pan-y' : 'none' }}>
+          style={{ inset: 'auto', left: 0, top: listTop, opacity: listOp, bottom: 0, width: 440, overflowY: state === 'peek' ? 'hidden' : 'auto', touchAction: state === 'full' || state === 'tall' ? 'pan-y' : 'none' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24, padding: '0 20px 112px' }}>
             {RECS.map((r, i) => <Recommendation key={r.id} r={r} saved={savedIds.includes(r.id)} onToggleSaved={onToggleSaved} onOpen={i === 0 ? onOpenVenue : undefined} />)}
           </div>

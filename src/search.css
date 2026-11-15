@@ -57,3 +57,6 @@
 .s-category img{transform-origin:70% 85%}
 .s-category:hover img,.s-category:active img,.s-category:focus-visible img{animation:s-wiggle .7s cubic-bezier(.36,.07,.19,.97) both}
 @media (prefers-reduced-motion:reduce){.s-category:hover img,.s-category:active img{animation:none}}
+
+.s-result-art.photo{overflow:hidden}.s-result-art.photo img{width:76px;height:76px;object-fit:cover}
+.s-place-art.photo{overflow:hidden}.s-place-art.photo img{width:100%;height:120px;object-fit:cover}

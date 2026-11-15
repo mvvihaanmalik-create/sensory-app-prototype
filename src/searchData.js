@@ -1,4 +1,6 @@
 import { PAGES } from './listData.js';
+import { PHOTO } from './remainingPhotos.js';
+import { CAROUSEL } from './venueFinalPhotos.js';
 import { PLACES as DISCOVERY_PLACES, rankPlaces, SOUND_W, LIGHT_W, CROWD_W } from './discoverData.js';
 
 // Search fixtures for interaction testing, not live hours or sensory measurements.
@@ -37,6 +39,11 @@ for (const [key, page] of Object.entries(PAGES)) {
     inventory.set(row.id, { ...discovered, ...row, page: key, type: row.type || (key === 'cafes' ? 'Café' : key === 'dining' ? 'Restaurant' : key === 'nightlife' ? 'Bar' : key === 'events' ? 'Event' : discovered?.cat || row.meta?.split(' · ')[0] || 'Place') });
   }
 }
+// Real photos from the Figma image cluster, matched by place. Places without a supplied photo borrow a sample.
+const PHOTO_BY_ID = { foxy: CAROUSEL[0], sentient: PHOTO.p0606, gallery: PHOTO.p0608, bean: PHOTO.p0602, grey: PHOTO.p0610, husk: PHOTO.p0801, cotton: PHOTO.p0802, kitchen: PHOTO.p0803, rocks: PHOTO.p0804, lanie: PHOTO.p0805, alligator: PHOTO.p0806, treehouse: PHOTO.p0807 };
+const SAMPLES = [PHOTO.p0603, PHOTO.p0604, PHOTO.p0602, PHOTO.p0908];
+let sampleAt = 0;
+const photoFor = (p) => PHOTO_BY_ID[p.id] || p.img || SAMPLES[sampleAt++ % SAMPLES.length];
 const artwork = { cafes: ['Cafes', '#dccdbc'], dining: ['Restaurants', '#eccbbf'], nightlife: ['Romantic', '#e9c2cd'], events: ['Events', '#d9cbe6'], more: ['LowKey', '#cfd7bb'], foryou: ['StudyWork', '#c8d6e4'] };
 export const PLACES = [...inventory.values()].map(p => {
   // Foxy's venue screen explicitly describes Natural light and Patio seating.
@@ -57,11 +64,11 @@ export const PLACES = [...inventory.values()].map(p => {
   add(p.l != null && p.l <= 2 && p.s != null && p.s <= 3, 'Romantic');
   add(p.s != null && p.s <= 2 && ['Café', 'Bookstore'].includes(p.type), 'Study & work');
   add(p.id === 'opening', 'New in Savannah');
-  return { ...p, l: lightLevel, tags, art, color, area: p.type === 'Event' ? p.meta?.split(' · ')[0] || 'Savannah' : 'Savannah', distance: p.dist || p.meta?.match(/[0-9.]+ mi/)?.[0] || 'Nearby', sound: SOUND_W[p.s] || 'Unknown', light: LIGHT_W[lightLevel] || 'Unknown', crowd: CROWD_W[p.c] || 'Unknown', seating: p.seat?.includes('outdoor') ? p.type === 'Event' ? 'Outdoor' : 'Patio' : p.seat?.includes('booth') ? 'Booths' : p.seat?.includes('indoor') ? 'Indoor' : 'Unknown' };
+  return { ...p, photo: photoFor(p), l: lightLevel, tags, art, color, area: p.type === 'Event' ? p.meta?.split(' · ')[0] || 'Savannah' : 'Savannah', distance: p.dist || p.meta?.match(/[0-9.]+ mi/)?.[0] || 'Nearby', sound: SOUND_W[p.s] || 'Unknown', light: LIGHT_W[lightLevel] || 'Unknown', crowd: CROWD_W[p.c] || 'Unknown', seating: p.seat?.includes('outdoor') ? p.type === 'Event' ? 'Outdoor' : 'Patio' : p.seat?.includes('booth') ? 'Booths' : p.seat?.includes('indoor') ? 'Indoor' : 'Unknown' };
 });
 // Figma includes Bakeries; the existing inventory has none. One explicit fixture
 // keeps this card usable until bakery data is supplied.
-PLACES.push({ id: 'bakery-demo', name: 'Auspicious Baking Co.', type: 'Bakery', area: 'Savannah', distance: '2.1 mi', s: 2, l: 4, c: 2, seat: ['outdoor'], sound: 'Quiet', light: 'Natural', crowd: 'Calm', seating: 'Patio', art: 'Bakeries', color: '#ebd7b4', tags: ['Bakeries', 'Brunch', 'Low-key', 'Cozy', 'Quiet now', 'Outdoor seating', 'Natural light', 'New in Savannah'] });
+PLACES.push({ id: 'bakery-demo', name: 'Auspicious Baking Co.', type: 'Bakery', area: 'Savannah', distance: '2.1 mi', s: 2, l: 4, c: 2, seat: ['outdoor'], sound: 'Quiet', light: 'Natural', crowd: 'Calm', seating: 'Patio', art: 'Bakeries', photo: PHOTO.p0603, color: '#ebd7b4', tags: ['Bakeries', 'Brunch', 'Low-key', 'Cozy', 'Quiet now', 'Outdoor seating', 'Natural light', 'New in Savannah'] });
 
 export function matchesFilters(place, filters) {
   return filters.every(f => {
