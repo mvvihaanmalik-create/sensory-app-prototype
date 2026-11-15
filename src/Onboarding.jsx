@@ -14,7 +14,7 @@ import boothsImg from './assets/onboarding/booths.png';
 import fitsImg from './assets/onboarding/fits.png';
 import cafesImg from './assets/onboarding/cafes.png';
 import musicImg from './assets/onboarding/music.png';
-import contoursImg from './assets/onboarding/contours.svg';
+import { CONTOURS } from './contourData.js';
 
 const INDIGO = '#5b52c9';
 // Figma onboarding chip: navy text (#2a2650), unlike the venue pages' #5e5a7e
@@ -95,19 +95,68 @@ const Title = ({ top, children }) => (
   <p className="abs" style={{ left: 40, top, width: 360, textAlign: 'center', ...t(28, 600, NAVY, { lineHeight: 1.2 }) }}>{children}</p>
 );
 
+/* ---------- Background motion (Figma 1472:8838 and 1487:9200) ---------- */
+// Four Figma phases looped 1 > 2 > 3 > 4 > 1, Ease In and Out per transition.
+const loop = (vals, dur) => ({ duration: dur * 4, times: [0, 0.25, 0.5, 0.75, 1], ease: Array(4).fill('easeInOut'), repeat: Infinity });
+const keys = (a) => [...a, a[0]];
+// Steps render inside AnimatePresence initial={false}, which blocks mount animations; start the loops one tick after mount.
+const useStarted = () => { const [on, setOn] = useState(false); useEffect(() => { setOn(true); }, []); return on; };
+
+// Diffuse gradient: five blurred colour clouds anchored to the bottom, 1.5 s per phase. [x, y, w, h, opacity] per phase.
+const CLOUDS = [
+  { c: 'rgb(243,205,173)', blur: 105, p: [[0, 825, 300, 283, 0.6], [111, 747, 310, 319, 0.63], [181, 856, 276, 276, 0.48], [-50, 864, 338, 275, 0.55]] },
+  { c: 'rgb(207,225,167)', blur: 82, p: [[-118, 915, 278, 325, 0.76], [-155, 810, 277, 388, 0.63], [-37, 849, 245, 320, 0.72], [-106, 958, 293, 305, 0.66]] },
+  { c: 'rgb(211,168,218)', blur: 98, p: [[237, 895, 331, 325, 0.79], [153, 910, 378, 342, 0.77], [269, 761, 312, 393, 0.75], [192, 819, 399, 361, 0.82]] },
+  { c: 'rgb(235,167,175)', blur: 92, p: [[64, 810, 321, 362, 0.76], [180, 821, 281, 366, 0.75], [120, 921, 312, 287, 0.72], [-4, 784, 316, 378, 0.73]] },
+  { c: 'rgb(238,218,170)', blur: 104, p: [[-166, 851, 268, 305, 0.65], [-69, 855, 288, 327, 0.59], [-141, 746, 306, 390, 0.55], [-102, 804, 258, 337, 0.61]] },
+];
+function DiffuseGradient() {
+  return (
+    <div className="abs" style={{ inset: 0, overflow: 'hidden', pointerEvents: 'none' }} aria-hidden>
+      {CLOUDS.map(({ c, blur, p }, i) => {
+        const [x0, y0, w0, h0] = p[0];
+        return (
+          <motion.div key={i} className="abs" style={{ left: x0, top: y0, width: w0, height: h0, borderRadius: '50%', background: c, filter: `blur(${blur / 2}px)`, transformOrigin: '0 0', willChange: 'transform, opacity' }}
+            animate={{ x: keys(p.map((q) => q[0] - x0)), y: keys(p.map((q) => q[1] - y0)), scaleX: keys(p.map((q) => q[2] / w0)), scaleY: keys(p.map((q) => q[3] / h0)), opacity: keys(p.map((q) => q[4])) }}
+            transition={loop(p, 1.5)} />
+        );
+      })}
+    </div>
+  );
+}
+
+// Contour ripple: each line shifts and scales a little out of step with its neighbours, 1.65 s per phase,
+// under the Figma alpha fade (solid to 46.9%, clear by 68.3%).
+function ContourRipple() {
+  const on = useStarted();
+  return (
+    <svg className="abs" width="440" height="956" viewBox="0 0 440 956" fill="none" aria-hidden
+      style={{ left: 0, top: 0, pointerEvents: 'none', overflow: 'hidden',
+        WebkitMaskImage: 'linear-gradient(180deg, #000 46.86%, transparent 68.33%)', maskImage: 'linear-gradient(180deg, #000 46.86%, transparent 68.33%)' }}>
+      {CONTOURS.map(({ d, o, f }, i) => (
+        <motion.path key={i} d={d} stroke="rgba(94,90,126,0.16)" strokeWidth="1.2" vectorEffect="non-scaling-stroke"
+          style={{ transformOrigin: `${o[0]}px ${o[1]}px`, transformBox: 'view-box' }}
+          animate={on ? { x: keys(f.map((q) => q[0])), y: keys(f.map((q) => q[1])), scaleX: keys(f.map((q) => q[2])), scaleY: keys(f.map((q) => q[3])) } : { x: f[0][0], y: f[0][1], scaleX: f[0][2], scaleY: f[0][3] }}
+          transition={loop(f, 1.65)} />
+      ))}
+    </svg>
+  );
+}
+
 /* ---------- Welcome ---------- */
+// Floating icons: Figma rest positions (y shifted 18 like the rest of this screen), [dx, dy] per phase.
 const ORBIT = [
-  { src: soundImg, left: 46, top: 150, s: 84, dur: 5.4, dy: -6 },
-  { src: lightImg, left: 294, top: 130, s: 84, dur: 6.2, dy: 6 },
-  { src: boothsImg, left: 316, top: 350, s: 84, dur: 5.8, dy: -5 },
-  { src: musicImg, left: 60, top: 372, s: 84, dur: 6.6, dy: 5 },
+  { src: soundImg, left: 49, top: 150, s: 84, dx: [0, -3, -5, -2], dy: [0, -13, 0, 13] },
+  { src: lightImg, left: 294, top: 145, s: 84, dx: [0, -4, 0, 4], dy: [0, 12, 0, -12] },
+  { src: boothsImg, left: 312, top: 352, s: 84, dx: [0, 3, 6, 3], dy: [0, -8, -14, -6] },
+  { src: musicImg, left: 59, top: 361, s: 84, dx: [0, 3, 1, -2], dy: [0, 6, 11, 4] },
 ];
 
 function Welcome({ onNext, onSkip }) {
+  const on = useStarted();
   return (
     <>
-      <img className="abs" src={contoursImg} alt="" draggable={false} style={{ left: 0, top: 0, width: 440, height: 956 }} />
-      <div className="abs" style={{ left: 0, top: 430, width: 440, height: 456, background: 'linear-gradient(180deg, rgba(247,245,241,0) 0%, #f7f5f1 45%, #f7f5f1 100%)' }} />
+      <ContourRipple />
       <SkipBtn onClick={onSkip} />
       <motion.div className="abs" style={{ left: 132, top: 218, width: 176, height: 176, borderRadius: 88, background: 'rgba(255,255,255,0.85)', boxShadow: '0 2px 8px rgba(42,38,80,0.06)' }}
         initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={GENTLE}>
@@ -116,7 +165,7 @@ function Welcome({ onNext, onSkip }) {
       {ORBIT.map((o, i) => (
         <motion.div key={i} className="abs" style={{ left: o.left, top: o.top, width: o.s, height: o.s }}
           initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ ...GENTLE, delay: 0.08 * (i + 1) }}>
-          <motion.div className="gl" animate={{ y: [0, o.dy, 0] }} transition={{ duration: o.dur, repeat: Infinity, ease: 'easeInOut' }}
+          <motion.div className="gl" animate={on ? { x: keys(o.dx), y: keys(o.dy) } : { x: 0, y: 0 }} transition={loop(o.dy, 1.65)}
             style={{ width: o.s, height: o.s, borderRadius: o.s / 2, boxShadow: '0 14px 36px rgba(42,38,80,0.1), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
             <img src={o.src} alt="" draggable={false} style={{ position: 'absolute', left: 6, top: 6, width: 66, height: 66, objectFit: 'contain' }} />
           </motion.div>
@@ -294,6 +343,7 @@ export default function Onboarding({ start = 0, onSkip, onFinish, onAddAnother }
   const shell = { skip: onSkip, back, next };
   return (
     <div className="abs" style={{ inset: 0, background: '#f7f5f1', overflow: 'hidden' }}>
+      <DiffuseGradient />
       <AnimatePresence initial={false} custom={dir} mode="popLayout">
         <motion.div key={id} className="abs" style={{ inset: 0 }} custom={dir}
           initial={{ opacity: 0, x: 36 * dir }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -36 * dir }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}>
