@@ -1,4 +1,4 @@
-// Venue page · Foxy Loxy Cafe (Figma 789:3120): Overview / Menu / Reviews / Photos
+// Venue page · Fern & Fable (Figma 789:3120): Overview / Menu / Reviews / Photos
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useMotionValue, useTransform } from 'motion/react';
 import { GENTLE, Icon } from './ui.jsx';
@@ -8,9 +8,9 @@ import { VP, ZONES, GRID } from './venuePhotos.js';
 import { G, CircleBtn, Chip, SenseTiles, InfoList, ReviewSummary, AISummary, ReviewCard, H, PrimaryCTA, Toast, DayChart, weekFrom, NAVY, MUTED, PURPLE, DIV, TAP, t } from './flow.jsx';
 
 export const VENUE = {
-  name: 'Foxy Loxy Cafe',
-  address: '1919 Bull St, Savannah, GA 31401',
-  phone: '(912) 401-0543',
+  name: 'Fern & Fable',
+  address: '214 Jones St, Savannah, GA 31401',
+  phone: '(912) 555-0142',
 };
 
 // Typical crowd by hour, 6a to 11p (18 bars). Sunday matches the Figma frame.
@@ -24,7 +24,7 @@ export function CrowdCard() {
   );
 }
 
-export const SENSE_VALUES = { sound: 'Lively', light: 'Natural', crowd: 'Busy', temp: 'Mild', seating: 'Patio' };
+export const SENSE_VALUES = { sound: 'Lively', light: 'Natural', crowd: 'Busy', temp: 'Mild', seating: 'Window tables' };
 
 
 function Overview({ onReviews, firstReview }) {
@@ -37,12 +37,13 @@ function Overview({ onReviews, firstReview }) {
           <button style={{ width: '100%', height: 52, padding: '0 18px 0 20px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}>
             <VIcon name="clock" />
             <span style={{ ...t(15, 500), flex: '1 0 0' }}>Open · Closes 9 PM</span>
+            <VIcon name="caretDown" size={18} />
           </button>
         </div>
       ),
     },
-    { icon: 'forkKnife', text: 'foxyloxycafe.com/menu' },
-    { icon: 'globe', text: 'foxyloxycafe.com' },
+    { icon: 'forkKnife', text: 'fernandfable.com/menu' },
+    { icon: 'globe', text: 'fernandfable.com' },
     { icon: 'phone', text: VENUE.phone },
   ];
   return (
@@ -50,7 +51,7 @@ function Overview({ onReviews, firstReview }) {
       <InfoList rows={rows} />
       <H>What's here</H>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-        {['Back patio', 'Garden pond', 'Live music', 'Beer & wine', 'Art gallery'].map((c) => <Chip key={c} label={c} />)}
+        {['Window seating', 'Glass-block wall', 'Live music', 'Beer & wine', 'Art gallery'].map((c) => <Chip key={c} label={c} />)}
       </div>
       <H>Reviews</H>
       <ReviewSummary onClick={onReviews} />
@@ -60,29 +61,32 @@ function Overview({ onReviews, firstReview }) {
   );
 }
 
-const DISHES = [['Breakfast taco', 'Tex-Mex'], ['Kolache', 'Bakery'], ['Horchata latte', 'Coffee'], ['Chai', 'Coffee']];
+const MENU_PHOTOS = [[128, VP.counter], [188, VP.pie], [199, VP.tacos], [199, VP.store]];
+const HIGHLIGHTS = [[VP.patio, 'Iced Strawberry and Matcha Latte'], [VP.indoor, 'Iced Americano'], [VP.garden], [VP.bar], [VP.hero]];
 function Menu() {
+  const tile = (src, label, i) => (
+    <motion.div key={i} whileTap={{ scale: 0.97 }} transition={TAP} style={{ position: 'relative', height: 251, borderRadius: 16, overflow: 'hidden', background: `#dbdbde url(${src}) center / cover` }}>
+      {label && <span className="abs" style={{ left: 10, right: 10, bottom: 10, alignSelf: 'flex-start', width: 'fit-content', maxWidth: 168, padding: '6px 12px', borderRadius: 14,
+        background: 'rgba(255,255,255,0.88)', border: '1.5px solid rgba(255,255,255,0.95)', boxShadow: '0 4px 12px rgba(42,38,80,0.12)', ...t(13, 600, NAVY, { lineHeight: 1.25 }) }}>{label}</span>}
+    </motion.div>
+  );
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <H>Popular dishes</H>
-      <div className="hscroll" style={{ margin: '0 -24px -20px', padding: '4px 24px 40px', display: 'flex', gap: 12 }}>
-        {DISHES.map(([n, k]) => (
-          <G key={n} r={24} style={{ width: 168, flex: 'none', padding: '8px 8px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ height: 112, borderRadius: 18, background: '#e0e0e3' }} />
-            <div style={{ padding: '0 6px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <span className="nowrap" style={t(15, 600)}>{n}</span>
-              <span style={t(13, 400, MUTED)}>{k}</span>
-            </div>
-          </G>
-        ))}
-      </div>
       <H>Menu photos</H>
-      <div style={{ display: 'grid', gridTemplateColumns: '188px 188px', gap: 16 }}>
-        {[VP.tacos, VP.pie, VP.counter, VP.patio].map((src, i) => <motion.div key={i} whileTap={{ scale: 0.97 }} style={{ height: 188, borderRadius: 24, background: `#dbdbde url(${src}) center / cover` }} />)}
+      <div className="hscroll" style={{ margin: '0 -24px', padding: '0 24px', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+        {MENU_PHOTOS.map(([w, src], i) => <motion.div key={i} whileTap={{ scale: 0.97 }} transition={TAP} style={{ width: w, height: i ? 266 : 262, flex: 'none', borderRadius: 16, background: `#dbdbde url(${src}) center / cover` }} />)}
+        <motion.button whileTap={{ scale: 0.97 }} transition={TAP} style={{ width: 156, height: 266, flex: 'none', borderRadius: 16, background: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+          <VIcon name="plusBold" size={24} />
+          <span className="nowrap" style={t(14, 600)}>Add menu photos</span>
+        </motion.button>
+      </div>
+      <H>Highlights</H>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+        {[[0, 2, 4], [1, 3]].map((col, ci) => <div key={ci} style={{ width: 188, display: 'flex', flexDirection: 'column', gap: 12 }}>{col.map((i) => tile(HIGHLIGHTS[i][0], HIGHLIGHTS[i][1], i))}</div>)}
       </div>
       <G as="button" r={28} whileTap={{ scale: 0.98 }} transition={TAP} style={{ height: 56, padding: '0 18px 0 20px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}>
         <VIcon name="forkKnife" />
-        <span style={{ ...t(15, 500), flex: '1 0 0' }}>View full menu · foxyloxycafe.com</span>
+        <span style={{ ...t(15, 500), flex: '1 0 0' }}>View full menu · fernandfable.com</span>
         <VIcon name="arrowUpRight" />
       </G>
     </div>
@@ -90,11 +94,11 @@ function Menu() {
 }
 
 export const REVIEWS = [
-  { name: 'Local guide', meta: '42 reviews · 1 week ago', text: 'Cozy, artsy space with a lovely back patio. Great chai and kolaches. Gets busy on weekends, so come early for a seat.', tags: ['Sound · Lively', 'Crowd · Busy'], age: 7 },
-  { name: 'Weekend regular', meta: '8 reviews · 2 weeks ago', text: 'Lively but easy to talk at the patio tables. Natural light inside makes it a nice spot to read in the morning.', tags: ['Sound · Easy to talk', 'Light · Natural'], age: 14 },
-  { name: 'First visit', meta: '3 reviews · 1 month ago', text: 'Loved the horchata latte and the art on the walls. Parking is limited and the line moves slowly at brunch.', tags: ['Crowd · Packed', 'Seating · Patio'], age: 30 },
+  { name: 'Daniel Brooks', meta: 'Local guide · 1 wk ago', text: 'The espresso machine and chatter made the counter area lively.', tags: ['Sound · Lively'], likes: 42, replies: 12, age: 7 },
+  { name: 'Leah Park', meta: '3 days ago', text: 'The wall lights felt soft, and it was a little cool by the booth.', tags: ['Light · Warm & cozy', 'Temperature · Cool'], likes: 16, replies: 3, age: 3 },
+  { name: 'Priya Shah', meta: '3 wks ago', text: 'We could still find a table, but the aisle felt tight when people passed.', tags: ['Crowd · Busy'], likes: 13, replies: 1, age: 21 },
 ];
-const FILTERS = ['All', 'Sound', 'Crowd', 'Seating', 'Service'];
+const FILTERS = ['All', 'Sound', 'Light', 'Crowd', 'Temperature', 'Seating', 'Service'];
 
 function Reviews({ onWrite, mine }) {
   const [f, setF] = useState('All');
@@ -113,14 +117,14 @@ function Reviews({ onWrite, mine }) {
       </G>
       <div className="hscroll" style={{ margin: '0 -24px -24px', padding: '4px 24px 40px', display: 'flex', gap: 8 }}>
         {FILTERS.map((c) => <Chip key={c} label={c} on={f === c} onClick={() => setF(c)} />)}
-        <div style={{ width: 1, background: DIV, margin: '8px 4px', flex: 'none' }} />
+      </div>
+      <div style={{ display: 'flex', marginTop: -24 }}>
         <G as="button" r={20} onClick={() => setSort((s) => (s === 'Newest' ? 'Most relevant' : 'Newest'))} whileTap={{ scale: 0.95 }} transition={TAP}
-          style={{ height: 40, padding: '0 12px 0 16px', display: 'flex', alignItems: 'center', gap: 6, flex: 'none' }}>
+          style={{ height: 40, padding: '0 16px', display: 'flex', alignItems: 'center', gap: 6, flex: 'none' }}>
           <span className="nowrap" style={t(14, 500)}>{sort}</span>
-          <VIcon name="caretDown" size={16} />
         </G>
       </div>
-      <motion.div layout style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: -16 }}>
+      <motion.div layout style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <AnimatePresence mode="popLayout" initial={false}>
           {list.map((r) => (
             <motion.div key={r.name} layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }} transition={GENTLE}>
@@ -185,15 +189,13 @@ export default function Venue({ tab, setTab, onBack, backLabel = 'Back', saved =
         <div style={{ position: 'relative', background: '#f7f5f1', padding: '24px 24px 140px', display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <h1 style={t(28, 600, NAVY, { letterSpacing: -0.4 })}>{VENUE.name}</h1>
-            <p style={t(14, 400, MUTED)}>4.6 ★ · 2,600 reviews · $ · Café · Tex-Mex</p>
+            <p style={t(14, 400, MUTED)}>4.6 ★ · 2,600 reviews · $ · Café</p>
           </div>
           <SenseTiles values={SENSE_VALUES} onOpen={onSense} />
           <div className="hscroll" style={{ margin: '0 -24px', padding: '0 24px', display: 'flex', gap: 12 }}>
-            {[300, 220, 220, 220].map((w, i) => (
-              <motion.button key={i} aria-label={`See photos · ${ZONES[i][0]}`} onClick={() => goTab('photos', true)} whileTap={{ scale: 0.97 }} transition={TAP}
-                style={{ position: 'relative', width: w, height: 280, borderRadius: 24, background: `#dbdbde url(${ZONES[i][1]}) center / cover`, flex: 'none', overflow: 'hidden' }}>
-                <span className="abs nowrap" style={{ left: 12, bottom: 12, height: 30, padding: '0 14px', borderRadius: 16, background: 'rgba(255,255,255,0.88)', border: '1.5px solid rgba(255,255,255,0.95)', boxShadow: '0 4px 12px rgba(42,38,80,0.12)', display: 'flex', alignItems: 'center', ...t(13, 600, NAVY) }}>{ZONES[i][0]}</span>
-              </motion.button>
+            {[[220, VP.hero], [210, VP.patio], [210, VP.indoor], [210, VP.bar], [210, VP.garden]].map(([w, src], i) => (
+              <motion.button key={i} aria-label="See photos" onClick={() => goTab('photos', true)} whileTap={{ scale: 0.97 }} transition={TAP}
+                style={{ width: w, height: 280, borderRadius: 24, background: `#dbdbde url(${src}) center / cover`, flex: 'none' }} />
             ))}
           </div>
           <div style={{ height: 104 }} />
@@ -224,7 +226,7 @@ export default function Venue({ tab, setTab, onBack, backLabel = 'Back', saved =
       <CircleBtn icon="caretLeft" label={backLabel} onClick={onBack} style={{ position: 'absolute', left: 24, top: 56, zIndex: 10 }} />
       <CircleBtn label={saved ? 'Saved' : 'Save'} onClick={onToggleSaved} style={{ position: 'absolute', left: 316, top: 56, zIndex: 10 }}>
         <motion.span key={saved ? 'on' : 'off'} initial={{ scale: 0.4 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 14 }}>
-          <VIcon name={saved ? 'heartFill' : 'heart'} fill={saved ? PURPLE : NAVY} />
+          <VIcon name={saved ? 'bookmarkFill' : 'bookmark'} size={22} fill={NAVY} />
         </motion.span>
       </CircleBtn>
       <CircleBtn icon="export" label="Share" style={{ position: 'absolute', left: 368, top: 56, zIndex: 10 }} />

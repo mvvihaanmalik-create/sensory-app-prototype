@@ -32,69 +32,51 @@ function Stars({ value, onChange }) {
   );
 }
 
-// Stepped slider. value = null means not set yet: no fill, no thumb.
-function Scale({ icon, title, steps, value, onChange, endsOnly }) {
+// Stepped slider (Figma "Review / Sound slider"). Stop 0 is "Didn't notice".
+// value = null means not set yet: no thumb, every stop shows a marker.
+const INK = '#2a2650';
+function Scale({ title, steps, value, onChange }) {
   const ref = useRef(null);
+  const drag = useRef(false);
   const n = steps.length;
-  const skip = value === 'skip';
-  if (skip) value = null;
-  const f = value == null ? 0 : value / (n - 1);
-  const W = 345; // card inner width (392 - 2 x 1.5 border - 2 x 22 padding)
-  const pos = (x) => 14 + (W - 28) * x;
+  const L = 24, W = 344; // track inset and width inside the 392 card
+  const pos = (i) => L + (W * i) / (n - 1);
   const pick = (e) => {
-    const el = ref.current; const r = el.getBoundingClientRect();
-    const px = ((e.clientX - r.left) / r.width) * W;
-    const k = Math.max(0, Math.min(n - 1, Math.round(((px - 14) / (W - 28)) * (n - 1))));
+    const r = ref.current.getBoundingClientRect();
+    const px = ((e.clientX - r.left) / r.width) * 392;
+    const k = Math.max(0, Math.min(n - 1, Math.round(((px - L) / W) * (n - 1))));
     if (k !== value) onChange(k);
   };
-  const drag = useRef(false);
   return (
-    <G r={28} style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, height: 36 }}>
-        {icon}
-        <span style={{ ...t(17, 600), flex: '1 0 0' }}>{title}</span>
-        <motion.button whileTap={{ scale: 0.94 }} transition={TAP} onClick={() => onChange(skip ? null : 'skip')} aria-pressed={skip}
-          initial={false} animate={{ backgroundColor: skip ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.5)' }}
-          style={{ height: 36, padding: '0 16px', borderRadius: 18, border: '1px solid rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', gap: 6, flex: 'none' }}>
-          <AnimatePresence initial={false}>
-            {skip && <motion.span initial={{ width: 0, opacity: 0 }} animate={{ width: 14, opacity: 1 }} exit={{ width: 0, opacity: 0 }} style={{ display: 'flex', overflow: 'hidden' }}><VIcon name="check" size={14} /></motion.span>}
-          </AnimatePresence>
-          <span className="nowrap" style={t(13, skip ? 600 : 500)}>Didn't notice</span>
-        </motion.button>
-      </div>
-      <motion.div ref={ref} initial={false} animate={{ opacity: skip ? 0.35 : 1 }} style={{ position: 'relative', height: 44, touchAction: 'none', cursor: 'pointer' }}
+    <G r={22} style={{ position: 'relative', height: 108 }}>
+      <span className="abs" style={{ left: 16, top: 13, ...t(16, 600, INK) }}>{title}</span>
+      <div ref={ref} className="abs" style={{ left: 0, right: 0, top: 42, bottom: 0, touchAction: 'none', cursor: 'pointer' }}
         onPointerDown={(e) => { drag.current = true; e.currentTarget.setPointerCapture(e.pointerId); pick(e); }}
         onPointerMove={(e) => drag.current && pick(e)}
         onPointerUp={() => { drag.current = false; }} onPointerCancel={() => { drag.current = false; }}>
-        <div className="abs" style={{ left: 0, right: 0, top: 18, height: 8, borderRadius: 4, background: 'rgba(42,38,80,0.1)' }} />
-        <motion.div className="abs" style={{ left: 0, top: 18, height: 8, borderRadius: 4, background: PURPLE }}
-          initial={false} animate={{ width: value == null ? 0 : pos(f) }} transition={GENTLE} />
+        <div className="abs" style={{ left: L, width: W, top: 15, height: 4, borderRadius: 2, background: 'rgba(42,38,80,0.1)' }} />
+        <motion.div className="abs" style={{ left: L, top: 15, height: 4, borderRadius: 2, background: PURPLE }}
+          initial={false} animate={{ width: value == null ? 0 : pos(value) - L }} transition={GENTLE} />
         {steps.map((_, i) => (
-          <motion.div key={i} className="abs" style={{ left: pos(i / (n - 1)), top: 19, width: 6, height: 6, marginLeft: -3, borderRadius: 3 }}
-            initial={false} animate={{ backgroundColor: value != null && i <= value ? 'rgba(255,255,255,0.9)' : 'rgba(42,38,80,0.25)' }} />
+          <motion.div key={i} className="abs" style={{ left: pos(i) - 3, top: 14, width: 6, height: 6, borderRadius: 3, background: '#c4c2cf' }}
+            initial={false} animate={{ opacity: value == null || i > value ? 1 : 0 }} transition={{ duration: 0.15 }} />
         ))}
         <AnimatePresence>
           {value != null && (
-            <motion.div className="abs" style={{ top: 8, width: 28, height: 28, marginLeft: -14, borderRadius: 14, background: '#fff', border: '1.5px solid #fff', boxShadow: '0 2px 8px rgba(42,38,80,0.18), 0 0 0 0.5px rgba(42,38,80,0.06)' }}
-              initial={{ scale: 0, left: pos(f) }} animate={{ scale: 1, left: pos(f) }} exit={{ scale: 0 }} transition={GENTLE} />
+            <motion.div className="abs" style={{ top: 10, width: 15, height: 15, marginLeft: -7.5, borderRadius: 8, background: PURPLE }}
+              initial={{ scale: 0, left: pos(value) }} animate={{ scale: 1, left: pos(value) }} exit={{ scale: 0 }} transition={GENTLE} />
           )}
         </AnimatePresence>
-      </motion.div>
-      <motion.div initial={false} animate={{ opacity: skip ? 0.35 : 1 }} style={{ position: 'relative', height: 16, marginTop: -6 }}>
         {steps.map((s, i) => {
-          if (endsOnly && i > 0 && i < n - 1) return null;
           const first = i === 0, last = i === n - 1;
-          const on = value === i;
           return (
-            <motion.span key={s} className="abs nowrap" initial={false}
-              
-              style={{ top: 0, fontSize: 12, fontWeight: on ? 600 : 400, lineHeight: '16px', color: NAVY,
-                ...(first ? { left: 0 } : last ? { right: 0 } : { left: pos(i / (n - 1)), transform: 'translateX(-50%)' }) }}>
+            <span key={s} className="abs nowrap" style={{ top: 40, fontSize: 12, fontWeight: 400, lineHeight: '14px', color: value === i ? PURPLE : INK, transition: 'color .15s',
+              ...(first ? { left: 12 } : last ? { right: 12 } : { left: pos(i), transform: 'translateX(-50%)' }) }}>
               {s}
-            </motion.span>
+            </span>
           );
         })}
-      </motion.div>
+      </div>
     </G>
   );
 }
@@ -113,11 +95,13 @@ function TwoWay({ value, onChange, options }) {
   );
 }
 
+const SKIP = "Didn't notice";
 const SCALES = {
-  sound: ['Quiet', 'Easy to talk', 'Lively', 'Loud'],
-  light: ['Dim', 'Warm & cozy', 'Natural light', 'Bright'],
-  crowd: ['Almost empty', 'Relaxed', 'Buzzing', 'Busy', 'Packed'],
-  temp: ['Cool', 'Mild', 'Warm'],
+  tod: [SKIP, 'Morning', 'Afternoon', 'Evening', 'Night'],
+  sound: [SKIP, 'Quiet', 'Low', 'Moderate', 'Lively'],
+  light: [SKIP, 'Dim', 'Soft', 'Moderate', 'Bright'],
+  crowd: [SKIP, 'Empty', 'Light', 'Moderate', 'Busy'],
+  temp: [SKIP, 'Cold', 'Cool', 'Mild', 'Warm'],
 };
 
 export default function WriteReview({ onClose, onPosted, mine }) {
@@ -142,9 +126,9 @@ export default function WriteReview({ onClose, onPosted, mine }) {
   const post = () => {
     setBusy(true);
     const tags = [];
-    if (typeof v.sound === 'number') tags.push(`Sound · ${SCALES.sound[v.sound]}`);
-    if (typeof v.crowd === 'number') tags.push(`Crowd · ${SCALES.crowd[v.crowd]}`);
-    if (typeof v.light === 'number') tags.push(`Light · ${SCALES.light[v.light]}`);
+    if (v.sound > 0) tags.push(`Sound · ${SCALES.sound[v.sound]}`);
+    if (v.crowd > 0) tags.push(`Crowd · ${SCALES.crowd[v.crowd]}`);
+    if (v.light > 0) tags.push(`Light · ${SCALES.light[v.light]}`);
     if (seats[0]) tags.push(`Seating · ${seats[0]}`);
     setTimeout(() => onPosted({ name: 'You', meta: 'Just now', stars: rating, text: text.trim(), tags, mine: true, age: 0 }), 800);
   };
@@ -160,21 +144,21 @@ export default function WriteReview({ onClose, onPosted, mine }) {
           </motion.div>
 
           <Section icon="clock" title="When did you go?">
-            <Scale icon={<VIcon name="clock" />} title="Time of day" steps={['Morning', 'Afternoon', 'Evening', 'Night']} value={tod} onChange={setTod} />
+            <Scale title="Time of day" steps={SCALES.tod} value={tod} onChange={setTod} />
             <TwoWay options={['Weekday', 'Weekend']} value={part} onChange={setPart} />
           </Section>
 
-          <Scale icon={<Icon d={paths.speaker} size={24} fill={NAVY} />} title="Sound" steps={SCALES.sound} value={v.sound} onChange={(k) => setV({ ...v, sound: k })} />
-          <Scale icon={<Icon d={paths.sun} size={24} fill={NAVY} />} title="Light" steps={SCALES.light} value={v.light} onChange={(k) => setV({ ...v, light: k })} />
-          <Scale icon={<Icon d={paths.users} size={24} fill={NAVY} />} title="Crowd" steps={SCALES.crowd} value={v.crowd} onChange={(k) => setV({ ...v, crowd: k })} endsOnly />
-          <Scale icon={<VIcon name="therm" />} title="Temperature" steps={SCALES.temp} value={v.temp} onChange={(k) => setV({ ...v, temp: k })} />
+          <Scale title="Sound" steps={SCALES.sound} value={v.sound} onChange={(k) => setV({ ...v, sound: k })} />
+          <Scale title="Light" steps={SCALES.light} value={v.light} onChange={(k) => setV({ ...v, light: k })} />
+          <Scale title="Crowd" steps={SCALES.crowd} value={v.crowd} onChange={(k) => setV({ ...v, crowd: k })} />
+          <Scale title="Temperature" steps={SCALES.temp} value={v.temp} onChange={(k) => setV({ ...v, temp: k })} />
 
-          <Section icon="chair" iconSize={24} title="Seating" note="Pick any">
-            <ChipGroup options={['Patio', 'Tables', 'Bar seats', 'Sofas', 'Booths', 'Standing room', 'Window seat']} value={seats} onChange={setSeats} />
+          <Section icon="chair" iconSize={24} title="Seating" note="Select all that apply">
+            <ChipGroup options={['Booth', 'Corner seat', 'Table with space', 'Bar seat', 'Couch or lounge', 'Communal table', 'Outdoor', 'Window seat']} value={seats} onChange={setSeats} />
           </Section>
 
-          <Section icon="wind" title="Smells you noticed" note="Pick any">
-            <ChipGroup options={['None', 'Coffee', 'Food cooking', 'Smoke', 'Perfume']} value={smells}
+          <Section icon="wind" title="Smells you noticed" note="Select all that apply">
+            <ChipGroup options={['None', 'Smoke', 'Perfume or incense', 'Fried food', 'Seafood', 'Cleaning products']} value={smells}
               onChange={(next) => {
                 const added = next.find((x) => !smells.includes(x));
                 if (added === 'None') setSmells(['None']);

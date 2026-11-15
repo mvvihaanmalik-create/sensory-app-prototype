@@ -8,6 +8,7 @@ import { paths } from './svgs.js';
 import { VIcon, SpeakerWaves } from './venueIcons.jsx';
 import { G, CircleBtn, TopBar, Section, Chip, ChipGroup, PrimaryCTA, InfoList, Pill, NAVY, DIV, TAP, t } from './flow.jsx';
 import { VENUE } from './Venue.jsx';
+import ticketArt from './assets/ticket/panel.jpg';
 
 // ---------- Data ----------
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -114,7 +115,7 @@ const takenSet = (date, time) => {
   return s;
 };
 
-export const COMFORT = ['Away from speakers', 'Step-free access', 'Softer lighting', 'Space for a stroller'];
+export const COMFORT = ['Away from speakers', 'Near the exit', 'Step-free access', 'Softer lighting', 'Space for a stroller'];
 const RULES = {
   'Away from speakers': [(tb) => !tb.speaker, 'close to the speaker'],
   'Near the exit': [(tb) => tb.exit, 'not near an exit'],
@@ -123,7 +124,7 @@ const RULES = {
   'Space for a stroller': [(tb) => tb.space, 'tight for a stroller'],
 };
 
-export const emptyDraft = () => ({ guests: null, date: null, time: null, zone: 'Patio', table: null, comfort: [], note: '', name: 'Your name', phone: '(000) 000-0000', email: 'name@email.com', remind: true });
+export const emptyDraft = () => ({ guests: null, date: null, time: null, zone: 'Patio', table: null, comfort: [], note: '', name: 'Nora', phone: '(912) 555-0148', email: 'nora@email.com', remind: true });
 
 function useNudge() {
   const c = useAnimationControls();
@@ -494,7 +495,7 @@ function StepFor({ draft, set, goStep, existing, onCancelBooking }) {
         </G>
       </Section>
 
-      <p style={t(13, 400)}>Free to cancel up to 2 hours before. Foxy Loxy holds tables for 15 minutes.</p>
+      <p style={t(13, 400)}>Free to cancel up to 2 hours before. Fern & Fable holds tables for 15 minutes.</p>
       {existing && (
         <motion.button whileTap={{ scale: 0.96 }} onClick={onCancelBooking} style={{ ...t(15, 500, '#b4413c'), alignSelf: 'center', height: 32, marginTop: -12 }}>
           Cancel booking
@@ -577,45 +578,55 @@ export default function BookTable({ draft, setDraft, step, setStep, onClose, onB
 const mins = (s) => { const [hm, ap] = s.split(' '); let [h, m] = hm.split(':').map(Number); if (ap === 'PM' && h !== 12) h += 12; return h * 60 + m; };
 const fmt = (m) => { const h = Math.floor(m / 60), mm = m % 60; return `${h % 12 || 12}:${String(mm).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`; };
 
+// Ticket (Figma 1000:15090): 340 x 468, side notches at the perforation line.
+const BARS = [[26,2],[31,3],[35,1],[38,1],[42,2],[45,3],[50,1],[54,4],[59,3],[64,2],[69,2],[72,4],[78,3],[84,1],[86,2],[90,1],[94,3],[98,1],[101,3],[107,2],[110,1],[113,1],[117,4],[122,4],[128,1],[132,2],[135,4],[141,1],[145,2],[148,3],[153,3],[159,2],[162,1],[165,4],[172,2],[175,1],[178,3],[184,2],[187,1],[190,4],[197,2],[200,2],[204,1],[208,4],[213,1],[216,4],[223,2],[226,1],[229,3],[235,2],[238,4],[244,3],[250,1],[252,1],[255,2],[260,1],[262,1],[265,2],[270,3],[274,3],[279,4],[286,2],[289,2],[293,2],[298,2],[301,4],[307,2],[312,2]];
+const NOTCH = 'radial-gradient(circle 16px at 0 318px, transparent 15.5px, #000 16px) left / 51% 100% no-repeat, radial-gradient(circle 16px at 100% 318px, transparent 15.5px, #000 16px) right / 51% 100% no-repeat';
+function Ticket({ b }) {
+  const when = `${b.dayLong.replace('Today, ', '').replace(/^(\w{3}) /, '$1, ')} · ${b.time}`;
+  const ink = '#f6f4f0';
+  const field = (x, label, value) => (
+    <div className="abs" style={{ left: x, top: 338, display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <span style={t(12, 500, ink)}>{label}</span>
+      <span className="nowrap" style={t(17, 700, ink)}>{value}</span>
+    </div>
+  );
+  return (
+    <motion.div initial={{ opacity: 0, y: 28, scale: 0.94, rotate: -2 }} animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
+      transition={{ type: 'spring', stiffness: 170, damping: 20, delay: 0.15 }}
+      style={{ alignSelf: 'center', width: 340, height: 468, filter: 'drop-shadow(0 24px 30px rgba(27,42,68,0.1))' }}>
+      <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: 26, background: '#a18a7a', WebkitMask: NOTCH, mask: NOTCH }}>
+        <div className="abs" style={{ left: 14, top: 14, width: 312, height: 290, borderRadius: 18, overflow: 'hidden', background: `#6b5a4e url(${ticketArt}) center / cover` }}>
+          <span className="abs nowrap" style={{ left: 0, right: 0, top: 26, textAlign: 'center', ...t(11, 700, '#fcfcfb'), letterSpacing: '0.14em' }}>TABLE FOR {b.guests}</span>
+          <span className="abs nowrap" style={{ left: 41, top: 108, ...t(34, 600, '#fcfcfb'), letterSpacing: '-0.03em', lineHeight: '41px' }}>{VENUE.name}</span>
+          <span className="abs nowrap" style={{ left: 90, top: 156, ...t(15, 500, '#fcfcfb') }}>{when}</span>
+        </div>
+        <div className="abs" style={{ left: 24, right: 21, top: 318, height: 2, backgroundImage: 'linear-gradient(90deg, #fff 5px, transparent 5px)', backgroundSize: '10px 2px' }} />
+        {field(26, 'Seat', `${b.zone} · Table ${b.table}`)}
+        {field(150, 'Party', b.guests)}
+        {field(232, 'Held Until', fmt(mins(b.time) + 15))}
+        {BARS.map(([x, w]) => <div key={x} className="abs" style={{ left: x, top: 404, width: w, height: 44, background: '#f4f3ef' }} />)}
+      </div>
+    </motion.div>
+  );
+}
+
 export function BookingConfirmed({ booking, onClose, onChange }) {
   const [scrolled, setScrolled] = useState(false);
   const [added, setAdded] = useState(false);
   const b = booking;
-  const tableText = [`Table ${b.table}`, b.zone, ...b.comfort].join(' · ');
   const rise = (i) => ({ initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { ...GENTLE, delay: 0.25 + i * 0.07 } });
 
   return (
     <div className="abs" style={{ inset: 0, background: '#f7f5f1' }}>
       <TopBar title="Booking confirmed" onClose={onClose} scrolled={scrolled} right={<CircleBtn icon="export" label="Share booking" />} />
       <div className="scroll" onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 8)}>
-        <div style={{ padding: '128px 24px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ padding: '146px 24px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '12px 0 8px' }}>
-            <div style={{ position: 'relative', width: 88, height: 88 }}>
-              <motion.div className="abs" style={{ inset: 0, borderRadius: 44, border: `2px solid ${NAVY}` }}
-                initial={{ scale: 0.8, opacity: 0.5 }} animate={{ scale: 1.7, opacity: 0 }} transition={{ duration: 1.1, delay: 0.35, ease: 'easeOut' }} />
-              <motion.div className="abs" style={{ inset: 0, borderRadius: 44, background: 'rgba(255,255,255,0.92)', boxShadow: '0 14px 36px rgba(42,38,80,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                initial={{ scale: 0.3, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 16, delay: 0.1 }}>
-                <motion.span initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 400, damping: 14, delay: 0.3 }}>
-                  <VIcon name="check" size={40} />
-                </motion.span>
-              </motion.div>
-            </div>
             <motion.h2 {...rise(0)} style={t(28, 600, NAVY, { letterSpacing: -0.4 })}>You're booked</motion.h2>
             <motion.p {...rise(1)} style={t(15, 400)}>We sent the details to {b.phone}</motion.p>
           </div>
 
-          <motion.div {...rise(2)}>
-            <InfoList rows={[
-              { icon: 'storefront', text: tableText },
-              { icon: 'mapPin', text: VENUE.address },
-              { icon: 'clock', text: `${b.dayLong} · ${b.time} · ${b.guests} ${b.guests === 1 ? 'guest' : 'guests'}` },
-              { icon: 'phone', text: VENUE.phone },
-            ]} />
-          </motion.div>
-
-          <motion.p {...rise(3)} style={t(13, 400)}>
-            Held Until · {fmt(mins(b.time) + 15)}
-          </motion.p>
+          <Ticket b={b} />
 
           <motion.div {...rise(4)} style={{ display: 'flex', gap: 12 }}>
             <G as="button" r={26} on={added} onClick={() => setAdded(true)} whileTap={{ scale: 0.96 }} transition={TAP}

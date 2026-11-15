@@ -10,8 +10,14 @@ export const POSTS = [
  {id:'sunny',photo:VP.indoor,avatar:H.himgEllipse17,user:'jules.jpg',text:'A sunny seat for a slow morning.',likes:94,height:241},
  {id:'clay',photo:H.himgImagePlaceholder2,avatar:H.himgEllipse18,user:'nina.makes',text:'An afternoon of clay, color, and a little creative reset.',likes:53,height:240},
 ];
-export function ExploreFeed({onOpen,liked}) {
- return <section className="abs explore-feed" style={{left:24,top:1670,width:394}}><h2 style={{fontSize:24,fontWeight:600,lineHeight:'28px',color:INK}}>Explore</h2><div style={{display:'flex',gap:16,marginTop:20}}>{[[POSTS[0],POSTS[1]],[POSTS[2],POSTS[3]]].map((col,i)=><div key={i} style={{display:'flex',flexDirection:'column',gap:16}}>{col.map(p=><button key={p.id} onClick={p.id==='foxy'?onOpen:undefined} className="explore-feed-card" style={{cursor:p.id==='foxy'?'pointer':'default'}}><Glass radius={24} angle="120.18deg" style={{inset:0}} contentStyle={{display:'block',padding:'8px 5px'}}><div style={{width:176,display:'flex',flexDirection:'column',alignItems:'center',gap:10}}><img src={p.photo} alt="" style={{width:176,height:p.height,borderRadius:18,objectFit:'cover'}}/><div style={{width:161.5,display:'flex',flexDirection:'column',gap:10}}><p style={{fontSize:13,fontWeight:500,lineHeight:'normal',textAlign:'left'}}>{p.text}</p><div style={{display:'flex',alignItems:'center',height:13,gap:5,fontSize:11,color:MUTED}}><img src={p.avatar} alt="" width="13" height="13"/><span>{p.user}</span><img src={H.himgHeart} alt="" width="13" height="13" style={{marginLeft:'auto'}}/><span>{p.likes+(p.id==='foxy'&&liked?1:0)}</span></div></div></div></Glass></button>)}</div>)}</div></section>;
+export function ExploreFeed({onOpen,liked,top=1662}) {
+ const H_={foxy:340,dinner:325,sunny:325,clay:324};
+ return <section className="abs explore-feed" style={{left:24,top,width:394}}><h2 style={{fontSize:24,fontWeight:600,lineHeight:'28px',color:INK}}>Explore</h2><div style={{display:'flex',gap:16,marginTop:20}}>{[[POSTS[0],POSTS[1]],[POSTS[2],POSTS[3]]].map((col,i)=><div key={i} style={{display:'flex',flexDirection:'column',gap:16}}>{col.map(p=><button key={p.id} onClick={p.id==='foxy'?onOpen:undefined} className="explore-feed-card ef-dark" style={{height:H_[p.id],cursor:p.id==='foxy'?'pointer':'default'}}>
+  <img src={p.photo} alt="" className="ef-photo"/>
+  <span className="ef-blur" aria-hidden="true"/><span className="ef-shade" aria-hidden="true"/>
+  <span className="ef-copy"><span className="ef-text">{p.text}</span>
+   <span className="ef-meta"><img src={p.avatar} alt="" width="13" height="13"/><span>{p.user}</span><img src={H.himgHeart} alt="" width="13" height="13" className="ef-heart"/><span>{p.likes+(p.id==='foxy'&&liked?1:0)}</span></span></span>
+ </button>)}</div>)}</div></section>;
 }
 const Pic=({src,size=22,...props})=><img src={src} alt="" width={size} height={size} {...props}/>;
 export default function ExplorePost({onBack,onOpenVenue,liked,setLiked,saved,setSaved,follow,setFollow,replies,setReplies}) {

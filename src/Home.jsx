@@ -131,7 +131,7 @@ function useHeroSwipe(el, onStep) {
 }
 
 const CATS = [
-  {k:'Cafe',label:'Café',page:'cafes',x:8.5,y:3.98,size:58.438},
+  {k:'Cafe',label:'Cafés',page:'cafes',x:8.5,y:3.98,size:58.438},
   {k:'Dining',label:'Dining',page:'dining',x:0,y:-1.7,size:68},
   {k:'Nightlife',label:'Nightlife',page:'nightlife',x:7.28,y:6.43,size:54.188},
   {k:'Events',label:'Events',page:'events',x:2.13,y:-1.06,size:63.75},
@@ -152,8 +152,8 @@ function SectionHeader({ top, title, onSeeAll }) {
 
 /* ---------- For you stack (component 685:328, variants Front=A/B/C) ---------- */
 const VENUES = {
-  A: { name: 'Foxy Loxy Café', meta: 'Café · 0.5 mi', level: 'Level 2', photo: VP.garden },
-  B: { name: 'Gallery Café', meta: 'Café · 1.1 mi', level: 'Level 1', photo: VP.indoor },
+  A: { name: 'Fern & Fable', meta: 'Café · 0.5 mi', level: 'Level 2', photo: VP.garden },
+  B: { name: 'Gallery Espresso', meta: 'Café · 1.1 mi', level: 'Level 1', photo: VP.indoor },
   C: { name: 'The Sentient', meta: 'Café · 0.8 mi', level: 'Level 2' , photo: VP.bar },
 };
 const KEYS = ['A', 'B', 'C'];
@@ -184,7 +184,7 @@ function VenueCard({ v }) {
         <p className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.86)' }}>{v.meta}</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '2px 0' }}>
           <span style={{ width: 8, height: 8, borderRadius: 4, background: '#fff', display: 'block' }} />
-          <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Good fit</span>
+          <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Fits you</span>
         </div>
       </div>
     </>
@@ -263,7 +263,6 @@ function RankingRow({ top, n, name, meta, level, onClick, photo, wordmark }) {
       </span>
       <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <RippleIcon k={level === 1 ? 'ripple1' : 'ripple2'} size={36} />
-        <span style={{ fontSize: 17, fontWeight: 700, color: INK }}>{level}</span>
       </span>
     </motion.button>
   );
@@ -272,6 +271,9 @@ function RankingRow({ top, n, name, meta, level, onClick, photo, wordmark }) {
 export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, reduceMotion, pull, onDiscover, pullOn = true, onOpenExplore, exploreLiked, scene = 'morning', onStepScene }) {
   const sc = SCENES.find((x) => x.id === scene) || SCENES[0];
   const sub = sc.sub, left = sub ? 24 : 23;
+  const promo = sc.promo || { tag: 'Quiet hour', title: 'The Sentient', detail: '2 – 4 pm · 10% off pastries' };
+  const off = promo.cta ? 26 : 0;
+  const pill = modeLabel === 'Study mode' && sc.pill ? sc.pill : modeLabel;
   const scrollRef = useRef(null);
   usePullDown({ el: scrollRef, pull, enabled: pullOn, onCommit: onDiscover });
   useHeroSwipe(scrollRef, onStepScene);
@@ -280,12 +282,12 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
   return (
     <motion.div className="abs" style={{ inset: 0, y: pull, overflow: 'hidden', background: '#f7f5f1', borderTopLeftRadius: r, borderTopRightRadius: r, boxShadow: sh, zIndex: 1, userSelect: 'none', WebkitUserSelect: 'none' }} onDragStart={(e) => e.preventDefault()}>
     <div ref={scrollRef} className="scroll" style={{ background: '#f7f5f1' }} onScroll={(e) => onScroll?.(e.currentTarget.scrollTop)}>
-      <div style={{ position: 'relative', width: 440, height: 2663 }}>
+      <div style={{ position: 'relative', width: 440, height: 2681 + off }}>
         <Hero reduce={reduceMotion} pull={pull} scene={sc} />
         <p className="abs nowrap" style={{ left: 24, top: 59, fontSize: 15, fontWeight: 500, color: sc.dark ? 'rgba(255,255,255,0.8)' : INK2 }}>Savannah, GA</p>
         <motion.button className="abs nowrap" onClick={onOpenModes} whileTap={{ scale: 0.95 }} transition={GENTLE}
           style={{ right: 22, top: 46, height: 44, padding: '0 16px', borderRadius: 999, ...lightGlass, fontSize: 15, fontWeight: 500, color: INK }}>
-          {modeLabel}
+          {pill}
         </motion.button>
         <p className="abs nowrap" style={{ left: 24, top: 90, fontSize: 40, fontWeight: 600, lineHeight: '44px', letterSpacing: -1, color: sc.dark ? '#fff' : INK }}>{sc.greeting}</p>
         {sub && <p className="abs nowrap" style={{ left: 24, top: 140, fontSize: 16, color: sc.dark ? 'rgba(255,255,255,0.8)' : INK2 }}>{sub}</p>}
@@ -302,27 +304,23 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
         <SectionHeader top={421.17} title="For you" onSeeAll={() => onOpenPage?.('foryou')} />
         <ForYouStack onOpenVenue={onOpenVenue} />
 
-        <SectionHeader top={946} title="Popular Around you" onSeeAll={() => onOpenPage?.('popular')} />
-        <RankingRow top={998} n={1} photo={H.himgPhotoSlot} name="Gallery Café" meta="Café · 1.1 mi" level={1} />
-        <RankingRow top={1106} n={2} wordmark name="Foxy Loxy Café" meta="Café · 0.5 mi" level={2} onClick={onOpenVenue} />
-        <RankingRow top={1214} n={3} photo={H.himgPhotoSlot2} name="The Sentient" meta="Café · 0.8 mi" level={2} />
+        <SectionHeader top={964} title="Popular around you" onSeeAll={() => onOpenPage?.('popular')} />
+        <RankingRow top={1016} n={1} photo={H.himgPhotoSlot} name="Gallery Espresso" meta="Café · 1.1 mi" level={1} />
+        <RankingRow top={1124} n={2} wordmark name="Fern & Fable" meta="Café · 0.5 mi" level={2} onClick={onOpenVenue} />
+        <RankingRow top={1232} n={3} photo={H.himgPhotoSlot2} name="The Sentient" meta="Café · 0.8 mi" level={2} />
 
-        <div className="abs" style={{ left: 24, top: 1346, width: 392, height: 164, borderRadius: 24, overflow: 'hidden', background: '#c2ddd2', boxShadow: '0 12px 32px rgba(27,42,68,0.06)' }}>
-          <span className="abs nowrap" style={{ left: 24, top: 24, padding: '4px 12px', borderRadius: 999, background: INK, color: '#fff', fontSize: 13, fontWeight: 700, boxShadow: '0 6px 18px rgba(27,42,68,0.12)' }}>Quiet hour</span>
-          <p className="abs nowrap" style={{ ...h2, left: 24, top: 60 }}>The Sentient</p>
-          <p className="abs nowrap" style={{ left: 24, top: 96, fontSize: 15, fontWeight: 500, color: INK2 }}>2 – 4 pm · 10% off pastries</p>
-          <button className="abs nowrap" style={{ left: 24, top: 122, fontSize: 13, fontWeight: 700, color: INK }}>Plan a calm visit</button>
+        <div className="abs" style={{ left: 24, top: 1364, width: 392, height: 138 + off, borderRadius: 24, overflow: 'hidden', background: '#c2ddd2', boxShadow: '0 12px 32px rgba(27,42,68,0.06)' }}>
+          <span className="abs nowrap" style={{ left: 24, top: 24, padding: '4px 12px', borderRadius: 999, background: INK, color: '#fff', fontSize: 13, fontWeight: 700, boxShadow: '0 6px 18px rgba(27,42,68,0.12)' }}>{promo.tag}</span>
+          <p className="abs nowrap" style={{ ...h2, left: 24, top: 60 }}>{promo.title}</p>
+          <p className="abs nowrap" style={{ left: 24, top: 96, fontSize: 15, fontWeight: 500, color: INK2 }}>{promo.detail}</p>
+          {promo.cta && <button className="abs nowrap" style={{ left: 24, top: 122, fontSize: 13, fontWeight: 700, color: INK }}>{promo.cta}</button>}
         </div>
 
-        <img src={H.himgIllustrationCatchup} alt="" className="abs" style={{left:267,top:1346,width:164,height:164,objectFit:'contain',pointerEvents:'none'}}/>
-        <ExploreFeed onOpen={onOpenExplore} liked={exploreLiked}/>
-        <motion.button className="abs" onClick={onOpenMap} whileTap={{ scale: 0.98 }} transition={GENTLE}
-          style={{ left: 24, top: 1550, width: 392, height: 80, borderRadius: 24, ...cardGlass, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 16px 18px 20px', textAlign: 'left' }}>
-          <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: INK }}>Rather see a map?</span>
-            <span className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: INK2 }}>Calm spots around you, by noise level</span>
-          </span>
-          <span className="nowrap" style={{ border: '1.5px solid rgba(20,24,31,0.08)', borderRadius: 999, padding: '10px 16px', fontSize: 13, fontWeight: 700, color: INK, whiteSpace: 'pre' }}>{'Open map  →'}</span>
+        <img src={H.himgIllustrationCatchup} alt="" className="abs" style={{left:267,top:1364,width:164,height:164,objectFit:'contain',pointerEvents:'none'}}/>
+        <ExploreFeed onOpen={onOpenExplore} liked={exploreLiked} top={1662 + off}/>
+        <motion.button className="abs nowrap" onClick={onOpenMap} whileTap={{ scale: 0.98 }} transition={GENTLE}
+          style={{ left: 24, top: 1542 + off, width: 392, height: 47, borderRadius: 999, border: '1.5px solid rgba(20,24,31,0.08)', fontSize: 13, fontWeight: 700, color: INK, whiteSpace: 'pre' }}>
+          {'Open map  →'}
         </motion.button>
       </div>
     </div>

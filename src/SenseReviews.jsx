@@ -14,70 +14,55 @@ export const SENSE_DATA = {
   sound: {
     title: 'Sound', top: 'Lively',
     dist: [['Quiet', 8], ['Easy to talk', 31], ['Lively', 52], ['Loud', 9]],
-    summary: 'Lively at brunch and on weekends. Easier to talk on weekday afternoons and out on the patio.',
+    summary: 'The counter gets lively when the grinder is running. It’s easier to talk at the window tables.',
     note: 'Summarized by AI from reviews that mention sound',
     chart: {
-      title: 'Noise', sun: [11, 28, 52, 75, 85, 71, 47, 38, 42, 47, 56, 66, 80, 89, 85, 66, 47, 33], live: 'Live · Louder than usual',
+      title: 'Sound', sun: [11, 28, 52, 75, 85, 71, 47, 38, 42, 47, 56, 66, 80, 89, 85, 66, 47, 33], live: 'Live · Louder than usual',
       describe: (v) => (v < 30 ? 'Quiet' : v < 55 ? 'Easy to talk' : v < 80 ? 'Lively' : 'Loud'),
       info: 'Tap a bar for details',
     },
-    photos: [
-      [[240, 'Lively', 'Buzzy inside, calm out back by the pond.', 'Local guide · 1 wk ago', 7], [180, 'Loud', 'Weekend brunch was loud — patio was perfect.', 'First visit · 3 wks ago', 21], [210, 'Easy to talk', 'Easy to chat over coffee in the afternoon.', 'Visitor · 1 mo ago', 30]],
-      [[180, 'Easy to talk', 'Music on, but we could still talk easily.', 'Weekend regular · 2 wks ago', 14], [250, 'Lively', 'Acoustic night, cozy and not too loud.', 'Student · 1 mo ago', 31], [170, 'Lively', 'Lots of chatter at the counter at 10am.', 'Neighbor · 2 mo ago', 60]],
-    ],
+    photos: [[232, 'Lively', 'The espresso machine and chatter made the counter area lively.', 'Daniel Brooks', '1 wk ago', 42, 7, 0], [310, 'Loud', 'The grinder drowned us out for a moment while we waited at the counter.', 'Alex Kim', '2 wks ago', 19, 14, 1], [232, 'Easy to talk', 'We could talk at the window table without raising our voices.', 'Maya Chen', '3 wks ago', 24, 21, 0]],
   },
   light: {
     title: 'Light', top: 'Natural light',
     dist: [['Dim', 4], ['Warm & cozy', 28], ['Natural light', 61], ['Bright', 7]],
-    summary: 'Big windows bring in lots of daylight. Evenings feel warm and cozy with string lights out back.',
+    summary: 'The windows bring in daylight, softened by the glass blocks. Wall lights near the booths feel warmer.',
     note: 'Summarized by AI from reviews that mention light',
-    photos: [
-      [[240, 'Natural light', 'So much daylight by the front windows.', 'Local guide · 1 wk ago', 7], [180, 'Natural light', 'Perfect light for reading in the morning.', 'First visit · 3 wks ago', 21], [210, 'Bright', 'Sunny garden tables around noon.', 'Visitor · 1 mo ago', 30]],
-      [[180, 'Warm & cozy', 'String lights on the patio at dusk.', 'Weekend regular · 2 wks ago', 14], [250, 'Warm & cozy', 'Warm lamps inside once the sun sets.', 'Student · 1 mo ago', 31], [170, 'Warm & cozy', 'Soft light in the back room.', 'Neighbor · 2 mo ago', 60]],
-    ],
+    photos: [[232, 'Warm & cozy', 'The wall lights felt soft, and it was a little cool by the booth.', 'Leah Park', '3 days ago', 16, 3, 0], [310, 'Natural light', 'The glass-block wall softened the daylight by our table.', 'Nina Patel', '1 wk ago', 18, 7, 1], [232, 'Dim', 'The tiled entry was dimmer than the main seating area.', 'Jules Rivera', '2 wks ago', 7, 14, 0]],
   },
   crowd: {
     title: 'Crowd', top: 'Busy',
     dist: [['Almost empty', 3], ['Relaxed', 18], ['Buzzing', 27], ['Busy', 38], ['Packed', 14]],
-    summary: 'Busy on weekend mornings, with a line at the counter. Calmer after 2 PM on weekdays.',
+    summary: 'The line builds at the counter, but there can still be open tables. The aisle feels tighter when it’s busy.',
     note: 'Summarized by AI from reviews that mention crowd',
     chart: { title: 'Crowd', sun: CROWD_SUN, live: 'Live · Busier than usual', describe: crowdWord, info: 'Tap a bar for details' },
-    photos: [
-      [[240, 'Packed', 'Line out the door Saturday at 10.', 'Local guide · 1 wk ago', 7], [180, 'Busy', 'Packed for brunch, worth the wait.', 'First visit · 3 wks ago', 21], [210, 'Buzzing', 'Buzzing but we grabbed a patio spot.', 'Visitor · 1 mo ago', 30]],
-      [[180, 'Relaxed', 'Found a table easily on a Tuesday.', 'Weekend regular · 2 wks ago', 14], [250, 'Relaxed', 'Relaxed afternoon, plenty of seats.', 'Student · 1 mo ago', 31], [170, 'Almost empty', 'Quiet first thing at 8am.', 'Neighbor · 2 mo ago', 60]],
-    ],
+    photos: [[232, 'Relaxed', 'Grabbed a croissant before the line built up.', 'Owen Lee', '2 days ago', 11, 2, 0], [310, 'Buzzing', 'A few people were waiting for coffee, but there were still open tables.', 'Sam Ortiz', '1 wk ago', 9, 7, 1], [232, 'Busy', 'We could still find a table, but the aisle felt tight when people passed.', 'Priya Shah', '3 wks ago', 13, 21, 0]],
   },
   temp: {
     title: 'Temperature', top: 'Mild',
     dist: [['Cool', 38], ['Mild', 47], ['Warm', 15]],
-    summary: 'AC keeps it cool inside, especially near the counter. The patio gets warm on sunny afternoons; shaded garden tables stay mild.',
+    summary: 'The booth can feel cool. Window tables tend to feel mild, and the entrance warms up in direct sun.',
     note: 'Summarized by AI from reviews that mention temperature or AC',
     chart: {
-      title: 'Temperature', sun: [28, 30, 36, 42, 52, 61, 71, 80, 86, 89, 85, 75, 61, 52, 45, 39, 36, 33], live: 'Indoors · AC on · Patio warming up',
+      title: 'Temperature', sun: [28, 30, 36, 42, 52, 61, 71, 80, 86, 89, 85, 75, 61, 52, 45, 39, 36, 33], live: 'Indoors · AC on',
       describe: (v) => (v < 45 ? 'Cool' : v < 75 ? 'Mild' : 'Warm'),
-      info: 'Inside stays cool all day with AC. Bars show how warm the patio feels.',
-      foot: 'Inside stays cool all day with AC. Bars show how warm the patio feels.',
+      info: 'Tap a bar for details',
+      foot: 'Indoor and outdoor spots can feel different. The bars show how the patio feels throughout the day.',
     },
-    photos: [
-      [[240, 'Cool', 'AC is strong inside, bring a layer.', 'Local guide · 1 wk ago', 7], [180, 'Warm', 'Warm out back around 3pm.', 'First visit · 3 wks ago', 21], [210, 'Mild', 'Mild evening under the string lights.', 'Visitor · 1 mo ago', 30]],
-      [[180, 'Mild', 'Patio was perfect in the shade.', 'Weekend regular · 2 wks ago', 14], [250, 'Cool', 'Cool and comfy by the window.', 'Student · 1 mo ago', 31], [170, 'Cool', 'Chilly near the counter vent.', 'Neighbor · 2 mo ago', 60]],
-    ],
+    photos: [[232, 'Cool', 'The wall lights felt soft, and it was a little cool by the booth.', 'Leah Park', '3 days ago', 16, 3, 0], [310, 'Mild', 'The window table had room for my laptop and coffee, and the spot felt mild.', 'Jordan Bell', '1 wk ago', 14, 7, 1], [232, 'Warm', 'The entrance felt warm in the afternoon sun.', 'Riley Morgan', '2 wks ago', 8, 14, 0]],
   },
   seating: {
-    title: 'Seating', top: 'Patio', multi: true,
-    dist: [['Patio', 64], ['Tables', 48], ['Sofas', 22], ['Bar seats', 15]],
-    summary: 'The back patio and garden are the favorite spots. Indoor tables fill up fast at brunch.',
+    title: 'Seating', top: 'Window tables', multi: true,
+    dist: [['Window tables', 64], ['Other tables', 48], ['Bench seating', 22], ['Bar seats', 15]],
+    summary: 'Window tables have room for coffee and a laptop. The long bench works for small groups.',
     note: 'Summarized by AI from reviews that mention seating',
-    photos: [
-      [[240, 'Patio', 'Garden pond seats are the best in town.', 'Local guide · 1 wk ago', 7], [180, 'Patio', 'Shaded patio table for four.', 'First visit · 3 wks ago', 21], [210, 'Bar seats', 'Bar seats by the window, nice for one.', 'Visitor · 1 mo ago', 30]],
-      [[180, 'Sofas', 'Comfy sofa by the art wall.', 'Weekend regular · 2 wks ago', 14], [250, 'Tables', 'Small indoor tables, a bit tight.', 'Student · 1 mo ago', 31], [170, 'Patio', 'Big communal table out back.', 'Neighbor · 2 mo ago', 60]],
-    ],
+    photos: [[232, 'Bench seating', 'The long bench had enough room for the three of us.', 'Amelia Ross', '5 days ago', 10, 5, 0], [310, 'Window table', 'The window table had room for my laptop and coffee, and the spot felt mild.', 'Jordan Bell', '1 wk ago', 14, 7, 1], [232, 'Window table', 'We could talk at the window table without raising our voices.', 'Maya Chen', '3 wks ago', 24, 21, 0]],
   },
 };
 
 // Glass / Category bar: star (all reviews) + the five senses. The selected item grows to show its label.
 function CategoryBar({ value, onPick, onAll }) {
-  const items = [{ k: 'all', label: 'All', icon: <VIcon name="star24" size={24} /> }, ...SENSES];
+  const items = [{ k: 'all', label: 'All', icon: <VIcon name="sparkle" size={24} /> }, ...SENSES];
   return (
     <div style={{ display: 'flex', justifyContent: 'center' }}>
       <G r={32} style={{ padding: 7, display: 'flex', alignItems: 'center', gap: 2, height: 77 }}>
@@ -135,38 +120,48 @@ function MostSay({ sense, d, filter, setFilter }) {
 }
 
 function PhotoReview({ p }) {
-  const [h, tag, text, meta] = p;
+  const [h, tag, text, who, when, likes] = p;
+  const [liked, setLiked] = useState(false);
   const pic = REVIEW_PICS[[...text].reduce((a, c) => a + c.charCodeAt(0), 0) % REVIEW_PICS.length];
   return (
     <motion.div layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }} transition={GENTLE}>
-      <G r={24} whileTap={{ scale: 0.98 }} style={{ padding: '6px 6px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <G r={24} style={{ padding: '6px 6px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ position: 'relative', height: h, borderRadius: 18, background: `#dbdbde url(${pic}) center / cover` }}>
-          <span className="abs nowrap" style={{ left: 8, bottom: 10, height: 24, padding: '0 10px', borderRadius: 13, background: 'rgba(255,255,255,0.92)', display: 'flex', alignItems: 'center', ...t(12, 600) }}>{tag}</span>
+          <span className="abs nowrap" style={{ left: 8, top: 8, height: 24, padding: '0 10px', borderRadius: 13, background: 'rgba(255,255,255,0.92)', display: 'flex', alignItems: 'center', ...t(12, 600) }}>{tag}</span>
         </div>
-        <div style={{ padding: '0 6px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span style={t(13, 500, NAVY, { lineHeight: 1.25 })}>{text}</span>
-          <span style={t(11, 400)}>{meta}</span>
+        <div style={{ padding: '0 8px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <span style={t(13, 500, '#2a2650', { lineHeight: 1.35 })}>{text}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ width: 22, height: 22, borderRadius: 11, flex: 'none', background: 'rgba(94,90,126,0.12)' }} />
+            <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: '1 0 0' }}>
+              <span className="nowrap" style={t(12, 600, '#2a2650')}>{who}</span>
+              <span className="nowrap" style={t(11, 400)}>{when}</span>
+            </span>
+            <motion.button whileTap={{ scale: 0.9 }} aria-pressed={liked} aria-label="Like review" onClick={() => setLiked((v) => !v)} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <VIcon name={liked ? 'heartFill' : 'heart'} size={15} fill={NAVY} />
+              <span style={t(12, 500)}>{likes + (liked ? 1 : 0)}</span>
+            </motion.button>
+          </div>
         </div>
       </G>
     </motion.div>
   );
 }
 
-const EXTRA_META = ['Neighbor · 2 mo ago', 'Visitor · 1 mo ago', 'Weekend regular · 2 wks ago', 'Student · 1 mo ago'];
+const EXTRA = [['Grace Lin', '1 mo ago'], ['Marcus Hall', '1 mo ago'], ['Ivy Chen', '2 mo ago']];
 
 function SenseBody({ sense }) {
   const d = SENSE_DATA[sense];
   const [filter, setFilter] = useState(null);
   const [newest, setNewest] = useState(true);
   const [more, setMore] = useState(false);
-  let all = [...d.photos[0].map((p, i) => [...p, 0, i]), ...d.photos[1].map((p, i) => [...p, 1, i])];
-  if (more) all = all.concat(d.photos[0].concat(d.photos[1]).slice(0, 4).map((p, i) => [p[0] - 20, p[1], p[2], EXTRA_META[i], 70 + i * 20, i % 2, 3 + i]));
-  let list = filter ? all.filter((p) => p[1] === filter) : all;
-  list = [...list].sort((a, b) => (newest ? a[4] - b[4] : b[4] - a[4]));
-  // Masonry: drop each card into the shorter column
+  let all = d.photos.map((p, i) => [...p, i]);
+  if (more) all = all.concat(d.photos.map((p, i) => [p[0] - 30, p[1], p[2], EXTRA[i][0], EXTRA[i][1], Math.max(2, p[5] - 6), 40 + i * 15, (p[7] + 1) % 2, 3 + i]));
+  let list = filter ? all.filter((p) => p[1] === filter || (sense === 'seating' && filter.startsWith(p[1].split(' ')[0]))) : all;
+  list = [...list].sort((a, b) => (newest ? a[6] - b[6] : b[6] - a[6]));
   let cols = [[], []]; const hgt = [0, 0];
-  if (!filter && newest && !more) cols = [all.filter((p) => p[5] === 0), all.filter((p) => p[5] === 1)]; // Figma arrangement
-  else list.forEach((p) => { const c = hgt[0] <= hgt[1] ? 0 : 1; cols[c].push(p); hgt[c] += p[0] + 90; });
+  if (!filter && newest && !more) cols = [all.filter((p) => p[7] === 0), all.filter((p) => p[7] === 1)]; // Figma arrangement
+  else list.forEach((p) => { const c = hgt[0] <= hgt[1] ? 0 : 1; cols[c].push(p); hgt[c] += p[0] + 110; });
   const c = d.chart;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -194,7 +189,7 @@ function SenseBody({ sense }) {
         {cols.map((col, ci) => (
           <motion.div key={ci} layout style={{ width: 188, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <AnimatePresence mode="popLayout" initial={false}>
-              {col.map((p) => <PhotoReview key={`${p[5]}-${p[6]}-${p[3]}`} p={p} />)}
+              {col.map((p) => <PhotoReview key={`${p[8]}-${p[3]}`} p={p} />)}
             </AnimatePresence>
           </motion.div>
         ))}

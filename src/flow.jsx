@@ -35,7 +35,7 @@ export function CircleBtn({ icon, label, onClick, style, children }) {
 }
 
 // Top bar: close or back / title + venue / optional right action. Frosts once content scrolls under it.
-export function TopBar({ title, sub = 'Foxy Loxy Cafe', onClose, back, right, scrolled }) {
+export function TopBar({ title, sub = 'Fern & Fable', onClose, back, right, scrolled }) {
   return (
     <div className="abs" style={{ left: 0, top: 0, width: 440, zIndex: 20, padding: '52px 24px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <motion.div className="abs" style={{ inset: 0, background: 'rgba(247,245,241,0.82)', WebkitBackdropFilter: 'blur(14px)', backdropFilter: 'blur(14px)', borderBottom: `1px solid ${DIV}` }}
@@ -216,10 +216,10 @@ export function InfoList({ rows }) {
   );
 }
 
-export function Stars({ n = 5, size = 14, gap = 2 }) {
+export function Stars({ n = 5, size = 14, gap = 2, fill = NAVY }) {
   return (
     <div style={{ display: 'flex', gap }}>
-      {Array.from({ length: 5 }, (_, i) => <VIcon key={i} name="starFill" size={size} fill={i < n ? NAVY : 'rgba(94,90,126,0.22)'} />)}
+      {Array.from({ length: 5 }, (_, i) => <VIcon key={i} name="starFill" size={size} fill={i < n ? fill : 'rgba(94,90,126,0.22)'} />)}
     </div>
   );
 }
@@ -257,10 +257,10 @@ export function AISummary() {
         <span style={t(15, 600)}>Review summary</span>
       </div>
       <p style={t(15, 400, NAVY, { lineHeight: 1.4 })}>
-        People love the cozy, artsy feel, the back patio and garden pond, and the pastries — kolaches and chai come up often. Many say it gets busy on weekends and seating and parking can be tight, so mornings are calmer.
+        Daylight filters through the glass blocks, while wall lights give the booths a warmer glow. The espresso counter can get lively, and the window tables are easier for conversation.
       </p>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-        {['Patio · 310', 'Kolache · 180', 'Chai · 150', 'Busy weekends · 120'].map((m) => <Pill key={m}>{m}</Pill>)}
+        {['Window tables', 'Daylight', 'Warm lighting', 'Counter noise'].map((m) => <Pill key={m}>{m}</Pill>)}
       </div>
       <span style={t(12, 400)}>Summarized by AI from 2,600 reviews</span>
     </G>
@@ -272,26 +272,33 @@ export function Pill({ children, strong }) {
 }
 
 export function ReviewCard({ r }) {
-  const [helpful, setHelpful] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const ink = '#2a2650';
   return (
-    <G r={28} style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ width: 40, height: 40, borderRadius: 20, background: r.mine ? NAVY : '#E6E6E8', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: 15 }}>{r.mine ? 'R' : ''}</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <span style={t(15, 600)}>{r.name}</span>
-          <span style={t(13, 400)}>{r.meta}</span>
+    <G r={28} style={{ padding: '26px 25px 23px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{ width: 44, height: 44, borderRadius: 22, flex: 'none', background: r.mine ? NAVY : r.avatar ? `url(${r.avatar}) center / cover` : 'rgba(94,90,126,0.12)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: 15 }}>{r.mine ? 'R' : ''}</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <span style={t(15, 600, ink)}>{r.name}</span>
+          <span style={t(12, 400)}>{r.meta}</span>
         </div>
       </div>
-      <Stars n={r.stars ?? 5} />
-      {r.text && <p style={t(15, 400, NAVY, { lineHeight: 1.4 })}>{r.text}</p>}
-      {r.tags?.length > 0 && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>{r.tags.map((x) => <Pill key={x}>{x}</Pill>)}</div>}
+      <Stars n={r.stars ?? 5} size={14} fill={ink} />
+      {r.text && <p style={t(15, 400, ink, { lineHeight: 1.4 })}>{r.text}</p>}
+      {r.tags?.length > 0 && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>{r.tags.map((x) => <span key={x} className="nowrap" style={{ ...t(12, 500, ink), background: 'rgba(42,38,80,0.05)', padding: '6px 12px', borderRadius: 14 }}>{x}</span>)}</div>}
       {!r.mine && (
-        <motion.button whileTap={{ scale: 0.92 }} onClick={() => setHelpful((h) => !h)} style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 6, height: 28 }}>
-          <motion.span animate={helpful ? { rotate: [0, -18, 0], scale: [1, 1.2, 1] } : {}} transition={{ duration: 0.4 }}>
-            <VIcon name="thumbsUp" fill={NAVY} />
-          </motion.span>
-          <span style={t(13, helpful ? 600 : 500)}>Helpful</span>
-        </motion.button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24, height: 22 }}>
+          <motion.button whileTap={{ scale: 0.9 }} aria-pressed={liked} aria-label="Like review" onClick={() => setLiked((v) => !v)} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <motion.span animate={liked ? { scale: [1, 1.25, 1] } : {}} transition={{ duration: 0.35 }} style={{ display: 'flex' }}>
+              <VIcon name={liked ? 'heartFill' : 'heart'} size={18} fill={NAVY} />
+            </motion.span>
+            <span style={t(13, 500)}>{(r.likes ?? 0) + (liked ? 1 : 0)}</span>
+          </motion.button>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <VIcon name="chat" size={18} fill={NAVY} />
+            <span style={t(13, 500)}>{r.replies ?? 0}</span>
+          </span>
+        </div>
       )}
     </G>
   );
