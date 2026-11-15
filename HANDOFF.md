@@ -1,8 +1,14 @@
+## Interactive confirmation ticket
+
+- BookingConfirmed wraps its existing Ticket in TicketInteraction. The stacked wallet tickets retain their tap/reorder behavior.
+- Drag moves and rotates the ticket. Release uses measured angular velocity, exponential drag and a damped spring to settle facing forward. Touch/pen, keyboard arrows and Escape/Home are supported. MotionConfig reduced motion disables spinning.
+- Both builds and mouse/emulated-touch checks passed, including settling, gallery-independent booking buttons, Add to calendar and Done. Physical-device feel still needs user review.
+
 ## Current photo updates - November 15, 2026
 
 - Venue pass: `src/venueFinalPhotos.js` maps 22 exports to carousel, menu, highlights and Photos grid, with Final flow crops.
 - Remaining pass: `src/remainingPhotos.js` maps 34 more exports to Home cards/rankings/Explore, Map recommendations, Saved and Liked, category lists, Discover's Sentient photo, and sensory review photos. Existing venue-grid images are reused for matching sensory reviews.
-- All 59 JPGs in the seven supplied ZIPs are accounted for: 56 placed; three left unused because their layers are hidden or have no current equivalent: `01-06-venue-big-photo-img-5796.jpg`, `04-09-review-photo-placeholder.jpg` (older standalone Explore layout), and `06-01-home-for-you-card-a.jpg` (hidden full-card image behind the outlined card's visible `06-04` inset).
+- All 59 JPGs in the seven supplied ZIPs are accounted for: 56 placed; three left unplaced in the coded screens: `01-06-venue-big-photo-img-5796.jpg` (visible in separate venue references 1401:21713 and 1429:23274), `04-09-review-photo-placeholder.jpg` (older standalone Explore layout), and `06-01-home-for-you-card-a.jpg` (visible in full-bleed Home variants, hidden in outlined card 1163:8037 which uses the `06-04` inset).
 - People/avatars and reservation ticket photo ZIPs were not supplied. Those assets and unrelated screens remain unchanged.
 - This pass preserves all existing copy, card dimensions, event handlers, state, routing and motion. Figma has other pre-existing copy/layout differences; they are outside this photo-only update.
 

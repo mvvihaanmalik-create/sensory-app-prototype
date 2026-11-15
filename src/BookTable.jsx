@@ -9,6 +9,7 @@ import { VIcon, SpeakerWaves } from './venueIcons.jsx';
 import { G, CircleBtn, TopBar, Section, Chip, ChipGroup, PrimaryCTA, RESERVE_TOP, InfoList, Pill, NAVY, DIV, TAP, t } from './flow.jsx';
 import { VENUE } from './Venue.jsx';
 import ticketArt from './assets/ticket/panel.jpg';
+import TicketInteraction from './TicketInteraction.jsx';
 import greyArt from './assets/ticket/grey.jpg';
 import willowArt from './assets/ticket/willow.jpg';
 
@@ -641,7 +642,9 @@ export function BookingConfirmed({ booking, onClose, onDone, onChange }) {
             <motion.p {...rise(1)} style={t(15, 400)}>We sent the details to {b.phone}</motion.p>
           </div>
 
+          <TicketInteraction color={TICKET_THEMES.fern.bg} mask={NOTCH}>
           <Ticket {...ticketFor(b)} motionProps={{ initial: { opacity: 0, y: 28, scale: 0.94, rotate: -2 }, animate: { opacity: 1, y: 0, scale: 1, rotate: 0 }, transition: { type: 'spring', stiffness: 170, damping: 20, delay: 0.15 } }} />
+          </TicketInteraction>
 
           <motion.div {...rise(4)} style={{ display: 'flex', gap: 12 }}>
             <G as="button" r={26} on={added} onClick={() => setAdded(true)} whileTap={{ scale: 0.96 }} transition={TAP}
