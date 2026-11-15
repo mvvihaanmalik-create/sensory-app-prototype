@@ -11,8 +11,8 @@ import { VENUE } from './Venue.jsx';
 import ticketArt from './assets/ticket/panel.jpg';
 import TicketInteraction, { TicketArtwork } from './TicketInteraction.jsx';
 import { CAROUSEL } from './venueFinalPhotos.js';
-import greyArt from './assets/ticket/grey.jpg';
-import willowArt from './assets/ticket/willow.jpg';
+import greyArt from './assets/ticket/grey-hd.png';
+import willowArt from './assets/ticket/willow-hd.png';
 
 // ---------- Data ----------
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
