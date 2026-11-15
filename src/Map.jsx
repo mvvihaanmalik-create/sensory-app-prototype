@@ -1,81 +1,218 @@
-import { SensePin, SENSE_PLACES } from './sensePins.jsx';
+// Map (Figma "Map" section 568:1903): Default, Sheet half / tall / full, four sense layers, Filters.
 import { useEffect, useRef, useState } from 'react';
-import { motion, useMotionValue, useTransform, animate } from 'motion/react';
-import { uri, paths } from './svgs.js';
-import { Glass, Icon, GENTLE, NAVY, MUTED, useScale } from './ui.jsx';
+import { AnimatePresence, motion, useMotionValue, useTransform, animate } from 'motion/react';
+import { uri } from './svgs.js';
+import { Glass, GENTLE, NAVY, useScale } from './ui.jsx';
+import { TAP, t } from './flow.jsx';
+import { Ph } from './phosphor.jsx';
+import { VP } from './venuePhotos.js';
 import mapTiles from './assets/map-tiles.jpg';
 
-// The expanded sheet meets the category row's lower edge (128 + 44).
-// Half and hidden retain their existing Figma positions.
-export const SNAP = { full: 172, half: 616, hidden: 956 };
-const SNAPS = [SNAP.full, SNAP.half, SNAP.hidden];
+const INK = '#2a2650', SUB = '#5e5a7e';
+// Sheet tops: full screen, tall, half, peek (Default).
+export const SNAP = { full: 0, tall: 302, half: 616, peek: 764 };
+const SNAPS = [SNAP.full, SNAP.tall, SNAP.half, SNAP.peek];
+const ALIAS = { hidden: 'peek' };
 
 const RECS = [
-  { id: 'foxy', title: 'Foxy Loxy Café', meta: 'Level 2 · 0.5 mi · Updated 1h ago', reason: 'Good fit · Quiet · natural light' },
-  { id: 'sentient', title: 'The Sentient', meta: 'Level 2 · 0.5 mi · Updated 1h ago', reason: 'Good fit · Quiet · natural light' },
-  { id: 'gallery', title: 'Gallery Café', meta: 'Level 3 · 0.5 mi · Updated 1h ago', reason: 'Mixed fit · More crowded' },
+  { id: 'foxy', title: 'Fern & Fable', meta: 'Level 2 · 0.5 mi · Updated 1h ago', reason: 'Fits you · Quiet · natural light', photo: VP.garden },
+  { id: 'sentient', title: 'The Sentient', meta: 'Level 2 · 0.5 mi · Updated 1h ago', reason: 'Fits you · Quiet · natural light', photo: VP.bar },
+  { id: 'gallery', title: 'Juniper Coffee', meta: 'Level 3 · 0.5 mi · Updated 1h ago', reason: 'Mostly fits · More crowded', photo: VP.indoor },
 ];
 
 function Recommendation({ r, onOpen, saved, onToggleSaved }) {
   return (
     <div onClick={onOpen} style={{ width: 400, display: 'flex', flexDirection: 'column', gap: 8, cursor: onOpen ? 'pointer' : 'default' }}>
-      <div style={{ width: 400, height: 191, borderRadius: 8, background: '#d7d7d7' }} />
+      <div style={{ width: 400, height: 191, borderRadius: 8, background: `#d7d7d7 url(${r.photo}) center / cover` }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, width: 400 }}>
-        <div style={{ width: 344, display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 17, lineHeight: 1.3, color: '#383838' }}>{r.title}</p>
-          <p style={{ fontSize: 12, color: '#6a6478' }}>{r.meta}</p>
+        <div style={{ flex: '1 0 0', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <p style={t(17, 600, INK)}>{r.title}</p>
+          <p style={t(12, 400, SUB)}>{r.meta}</p>
         </div>
         <motion.button aria-label="Save venue" aria-pressed={saved} onClick={(e) => { e.stopPropagation(); onToggleSaved(r.id); }}
-          whileTap={{ scale: 0.8 }} style={{ position: 'relative', width: 44, height: 44, flex: 'none' }}>
-          <img src={uri('heart')} alt="" className="abs" style={{ left: 12, top: 10, width: 20, height: 20 }} />
-          <motion.svg className="abs" style={{ left: 12, top: 10 }} width="20" height="20" viewBox="0 0 20 20"
-            initial={false} animate={{ scale: saved ? 1 : 0, opacity: saved ? 1 : 0 }} transition={{ type: 'spring', stiffness: 500, damping: 18 }}>
-            <path d="M17.3436 3.4842C16.8994 3.01343 16.372 2.64003 15.7915 2.38537C15.211 2.1307 14.5889 1.99975 13.9607 2C13.3324 2.00025 12.7104 2.1317 12.1301 2.38682C11.5498 2.64195 11.0227 3.01576 10.5788 3.48689L9.99934 4.10844L9.42472 3.48824L9.42098 3.48428C8.97696 3.01373 8.44983 2.64046 7.86969 2.3858C7.28955 2.13113 6.66776 2.00006 6.03982 2.00006C5.41187 2.00006 4.79008 2.13113 4.20994 2.3858C3.6298 2.64046 3.10267 3.01373 2.65865 3.48428L2.40051 3.75784C1.50378 4.70816 1 5.99708 1 7.34103C1 8.68499 1.50378 9.9739 2.40051 10.9242L9.21339 18.1441L9.98275 18.9984L10.0011 18.9789L10.021 19L10.7418 18.194L17.6018 10.9241C18.4971 9.97302 19 8.6844 19 7.34091C19 5.99743 18.4971 4.7088 17.6018 3.75772L17.3436 3.4842Z" fill="#5D5970" />
-          </motion.svg>
+          whileTap={{ scale: 0.8 }} transition={TAP} style={{ width: 44, height: 44, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span key={saved ? 'on' : 'off'} initial={{ scale: 0.4 }} animate={{ scale: 1 }} exit={{ scale: 0.4, opacity: 0 }} transition={{ type: 'spring', stiffness: 500, damping: 18 }}>
+              <Ph n={saved ? 'bookmark-simple-fill' : 'bookmark-simple'} size={20} fill={SUB} />
+            </motion.span>
+          </AnimatePresence>
         </motion.button>
       </div>
-      <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, lineHeight: 1.3, color: '#6b6b6b' }}>{r.reason}</p>
+      <p style={t(12, 400, SUB)}>{r.reason}</p>
     </div>
   );
 }
 
-const PINS = [
-  { left: 98, top: 264, size: 64 },
-  { left: 216, top: 360, size: 72 },
-  { left: 240, top: 606, size: 64 },
-];
-const LABELS = [
-  { left: 39, top: 320, ga: '166.5deg' },
-  { left: 107, top: 424, ga: '168.2deg' },
-  { left: 168, top: 662, ga: '168.3deg' },
-];
+// Four pin slots, same spots on every layer. [pin x, pin y, label x]
+const SLOTS = [[83, 228], [278, 223], [218, 368], [73, 553]];
+// Each layer: [icon, ring colour, place, label x, intensity 0-2 (drives the pulse speed)]
+const LAYERS = {
+  None: [['coffee', null, 'Juniper Coffee', 51], ['fork-knife', null, 'Willow Table', 256], ['martini', null, "Lanie's", 203], ['ticket', null, 'Art Walk', 53]],
+  Sound: [['speaker-none', '#3fa06b', 'Juniper Coffee', 51, 0], ['speaker-high', '#d84b43', "Lanie's", 263, 2], ['speaker-high', '#f29a3a', 'Fern & Fable', 186, 1], ['speaker-low', '#3fa06b', 'Willow Table', 51, 0]],
+  Light: [['sun-horizon', '#ddb65c', 'Copper Window Café', 45, 1], ['sun-dim', '#8e89a8', 'Husk', 269, 0], ['sun', '#f4d77a', 'Page & Co.', 190, 2], ['lamp', '#b79a72', 'Fern & Fable', 41, 1]],
+  Crowd: [['user', '#3fa06b', 'Cotton & Rye', 47, 0], ['users-three', '#d84b43', 'Treehouse', 252, 2], ['users', '#f29a3a', 'The Sentient', 184, 1], ['user', '#3fa06b', 'Juniper Coffee', 41, 0]],
+  Temperature: [['thermometer', '#b9b4cc', 'Willow Table', 61, 0], ['snowflake', '#8db8e8', 'Copper Window Café', 240, 1], ['sun', '#f2a65a', 'The Sentient', 184, 1], ['snowflake', '#3e73c9', 'Juniper Coffee', 41, 2]],
+};
+const PULSE = [3.2, 2.2, 1.4];
+
+function Pin({ icon, ring, level, i, layer }) {
+  return (
+    <motion.div className="abs" style={{ left: SLOTS[i][0], top: SLOTS[i][1], width: 44, height: 44 }}
+      initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0, transition: { duration: 0.15 } }}
+      transition={{ type: 'spring', stiffness: 420, damping: 20, delay: 0.04 + i * 0.05 }}>
+      {ring && <span className="mp-ping" style={{ '--c': ring, '--d': `${PULSE[level]}s`, animationDelay: `${-i * 0.6}s` }} />}
+      <div className="abs" style={{ inset: 0, borderRadius: 22, background: '#fff', border: `2.5px solid ${ring || 'rgba(42,38,80,0.25)'}`, boxShadow: '0 4px 10px rgba(20,26,38,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span className={ring ? `mp-ico mp-${layer.toLowerCase()}` : ''} style={{ '--d': `${PULSE[level ?? 0]}s`, display: 'flex' }}><Ph n={icon} size={22} fill={INK} /></span>
+      </div>
+    </motion.div>
+  );
+}
+
 const CHIPS = ['All', 'Cafés', 'Dining', 'Nightlife', 'Events'];
 const SENSES = [
-  { key: 'Sound', d: paths.speaker },
-  { key: 'Light', d: paths.sun },
-  { key: 'Crowd', d: paths.users },
+  { key: 'Sound', icon: 'speaker-high' },
+  { key: 'Light', icon: 'sun' },
+  { key: 'Crowd', icon: 'users' },
+  { key: 'Temperature', icon: 'thermometer', short: 'Temp' },
 ];
 
-export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds = [], onToggleSaved = () => {} }) {
+// ---------- Filters (Figma 1378:326) ----------
+const F_DEFAULT = { mode: null, sort: 'Best fit', open: true, dist: 'Walk', price: 'Any', verified: false };
+function FSeg({ options, value, onChange }) {
+  return (
+    <div style={{ display: 'flex', padding: 3, borderRadius: 22, background: 'rgba(42,38,80,0.05)', flex: 'none' }}>
+      {options.map((o) => {
+        const on = value === o;
+        return (
+          <button key={o} onClick={() => onChange(o)} style={{ position: 'relative', height: 38, padding: '0 12px', borderRadius: 19 }}>
+            {on && <motion.div layoutId={`fseg-${options[0]}`} transition={GENTLE} className="abs" style={{ inset: 0, borderRadius: 19, background: 'rgba(255,255,255,0.85)', boxShadow: '0 2px 6px rgba(42,38,80,0.08)' }} />}
+            <span className="nowrap" style={{ position: 'relative', ...t(13, on ? 600 : 500, on ? INK : SUB) }}>{o}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+function FSwitch({ on, onChange }) {
+  return (
+    <motion.button role="switch" aria-checked={on} onClick={() => onChange(!on)} initial={false}
+      animate={{ backgroundColor: on ? INK : 'rgba(42,38,80,0.12)' }} transition={{ duration: 0.2 }}
+      style={{ width: 44, height: 26, borderRadius: 13, padding: 3, display: 'flex', justifyContent: on ? 'flex-end' : 'flex-start', flex: 'none' }}>
+      <motion.div layout transition={{ type: 'spring', stiffness: 600, damping: 34 }} style={{ width: 20, height: 20, borderRadius: 10, background: '#fff' }} />
+    </motion.button>
+  );
+}
+function FRow({ icon, label, children, last }) {
+  return (
+    <>
+      <div style={{ height: 60, display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px 0 18px' }}>
+        <Ph n={icon} size={20} fill={INK} />
+        <span className="nowrap" style={{ ...t(15, 500, INK), flex: '1 0 0' }}>{label}</span>
+        {children}
+      </div>
+      {!last && <div style={{ height: 1, margin: '0 20px', background: 'rgba(42,38,80,0.07)' }} />}
+    </>
+  );
+}
+const Any = ({ v = 'Any' }) => <><span style={t(14, 400, SUB)}>{v}</span><Ph n="caret-right" size={16} fill={SUB} /></>;
+const FHead = ({ children }) => <p style={{ ...t(13, 600, SUB), letterSpacing: '0.04em', padding: '0 4px' }}>{children}</p>;
+const FCard = ({ children }) => <Glass radius={28} style={{ position: 'relative' }} contentStyle={{ display: 'block', padding: '6px 0' }}>{children}</Glass>;
+
+function Filters({ value, onChange, onClose }) {
+  const set = (k) => (v) => onChange({ ...value, [k]: v });
+  return (
+    <motion.div className="abs" style={{ inset: 0, background: '#f7f5f1', zIndex: 30 }}
+      initial={{ x: 440 }} animate={{ x: 0 }} exit={{ x: 440 }} transition={GENTLE}>
+      <div className="scroll" style={{ position: 'absolute', inset: 0 }}>
+        <div style={{ padding: '124px 24px 150px', display: 'flex', flexDirection: 'column' }}>
+          <FHead>MODE</FHead>
+          <div className="hscroll" style={{ margin: '18px -24px 0', padding: '6px 24px 20px', display: 'flex', gap: 8 }}>
+            {['Everyday', 'Study', 'Hang out', 'Date', 'Night out', 'Family'].map((m) => {
+              const on = value.mode === m;
+              return (
+                <motion.button key={m} onClick={() => set('mode')(on ? null : m)} whileTap={{ scale: 0.95 }} transition={GENTLE}
+                  className="glass" style={{ position: 'relative', height: 44, borderRadius: 22, flex: 'none', '--ga': '157.6deg' }}>
+                  <div className="g-bg" style={on ? { background: 'rgba(255,255,255,0.92)' } : undefined} />
+                  <span className="g-c nowrap" style={{ padding: '0 22px', ...t(15, on ? 600 : 500, on ? INK : 'rgba(42,38,80,0.8)') }}>{m}</span>
+                  <div className="g-in" />
+                </motion.button>
+              );
+            })}
+          </div>
+          <FHead>BASICS</FHead>
+          <div style={{ height: 24 }} />
+          <FCard>
+            <FRow icon="sort-ascending" label="Sort"><FSeg options={['Best fit', 'Nearest', 'Top rated']} value={value.sort} onChange={set('sort')} /></FRow>
+            <FRow icon="clock" label="Open now"><FSwitch on={value.open} onChange={set('open')} /></FRow>
+            <FRow icon="person-simple-walk" label="Distance"><FSeg options={['Walk', '1 mi', '5 mi']} value={value.dist} onChange={set('dist')} /></FRow>
+            <FRow icon="currency-dollar" label="Price" last><FSeg options={['$', '$$', '$$$', 'Any']} value={value.price} onChange={set('price')} /></FRow>
+          </FCard>
+          <div style={{ height: 24 }} />
+          <FHead>COMFORT</FHead>
+          <div style={{ height: 24 }} />
+          <FCard>
+            <FRow icon="speaker-high" label="Sound"><Any /></FRow>
+            <FRow icon="sun" label="Light"><Any /></FRow>
+            <FRow icon="users" label="Crowd"><Any /></FRow>
+            <FRow icon="thermometer-simple" label="Temperature"><Any /></FRow>
+            <FRow icon="armchair" label="Seating" last><Any /></FRow>
+          </FCard>
+          <div style={{ height: 24 }} />
+          <FHead>MORE</FHead>
+          <div style={{ height: 24 }} />
+          <FCard>
+            <FRow icon="squares-four" label="Place type"><Any v="All" /></FRow>
+            <FRow icon="check-circle" label="Looking for"><Any /></FRow>
+            <FRow icon="prohibit" label="Not for me"><Any v="None" /></FRow>
+            <FRow icon="wind" label="Smells I’d skip"><Any v="None" /></FRow>
+            <FRow icon="seal-check" label="Verified info only" last><FSwitch on={value.verified} onChange={set('verified')} /></FRow>
+          </FCard>
+        </div>
+      </div>
+      <div className="abs" style={{ left: 0, top: 0, width: 440, height: 120, background: 'linear-gradient(#f7f5f1 70%, rgba(247,245,241,0))', pointerEvents: 'none' }} />
+      <motion.button className="abs" aria-label="Back" onClick={onClose} whileTap={{ scale: 0.9 }} transition={TAP} style={{ left: 24, top: 62, width: 48, height: 48 }}>
+        <Glass radius={24} style={{ inset: 0 }} contentStyle={{ justifyContent: 'center' }}><Ph n="caret-left" size={22} fill={INK} /></Glass>
+      </motion.button>
+      <p className="abs nowrap" style={{ left: 84, top: 72, ...t(24, 600, INK), lineHeight: '29px' }}>Filters</p>
+      <motion.button className="abs" whileTap={{ scale: 0.94 }} onClick={() => onChange(F_DEFAULT)} style={{ right: 16, top: 64, height: 44, padding: '0 8px', ...t(15, 500, SUB) }}>Reset</motion.button>
+      <Glass radius={0} className="abs" style={{ left: 0, top: 842, width: 440, height: 114 }} contentStyle={{ alignItems: 'flex-start', padding: '16px 25px 0 26px', justifyContent: 'space-between' }}>
+        <motion.button whileTap={{ scale: 0.94 }} onClick={() => onChange(F_DEFAULT)} style={{ height: 63, ...t(15, 500, SUB) }}>Clear all</motion.button>
+        <motion.button whileTap={{ scale: 0.96 }} transition={TAP} onClick={onClose} className="gl"
+          style={{ height: 63, padding: '0 36px', borderRadius: 32, boxShadow: '0 14px 36px rgba(42,38,80,0.1), inset 0 1px 0 rgba(255,255,255,0.9)', ...t(17, 600, INK) }}>Show 24 places</motion.button>
+      </Glass>
+    </motion.div>
+  );
+}
+
+export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds = [], onToggleSaved = () => {}, onOverlay = () => {} }) {
   const scale = useScale();
-  const top = useMotionValue(SNAP.half);
-  const [state, setState] = useState('half');
-  const [chip, setChip] = useState('Cafés');
-  const [sense, setSense] = useState('Sound');
+  const top = useMotionValue(SNAP.peek);
+  const [state, setState] = useState('peek');
+  const [chip, setChip] = useState('All');
+  const [sense, setSense] = useState('None');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filters, setFilters] = useState(F_DEFAULT);
   const listRef = useRef(null);
   const g = useRef(null);
 
-  // Floating map controls only appear once the sheet is out of the way (Sheet hidden frame).
-  const p = useTransform(top, [SNAP.half, SNAP.hidden], [0, 1], { clamp: true });
-  const ctrlX = useTransform(p, [0, 1], [24, 0]);
-  const ctrlEvents = useTransform(p, (v) => (v > 0.6 ? 'auto' : 'none'));
+  // Rail and recenter sit just above the peeking sheet; they fade once the sheet rises past them.
+  const ctrl = useTransform(top, [560, 700], [0, 1], { clamp: true });
+  const ctrlEvents = useTransform(ctrl, (v) => (v > 0.6 ? 'auto' : 'none'));
+  const credit = useTransform(top, (v) => Math.min(839, v - 21));
+  const pad = useTransform(top, [SNAP.full, SNAP.tall], [42, 0], { clamp: true });
+  const listTop = useTransform(pad, (v) => 80 + v);
+  const titleTop = useTransform(pad, (v) => 36 + v);
+  const listOp = useTransform(top, [SNAP.peek, SNAP.half], [0, 1], { clamp: true });
+  const handleOp = useTransform(top, [SNAP.full, 120], [0, 1], { clamp: true });
 
   const go = (name, velocity = 0) => {
+    name = ALIAS[name] || name;
     if (name !== 'full' && listRef.current) listRef.current.scrollTop = 0;
     setState(name);
     animate(top, SNAP[name], { ...GENTLE, velocity });
   };
   useEffect(() => { if (command) go(command.state); }, [command]);
+  useEffect(() => { onOverlay(filtersOpen); return () => onOverlay(false); }, [filtersOpen]);
 
   // ---- drag handling (pointer deltas are divided by the device scale) ----
   const begin = (e, source) => {
@@ -100,7 +237,7 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
   const end = () => {
     const d = g.current; g.current = null; if (!d) return;
     if (!d.moved) {
-      if (d.source === 'header') go(state === 'full' ? 'half' : 'full');
+      if (d.source === 'header') go(state === 'full' ? 'half' : state === 'peek' ? 'half' : 'full');
       if (d.source === 'hotspot') go('half');
       return;
     }
@@ -114,39 +251,40 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
     onPointerDown: (e) => begin(e, source), onPointerMove: move, onPointerUp: end, onPointerCancel: end,
   });
 
+  const pins = LAYERS[sense];
   return (
     <div className="abs" style={{ inset: 0, background: '#f7f5f1', overflow: 'hidden' }}>
       <div className="abs" style={{ inset: 0, background: '#eef0ea' }}>
         <img src={mapTiles} alt="" className="abs" style={{ left: 0, top: 0, width: 440, height: 956, objectFit: 'cover' }} />
       </div>
 
-      {/* Layer / Sensory pins */}
-      {PINS.map((pn, i) => (
-        <motion.div key={sense + i} className="abs" style={{ left: pn.left, top: pn.top, width: pn.size, height: pn.size }}
-          initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ ...GENTLE, delay: 0.12 + i * 0.06 }}><SensePin sense={sense} place={i} /></motion.div>
-      ))}
-      {LABELS.map((l, i) => (
-        <motion.div key={sense + i} className="abs" style={{ left: l.left, top: l.top }}
-          initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ ...GENTLE, delay: 0.18 + i * 0.06 }}>
-          <Glass radius={22} angle={l.ga} style={{ position: 'relative', height: 44 }} contentStyle={{ gap: 8, padding: '0 14.5px 0 10.5px' }}>
-            <img src={uri('mapPin')} alt="" style={{ width: 20, height: 20, display: 'block' }} />
-            <span className="nowrap" style={{ fontSize: 14, fontWeight: 500, color: NAVY }}>{SENSE_PLACES[sense][i]}</span>
-          </Glass>
-        </motion.div>
-      ))}
+      {/* Layer / pins: category pins by default, sense-coloured pins once a layer is on */}
+      <AnimatePresence mode="popLayout">
+        {pins.map(([icon, ring, , , lvl], i) => <Pin key={sense + i} i={i} icon={icon} ring={ring} level={lvl} layer={sense} />)}
+      </AnimatePresence>
+      <AnimatePresence mode="popLayout">
+        {pins.map(([, , name, lx], i) => (
+          <motion.div key={sense + 'l' + i} className="abs" style={{ left: lx, top: SLOTS[i][1] + 48 }}
+            initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.12 } }} transition={{ ...GENTLE, delay: 0.1 + i * 0.05 }}>
+            <Glass radius={22} angle="166deg" style={{ position: 'relative', height: 44 }} contentStyle={{ padding: '0 15px' }}>
+              <span className="nowrap" style={t(14, 500, INK)}>{name}</span>
+            </Glass>
+          </motion.div>
+        ))}
+      </AnimatePresence>
       <img src={uri('you')} alt="" className="abs" style={{ left: 154, top: 478, width: 44, height: 44 }} />
 
       {/* Search + filter */}
-      <Glass radius={26} angle="170deg" style={{ left: 24, top: 62, width: 328, height: 52 }} contentStyle={{ gap: 12, padding: '0 16.5px' }}>
-        <img src={uri('mapSearch')} alt="" style={{ width: 22, height: 22, display: 'block' }} />
-        <button type="button" onClick={onOpenSearch} className="nowrap" style={{ fontSize: 16, fontWeight: 500, color: NAVY, position: 'absolute', inset: 0, paddingLeft: 51, textAlign: 'left' }}>Search places</button>
+      <Glass radius={26} angle="170deg" style={{ left: 24, top: 80, width: 328, height: 52 }} contentStyle={{ gap: 12, padding: '0 16.5px' }}>
+        <Ph n="magnifying-glass" size={22} fill={INK} />
+        <button type="button" onClick={onOpenSearch} className="nowrap" style={{ ...t(16, 500, INK), position: 'absolute', inset: 0, paddingLeft: 51, textAlign: 'left' }}>Search places</button>
       </Glass>
-      <Glass radius={26} style={{ left: 364, top: 62, width: 52, height: 52 }} contentStyle={{ justifyContent: 'center' }} className="press">
-        <img src={uri('sliders')} alt="" style={{ width: 22, height: 22, display: 'block' }} />
-      </Glass>
+      <motion.button aria-label="Filters" className="abs" onClick={() => setFiltersOpen(true)} whileTap={{ scale: 0.92 }} transition={TAP} style={{ left: 364, top: 80, width: 52, height: 52 }}>
+        <Glass radius={26} style={{ inset: 0 }} contentStyle={{ justifyContent: 'center' }}><Ph n="sliders-horizontal" size={22} fill={INK} /></Glass>
+      </motion.button>
 
-      {/* Category chips (scrolls past the screen edge like the Figma row) */}
-      <div className="abs hscroll" style={{ left: 0, top: 120, width: 440, height: 100, pointerEvents: 'none' }}>
+      {/* Category chips */}
+      <div className="abs hscroll" style={{ left: 0, top: 138, width: 440, height: 100, pointerEvents: 'none' }}>
         <div style={{ display: 'flex', gap: 8, padding: '8px 24px 40px', width: 'max-content' }}>
           {CHIPS.map((c) => {
             const on = chip === c;
@@ -154,7 +292,7 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
               <motion.button key={c} onClick={() => setChip(c)} whileTap={{ scale: 0.95 }} transition={GENTLE}
                 className="glass" style={{ position: 'relative', height: 44, borderRadius: 22, pointerEvents: 'auto', borderColor: on ? '#fff' : 'rgba(255,255,255,.95)', '--ga': '157.6deg' }}>
                 <div className="g-bg" style={on ? { background: 'rgba(255,255,255,0.92)' } : undefined} />
-                <span className="g-c nowrap" style={{ padding: '0 18.5px', fontSize: 15, fontWeight: on ? 600 : 500, color: on ? NAVY : 'rgba(42,38,80,0.8)' }}>{c}</span>
+                <span className="g-c nowrap" style={{ padding: '0 22px', fontSize: 15, fontWeight: on ? 600 : 500, color: on ? INK : 'rgba(42,38,80,0.8)' }}>{c}</span>
                 <div className="g-in" />
               </motion.button>
             );
@@ -162,49 +300,47 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
         </div>
       </div>
 
-      <p className="abs nowrap" style={{ left: 24, top: 839, fontSize: 9, fontWeight: 500, color: 'rgba(90,98,112,0.85)' }}>Map: Esri, HERE, Garmin, OpenStreetMap contributors</p>
+      <motion.p className="abs nowrap" style={{ left: 24, top: credit, fontSize: 11, fontWeight: 500, color: SUB }}>Map: Esri, HERE, Garmin, OpenStreetMap contributors</motion.p>
 
-      {/* Sensitivity filters + Recenter (visible when the sheet is hidden) */}
-      <motion.div className="abs" style={{ left: 349, top: 280, width: 67, height: 191, opacity: p, x: ctrlX, pointerEvents: ctrlEvents }}>
-        <Glass radius={32} angle="109.3deg" style={{ inset: 0 }} contentStyle={{ flexDirection: 'column', gap: 4, padding: 2.5, alignItems: 'center', justifyContent: 'flex-start' }}>
+      {/* Sense layers rail + Recenter. Tap the active sense again to turn layers off. */}
+      <motion.div className="abs" style={{ left: 364, top: 441, width: 67, opacity: ctrl, pointerEvents: ctrlEvents }}>
+        <Glass radius={32} angle="109.3deg" style={{ position: 'relative' }} contentStyle={{ flexDirection: 'column', gap: 4, padding: 6, alignItems: 'center' }}>
           {SENSES.map((s) => {
             const on = sense === s.key;
             return (
-              <motion.button key={s.key} layout onClick={() => setSense(s.key)} transition={GENTLE}
+              <motion.button key={s.key} layout aria-pressed={on} aria-label={`${s.key} layer`} onClick={() => setSense(on ? 'None' : s.key)} transition={GENTLE}
                 style={{ position: 'relative', width: 56, height: on ? 68 : 52, borderRadius: 28, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, flex: 'none' }}>
                 {on && <motion.div layoutId="sense-pill" transition={GENTLE} className="abs" style={{ inset: 0, borderRadius: 28, background: 'rgba(255,255,255,0.85)', boxShadow: '0 2px 8px rgba(42,38,80,0.06)' }} />}
-                <motion.div layout="position" style={{ position: 'relative' }}><Icon d={s.d} fill={on ? NAVY : MUTED} /></motion.div>
-                {on && <motion.span layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ position: 'relative', fontSize: 12, fontWeight: 600, color: NAVY }}>{s.key}</motion.span>}
+                <motion.div layout="position" style={{ position: 'relative' }}><Ph n={s.icon} size={24} fill={on ? INK : SUB} /></motion.div>
+                {on && <motion.span layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ position: 'relative', ...t(12, 600, INK) }}>{s.short || s.key}</motion.span>}
               </motion.button>
             );
           })}
         </Glass>
       </motion.div>
-      <motion.div className="abs" style={{ left: 368, top: 487, width: 48, height: 48, opacity: p, pointerEvents: ctrlEvents }}>
-        <div className="glass press" style={{ inset: 0, borderRadius: 24, border: 'none', boxShadow: '0 14px 36px rgba(42,38,80,0.1)' }}>
+      <motion.button aria-label="Recenter" className="abs" whileTap={{ scale: 0.9 }} transition={TAP} style={{ left: 373, top: 700, width: 48, height: 48, opacity: ctrl, pointerEvents: ctrlEvents }}>
+        <div className="glass" style={{ position: 'absolute', inset: 0, borderRadius: 24, border: 'none', boxShadow: '0 14px 36px rgba(42,38,80,0.1)' }}>
           <div className="g-bg" />
-          <div className="g-c" style={{ justifyContent: 'center' }}><img src={uri('iconPin')} alt="" style={{ width: 22, height: 22, display: 'block' }} /></div>
+          <div className="g-c" style={{ justifyContent: 'center' }}><Ph n="navigation-arrow" size={22} fill={INK} /></div>
           <div className="g-in" />
         </div>
-      </motion.div>
-
-      {/* Pull up / hotspot (Sheet hidden) */}
-      {state === 'hidden' && <div className="abs" style={{ left: 0, top: 822, width: 440, height: 120, touchAction: 'none', cursor: 'grab' }} {...handlers('hotspot')} />}
+      </motion.button>
 
       {/* Recommendation sheet */}
       <motion.div className="abs" data-map-sheet={state} style={{ left: 0, top, bottom: 0, width: 440, background: '#fff', borderRadius: '22px 22px 0 0', overflow: 'hidden', boxShadow: '0 -6px 24px rgba(42,38,80,0.06)' }}>
-        <div className="abs" style={{ left: 0, top: 0, width: 440, height: 80, cursor: 'grab', touchAction: 'none', zIndex: 2 }} {...handlers('header')}>
-          <div className="abs" style={{ left: 170, top: 10, width: 100, height: 5, borderRadius: 100, background: '#d9d9d9' }} />
-          <p className="abs" style={{ left: 20, top: 36, fontSize: 26, fontWeight: 700, color: '#2b2638', lineHeight: 'normal' }}>For You</p>
-        </div>
-        <div ref={listRef} className="abs scroll" {...handlers('list')}
-          style={{ inset: 'auto', left: 0, top: 80, bottom: 0, width: 440, overflowY: state === 'full' ? 'auto' : 'hidden', touchAction: state === 'full' ? 'pan-y' : 'none' }}>
+        <motion.div className="abs" style={{ left: 0, top: 0, width: 440, height: listTop, cursor: 'grab', touchAction: 'none', zIndex: 2 }} {...handlers('header')}>
+          <motion.div className="abs" style={{ left: 170, top: 10, width: 100, height: 5, borderRadius: 100, background: '#d9d9d9', opacity: handleOp }} />
+          <motion.p className="abs nowrap" style={{ left: 20, top: titleTop, ...t(26, 700, INK) }}>Popular around you</motion.p>
+        </motion.div>
+        <motion.div ref={listRef} className="abs scroll" {...handlers('list')}
+          style={{ inset: 'auto', left: 0, top: listTop, opacity: listOp, bottom: 0, width: 440, overflowY: state === 'full' ? 'auto' : 'hidden', touchAction: state === 'full' ? 'pan-y' : 'none' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24, padding: '0 20px 112px' }}>
-            {RECS.map((r, i) => <Recommendation key={r.title} r={r} saved={savedIds.includes(r.id)} onToggleSaved={onToggleSaved} onOpen={i === 0 ? onOpenVenue : undefined} />)}
+            {RECS.map((r, i) => <Recommendation key={r.id} r={r} saved={savedIds.includes(r.id)} onToggleSaved={onToggleSaved} onOpen={i === 0 ? onOpenVenue : undefined} />)}
           </div>
-        </div>
+        </motion.div>
       </motion.div>
+
+      <AnimatePresence>{filtersOpen && <Filters value={filters} onChange={setFilters} onClose={() => setFiltersOpen(false)} />}</AnimatePresence>
     </div>
   );
 }
-

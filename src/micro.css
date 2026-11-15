@@ -54,3 +54,17 @@ input:focus,textarea:focus{box-shadow:0 0 0 3px rgba(94,90,126,.14)}
 [data-reduce-motion='on'] .spk-wave { opacity: 1; }
 [data-vivid='on'] #root { filter: saturate(1.22); }
 body:has([data-app-comfort]) .tabbar-wrap { display: none; }
+
+/* Map pins: a soft ring pulse whose speed follows the level (calm = slow, intense = quick). */
+.mp-ping { position: absolute; inset: 0; border-radius: 50%; border: 2.5px solid var(--c); animation: mpPing var(--d) ease-out infinite; pointer-events: none; }
+@keyframes mpPing { 0% { transform: scale(1); opacity: .5; } 100% { transform: scale(1.75); opacity: 0; } }
+.mp-ico { animation: mpBeat var(--d) ease-in-out infinite; }
+.mp-sound { transform-origin: 30% 50%; }
+.mp-light { animation-name: mpGlow; }
+.mp-crowd { animation-name: mpBob; }
+.mp-temperature { animation-name: mpSway; }
+@keyframes mpBeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+@keyframes mpGlow { 0%, 100% { transform: rotate(0) scale(1); } 50% { transform: rotate(18deg) scale(1.06); } }
+@keyframes mpBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.5px); } }
+@keyframes mpSway { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+@media (prefers-reduced-motion: reduce) { .mp-ping, .mp-ico { animation: none; } }
