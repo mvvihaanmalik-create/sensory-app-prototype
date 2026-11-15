@@ -66,8 +66,10 @@ const mercPx = (lat, lng) => [((lng + 180) / 360) * WORLD, ((1 - Math.log(Math.t
 const [CPX, CPY] = mercPx(CENTER[0], CENTER[1]);
 const ORIGIN = [CPX - 220, CPY - 478];
 const TILE_HOSTS = ['a', 'b', 'c', 'd'];
-// Tiles: OpenStreetMap needs no key. To use a CARTO key instead, swap this for the CARTO raster URL with {z}/{x}/{y}.
-const tileUrl = (z, x, y) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
+// Tiles: CARTO Voyager (double resolution). If a CARTO tile ever fails, that tile falls back to keyless OpenStreetMap.
+const CARTO_KEY = 'cb1_59q2_1_a2c0989975efa436121208af';
+const tileUrl = (z, x, y) => `https://basemaps.cartocdn.com/rastertiles/voyager/${z}/${x}/${y}@2x.png?key=${CARTO_KEY}`;
+const osmUrl = (z, x, y) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
 const MINZ = 0.3, MAXZ = 3.2, REACH = 2600;
 const bounds = (s) => ({ minX: 220 - s * (220 + REACH), maxX: 220 + s * (REACH - 220), minY: 478 - s * (478 + REACH), maxY: 478 + s * (REACH - 478) });
 
@@ -93,7 +95,7 @@ function Tiles({ view, onLoaded }) {
     const size = 256 * 2 ** (Z0 - z);
     const x0 = Math.floor(set.x0 / k), x1 = Math.floor(set.x1 / k), y0 = Math.floor(set.y0 / k), y1 = Math.floor(set.y1 / k);
     for (let tx = x0; tx <= x1; tx++) for (let ty = y0; ty <= y1; ty++) {
-      layers.push(<img key={`${z}/${tx}/${ty}`} className="mp-tile abs" alt="" draggable={false} src={tileUrl(z, tx, ty)} onLoad={(e) => { e.currentTarget.style.opacity = 1; onLoaded(); }}
+      layers.push(<img key={`${z}/${tx}/${ty}`} className="mp-tile abs" alt="" draggable={false} src={tileUrl(z, tx, ty)} onLoad={(e) => { e.currentTarget.style.opacity = 1; onLoaded(); }} onError={(e) => { if (!e.currentTarget.dataset.fb) { e.currentTarget.dataset.fb = '1'; e.currentTarget.src = osmUrl(z, tx, ty); } }}
         style={{ opacity: 0, transition: 'opacity .25s', left: tx * size - ORIGIN[0], top: ty * size - ORIGIN[1], width: size + 0.6, height: size + 0.6, pointerEvents: 'none' }} />);
     }
   }
