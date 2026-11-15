@@ -385,7 +385,7 @@ export function DayChart({ icon, title, week, nowIdx = 11, liveText, info, descr
         <span style={{ ...t(17, 600), flex: '1 0 0' }}>{title}</span>
         <div style={{ position: 'relative' }}>
           <motion.button whileTap={{ scale: 0.95 }} transition={TAP} onClick={() => setMenu((m) => !m)}
-            style={{ height: 44, padding: '0 12px 0 16px', borderRadius: 22, background: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            style={{ height: 44, padding: '0 12px 0 16px', borderRadius: 22, background: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={t(14, 500)}>{day}</span>
             <motion.span animate={{ rotate: menu ? 180 : 0 }} transition={GENTLE}><VIcon name="caretDown" size={16} /></motion.span>
           </motion.button>

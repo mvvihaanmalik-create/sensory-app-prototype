@@ -219,7 +219,7 @@ function StepWhen({ draft, set, refs, ctl }) {
         <Section icon="cal" title="Date" note={
           <div style={{ position: 'relative' }}>
             <motion.button whileTap={{ scale: 0.95 }} transition={TAP} onClick={() => setMenu((m) => !m)} className="gl-solid"
-              style={{ height: 40, padding: '0 14px 0 16px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 6, border: 0 }}>
+              style={{ height: 40, padding: '0 14px 0 16px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 8, border: 0 }}>
               <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span key={month} style={t(14, 500)} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.18 }}>{month}</motion.span>
               </AnimatePresence>

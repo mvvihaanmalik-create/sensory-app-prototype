@@ -125,7 +125,7 @@ function FilterChips({ sorts, openSense, onOpen }) {
           <G key={sense} as="button" r={22} on={!!cur} onClick={() => onOpen(sense, cur)} whileTap={{ scale: 0.95 }} transition={TAP}
             style={{ height: 44, minWidth: SORTS[sense].minW, padding: '0 22px', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none', pointerEvents: 'auto', boxShadow: '0 6px 14px rgba(42,38,80,0.08), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
             <span className="nowrap" style={{ fontSize: 15, fontWeight: 600, color: NAVY }}>{chipText(sense, cur)}</span>
-            <motion.span animate={{ rotate: openSense === sense ? 180 : 0 }} transition={GENTLE} style={{ display: 'flex', marginLeft: 0 }}>
+            <motion.span animate={{ rotate: openSense === sense ? 180 : 0 }} transition={GENTLE} style={{ display: 'flex', marginLeft: 6 }}>
               <VIcon name="caretDown" size={15} fill={NAVY} />
             </motion.span>
           </G>
