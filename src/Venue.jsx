@@ -7,6 +7,8 @@ import { VIcon } from './venueIcons.jsx';
 import { VP, ZONES } from './venuePhotos.js';
 import { CAROUSEL, MENU, HIGHLIGHT_PHOTOS, PHOTO_GRID as GRID, MENU_CROPS, GRID_CROPS, photoBackground } from './venueFinalPhotos.js';
 import Lightbox, { useLightbox } from './Lightbox.jsx';
+import { InfoShareHost } from './InfoShare.jsx';
+import danielAvatar from './assets/people/daniel.png';
 import { G, CircleBtn, Chip, SenseTiles, InfoList, ReviewSummary, AISummary, ReviewCard, KEYWORDS, H, PrimaryCTA, RESERVE_TOP, Toast, DayChart, weekFrom, NAVY, MUTED, PURPLE, DIV, TAP, t } from './flow.jsx';
 
 export const VENUE = {
@@ -96,7 +98,7 @@ function Menu({ onPhoto }) {
 }
 
 export const REVIEWS = [
-  { name: 'Daniel Brooks', meta: 'Local guide · 1 wk ago', text: 'The espresso machine and chatter made the counter area lively.', tags: ['Sound · Lively'], likes: 42, replies: 12, age: 7 },
+  { name: 'Daniel Brooks', avatar: danielAvatar, meta: 'Local guide · 1 wk ago', text: 'The espresso machine and chatter made the counter area lively.', tags: ['Sound · Lively'], likes: 42, replies: 12, age: 7 },
   { name: 'Leah Park', meta: '3 days ago', text: 'The wall lights felt soft, and it was a little cool by the booth.', tags: ['Light · Warm & cozy', 'Temperature · Cool'], likes: 16, replies: 3, age: 3 },
   { name: 'Priya Shah', meta: '3 wks ago', text: 'We could still find a table, but the aisle felt tight when people passed.', tags: ['Crowd · Busy'], likes: 13, replies: 1, age: 21 },
 ];
@@ -176,6 +178,7 @@ export default function Venue({ tab, setTab, onBack, backLabel = 'Back', saved =
   const scroller = useRef(null);
   const tabsRef = useRef(null);
   const lb = useLightbox();
+  const [shareOpen, setShareOpen] = useState(false);
   const sy = useMotionValue(0);
   const heroY = useTransform(sy, (v) => (v > 0 ? v * 0.45 : 0));
   const heroScale = useTransform(sy, (v) => (v < 0 ? 1 - v / 320 : 1));
@@ -192,6 +195,7 @@ export default function Venue({ tab, setTab, onBack, backLabel = 'Back', saved =
 
   return (
     <div className="abs" style={{ inset: 0, background: '#f7f5f1' }}>
+      <InfoShareHost shareOpen={shareOpen} onShareClose={() => setShareOpen(false)}>
       <div ref={scroller} className="scroll" onScroll={(e) => { sy.set(e.currentTarget.scrollTop); onScroll?.(e.currentTarget.scrollTop); }}>
         <motion.div style={{ height: 320, background: `#dbdbde url(${CAROUSEL[0]}) center / cover`, y: heroY, scale: heroScale, transformOrigin: '50% 0' }} />
         <div style={{ position: 'relative', background: '#f7f5f1', padding: '24px 24px 140px', display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -237,12 +241,13 @@ export default function Venue({ tab, setTab, onBack, backLabel = 'Back', saved =
           <VIcon name={saved ? 'bookmarkFill' : 'bookmark'} size={22} fill={NAVY} />
         </motion.span>
       </CircleBtn>
-      <CircleBtn icon="export" label="Share" style={{ position: 'absolute', left: 368, top: 56, zIndex: 10 }} />
+      <CircleBtn icon="export" label="Share" onClick={() => setShareOpen(true)} style={{ position: 'absolute', left: 368, top: 56, zIndex: 10 }} />
 
       <PrimaryCTA icon="calendarCheck" onClick={onReserve} top={RESERVE_TOP}
         label={booking ? `Booked · ${booking.dayShort}, ${booking.time}` : 'Reserve'} />
       <Toast text={toast} />
       <Lightbox box={lb.box} onClose={lb.close} setI={lb.setI} />
+      </InfoShareHost>
     </div>
   );
 }
