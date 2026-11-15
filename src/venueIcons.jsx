@@ -48,9 +48,10 @@ export function VIcon({ name, size, fill, style }) {
 }
 
 // Sound-level icon (dot + arcs) with the arcs pulsing outward on a loop
-export function RippleIcon({ k, size }) {
+export function RippleIcon({ k, size, color }) {
   let n = 0;
   const html = svgSrc(k)
+    .replace(/#14181F/gi, color || '#14181F')
     .replace(/width="\d+" height="\d+"/, `width="${size}" height="${size}" style="display:block"`)
     .replace(/<path (d="[^"]*") stroke=/g, (m, d) => `<path class="spk-wave spk-w${++n}" ${d} stroke=`);
   return <span style={{ display: 'block', width: size, height: size, flex: 'none' }} dangerouslySetInnerHTML={{ __html: html }} />;

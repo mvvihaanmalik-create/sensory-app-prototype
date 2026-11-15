@@ -4,9 +4,10 @@ import { useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { GENTLE } from './ui.jsx';
 import { VIcon } from './venueIcons.jsx';
-import { G, TopBar, PrimaryCTA, DayChart, weekFrom, SENSES, NAVY, DIV, TAP, t } from './flow.jsx';
+import { G, TopBar, PrimaryCTA, RESERVE_TOP, DayChart, weekFrom, SENSES, NAVY, DIV, TAP, t } from './flow.jsx';
 import { CROWD_SUN, crowdWord } from './Venue.jsx';
 import { REVIEW_PICS } from './venuePhotos.js';
+import Lightbox, { useLightbox } from './Lightbox.jsx';
 
 const ICON = Object.fromEntries(SENSES.map((s) => [s.k, s.icon]));
 
@@ -134,13 +135,14 @@ function MostSay({ sense, d, filter, setFilter }) {
   );
 }
 
-function PhotoReview({ p }) {
+const picFor = (text) => REVIEW_PICS[[...text].reduce((a, c) => a + c.charCodeAt(0), 0) % REVIEW_PICS.length];
+function PhotoReview({ p, onPhoto }) {
   const [h, tag, text, meta] = p;
-  const pic = REVIEW_PICS[[...text].reduce((a, c) => a + c.charCodeAt(0), 0) % REVIEW_PICS.length];
+  const pic = picFor(text);
   return (
     <motion.div layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }} transition={GENTLE}>
       <G r={24} whileTap={{ scale: 0.98 }} style={{ padding: '6px 6px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <div style={{ position: 'relative', height: h, borderRadius: 18, background: `#dbdbde url(${pic}) center / cover` }}>
+        <div role="button" aria-label="Open photo" onClick={onPhoto} style={{ position: 'relative', height: h, borderRadius: 18, background: `#dbdbde url(${pic}) center / cover`, cursor: 'pointer' }}>
           <span className="abs nowrap" style={{ left: 8, bottom: 10, height: 24, padding: '0 10px', borderRadius: 13, background: 'rgba(255,255,255,0.92)', display: 'flex', alignItems: 'center', ...t(12, 600) }}>{tag}</span>
         </div>
         <div style={{ padding: '0 6px', display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -154,7 +156,7 @@ function PhotoReview({ p }) {
 
 const EXTRA_META = ['Neighbor · 2 mo ago', 'Visitor · 1 mo ago', 'Weekend regular · 2 wks ago', 'Student · 1 mo ago'];
 
-function SenseBody({ sense }) {
+function SenseBody({ sense, onPhoto }) {
   const d = SENSE_DATA[sense];
   const [filter, setFilter] = useState(null);
   const [newest, setNewest] = useState(true);
@@ -194,7 +196,7 @@ function SenseBody({ sense }) {
         {cols.map((col, ci) => (
           <motion.div key={ci} layout style={{ width: 188, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <AnimatePresence mode="popLayout" initial={false}>
-              {col.map((p) => <PhotoReview key={`${p[5]}-${p[6]}-${p[3]}`} p={p} />)}
+              {col.map((p) => <PhotoReview key={`${p[5]}-${p[6]}-${p[3]}`} p={p} onPhoto={() => { const flat = [...cols[0], ...cols[1]]; onPhoto(flat.map((q) => picFor(q[2])), flat.indexOf(p)); }} />)}
             </AnimatePresence>
           </motion.div>
         ))}
@@ -210,6 +212,7 @@ function SenseBody({ sense }) {
 export default function SenseReviews({ sense, setSense, onBack, onAll, onReserve, booking }) {
   const [scrolled, setScrolled] = useState(false);
   const scroller = useRef(null);
+  const lb = useLightbox();
   const pick = (k) => { setSense(k); scroller.current?.scrollTo({ top: 0 }); };
   return (
     <div className="abs" style={{ inset: 0, background: '#f7f5f1' }}>
@@ -219,12 +222,13 @@ export default function SenseReviews({ sense, setSense, onBack, onAll, onReserve
           <CategoryBar value={sense} onPick={pick} onAll={onAll} />
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={sense} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-              <SenseBody sense={sense} />
+              <SenseBody sense={sense} onPhoto={lb.open} />
             </motion.div>
           </AnimatePresence>
         </div>
       </div>
-      <PrimaryCTA icon="calendarCheck" onClick={onReserve} label={booking ? `Booked · ${booking.dayShort}, ${booking.time}` : 'Reserve'} />
+      <PrimaryCTA icon="calendarCheck" onClick={onReserve} top={RESERVE_TOP} label={booking ? `Booked · ${booking.dayShort}, ${booking.time}` : 'Reserve'} />
+      <Lightbox box={lb.box} onClose={lb.close} setI={lb.setI} />
     </div>
   );
 }

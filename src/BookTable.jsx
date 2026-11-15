@@ -6,7 +6,7 @@ import { AnimatePresence, motion, useAnimationControls } from 'motion/react';
 import { GENTLE, Icon } from './ui.jsx';
 import { paths } from './svgs.js';
 import { VIcon, SpeakerWaves } from './venueIcons.jsx';
-import { G, CircleBtn, TopBar, Section, Chip, ChipGroup, PrimaryCTA, InfoList, Pill, NAVY, DIV, TAP, t } from './flow.jsx';
+import { G, CircleBtn, TopBar, Section, Chip, ChipGroup, PrimaryCTA, RESERVE_TOP, InfoList, Pill, NAVY, DIV, TAP, t } from './flow.jsx';
 import { VENUE } from './Venue.jsx';
 
 // ---------- Data ----------
@@ -239,9 +239,11 @@ function StepWhen({ draft, set, refs, ctl }) {
               const on = date === x.i;
               return (
                 <G key={x.i} as="button" r={24} on={on} onClick={() => pickDate(x.i)} whileTap={{ scale: 0.94 }} transition={TAP}
-                  style={{ width: 76, height: 88, flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, ...(on ? { border: 0, background: 'rgba(255,255,255,0.85)' } : null) }}>
-                  <span style={t(13, on ? 600 : 400)}>{x.label}</span>
-                  <span style={t(24, 600, NAVY, { lineHeight: '29px' })}>{x.num}</span>
+                  aria-pressed={on}
+                  style={{ width: 76, height: 88, flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, transition: 'background-color .2s, border-color .2s',
+                    ...(on ? { borderColor: NAVY, background: NAVY, boxShadow: '0 10px 22px rgba(94,90,126,0.28)' } : null) }}>
+                  <span style={t(13, on ? 600 : 400, on ? 'rgba(255,255,255,0.85)' : NAVY)}>{x.label}</span>
+                  <span style={t(24, 600, on ? '#fff' : NAVY, { lineHeight: '29px' })}>{x.num}</span>
                 </G>
               );
             })}
@@ -568,7 +570,7 @@ export default function BookTable({ draft, setDraft, step, setStep, onClose, onB
           </div>
         </motion.div>
       </AnimatePresence>
-      <PrimaryCTA label={cta.label} enabled={!!cta.ok} onClick={cta.go} onBlocked={blocked} busy={busy ? cta.label : null} />
+      <PrimaryCTA top={RESERVE_TOP} label={cta.label} enabled={!!cta.ok} onClick={cta.go} onBlocked={blocked} busy={busy ? cta.label : null} />
     </div>
   );
 }

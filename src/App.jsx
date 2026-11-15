@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { AnimatePresence, animate, motion, MotionConfig, useMotionValue, useIsPresent } from 'motion/react';
 import Home from './Home.jsx';
 import ExplorePost from './Explore.jsx';
@@ -131,9 +132,8 @@ export default function App() {
   const [exploreOpen, setExploreOpen] = useState(initial === 'explore-post');
   const [exploreLiked, setExploreLiked] = useState(false), [exploreSaved,setExploreSaved] = useState(false);
   const [exploreFollow,setExploreFollow]=useState(false),[exploreReplies,setExploreReplies]=useState([]);
-  const openExplore = () => { setExploreOpen(true); history.pushState({explore:true},'', '#explore-post'); };
-  const closeExplore = () => { setExploreOpen(false); if(history.state?.explore) history.back(); else history.replaceState(null,'','#home'); };
-  useEffect(()=>{ const back=()=>setExploreOpen(location.hash === '#explore-post'); window.addEventListener('popstate',back); return()=>window.removeEventListener('popstate',back); },[]);
+  const openExplore = () => { setExploreOpen(true); try { history.replaceState(null, '', '#explore-post'); } catch (_) {} };
+  const closeExplore = () => { setExploreOpen(false); try { history.replaceState(null, '', '#home'); } catch (_) {} };
   const [venueOpen, setVenueOpen] = useState(VENUE_VIEWS.includes(initial));
   const [flow, setFlow] = useState(flowOf(initial));
   const [bookStep, setBookStep] = useState(initial === 'book-2' ? 2 : initial === 'book-3' ? 3 : 1);
@@ -152,6 +152,7 @@ export default function App() {
   const reserve = () => { if (booking) setFlow('confirmed'); else { setBookStep(1); setFlow('book'); } };
   const [sheetCmd, setSheetCmd] = useState(initial.startsWith('map-') && initial !== 'map-half' ? { state: initial.slice(4), n: 0 } : null);
   const [homeScroll, setHomeScroll] = useState(0);
+  const [homeTop, setHomeTop] = useState(0); // bumps when Home is re-entered from another tab, so it opens at the top
   const [reduceMotion, setReduceMotion] = useState(false);
   const [scene, setScene] = useState('morning');
   const stepScene = (d) => setScene((cur) => SCENES[(SCENES.findIndex((x) => x.id === cur) + d + SCENES.length) % SCENES.length].id);
@@ -167,7 +168,8 @@ export default function App() {
   const showPassed = () => setDecided((m) => Object.fromEntries(Object.entries(m).filter(([, v]) => v === 'save')));
 
   const nav = (to) => {
-    if (screen === 'search' && to !== 'search') { try { history.pushState(null, '', '#' + (to === 'map' ? 'map-half' : to)); } catch (_) {} }
+    if (screen === 'search' && to !== 'search') { setSearchRoute('search'); try { history.replaceState(null, '', '#' + (to === 'map' ? 'map-half' : to)); } catch (_) {} }
+    if (to === 'home' && screen !== 'home') setHomeTop((n) => n + 1);
     if (discoverOpen) closeDiscover();
     setExploreOpen(false);
     if (page) setPage(null);
@@ -175,15 +177,36 @@ export default function App() {
   };
   const navigateSearch = (route, replace = false) => {
     setSearchRoute(route); setScreen('search');
-    const modal = route === 'search-filters' || route === 'search-place';
-    try { if (location.hash !== '#' + route) history[replace ? 'replaceState' : 'pushState']({ search: true, ...(modal ? { searchReturn: searchRoute } : {}) }, '', '#' + route); } catch (_) {}
+    try { if (location.hash !== '#' + route) history.replaceState(null, '', '#' + route); } catch (_) {}
   };
-  const backSearch = fallback => { if (history.state?.searchReturn === fallback) history.back(); else navigateSearch(fallback, true); };
-  const openSearchVenue = () => { openVenue(); try { history.pushState({ search: true }, '', '#venue'); } catch (_) {} };
+  const backSearch = fallback => navigateSearch(fallback, true);
+  // Home / Map "Search places": land on Search with the field focused so the keyboard comes up in the same tap
+  const searchFocus = useRef(null);
+  const openSearchTyping = () => { flushSync(() => { nav('search'); navigateSearch('search'); }); searchFocus.current?.(); };
+  const openSearchVenue = () => { openVenue(); try { history.replaceState(null, '', '#venue'); } catch (_) {} };
+  // Back swipe (browser / iOS edge swipe) always returns to Home. In-app navigation doesn't add history entries;
+  // one guard entry is added whenever you leave a clean Home, and popping it brings you Home.
+  const atHome = screen === 'home' && !venueOpen && !flow && !sense && !page && !sortSheet && !modesOpen && !editing && !exploreOpen && !discoverOpen;
+  const armed = useRef(false);
+  const goHome = () => {
+    setVenueOpen(false); setFlow(null); setSense(null); setVenueScroll(0); setPage(null); setSortSheet(null); setModesOpen(false); setEditing(null);
+    nav('home');
+    try { history.replaceState(null, '', '#home'); } catch (_) {}
+  };
+  const backRef = useRef(null);
+  backRef.current = () => {
+    armed.current = false;
+    if (onboarding) { try { history.pushState({ guard: true }, '', location.href); armed.current = true; } catch (_) {} return; }
+    if (!atHome) goHome(); else { try { history.replaceState(null, '', '#home'); } catch (_) {} }
+  };
   useEffect(() => {
-    const restore = () => { const id = location.hash.slice(1); if (SEARCH_ROUTES.includes(id)) { setSearchRoute(id); setScreen('search'); setVenueOpen(false); setFlow(null); setSense(null); } else if (['home','map-half','profile'].includes(id)) { setScreen(id === 'map-half' ? 'map' : id); } };
-    window.addEventListener('popstate', restore); window.addEventListener('hashchange', restore);
-    return () => { window.removeEventListener('popstate', restore); window.removeEventListener('hashchange', restore); };
+    if (atHome || armed.current || onboarding) return;
+    try { history.pushState({ guard: true }, '', location.href); armed.current = true; } catch (_) {}
+  }, [atHome, onboarding]);
+  useEffect(() => {
+    const back = () => backRef.current();
+    window.addEventListener('popstate', back);
+    return () => window.removeEventListener('popstate', back);
   }, []);
   const activeM = modes.find((m) => m.id === activeMode) || modes[0];
   const sortsFor = (k) => sortsBy[k] || [];
@@ -262,14 +285,14 @@ export default function App() {
                 <div className="abs" style={{ inset: 0, display: screen === 'home' ? 'block' : 'none' }} aria-hidden={screen !== 'home'}>
                     {<DiscoverLayer pull={pull} open={discoverOpen} onClose={closeDiscover} mode={activeM} decided={decided}
                       onDecide={(id, d) => setDecided((m) => ({ ...m, [id]: d }))} onShowPassed={showPassed} onOpenVenue={openVenue} blocked={venueOpen || !!sense || !!flow} />}
-                    {<Home pull={pull} onOpenExplore={openExplore} exploreLiked={exploreLiked} pullOn={screen === 'home' && !discoverOpen && !exploreOpen} onDiscover={() => setDiscoverOpen(true)} onOpenMap={() => nav('map')} onOpenSearch={() => { nav('search'); navigateSearch(searchRoute); }} onOpenVenue={openVenue} onOpenPage={setPage} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} reduceMotion={reduceMotion} scene={scene} onStepScene={stepScene} />}
+                    {<Home pull={pull} onOpenExplore={openExplore} exploreLiked={exploreLiked} pullOn={screen === 'home' && !discoverOpen && !exploreOpen} onDiscover={() => setDiscoverOpen(true)} onOpenMap={() => nav('map')} onOpenSearch={openSearchTyping} onOpenVenue={openVenue} onOpenPage={setPage} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} scrollTopKey={homeTop} reduceMotion={reduceMotion} scene={scene} onStepScene={stepScene} />}
                 </div>
                 <AnimatePresence>{!['home', 'search'].includes(screen) && <ScreenLayer key={screen} screen={screen}>
-                  {screen === 'map' && <MapScreen command={sheetCmd} onOpenVenue={openVenue} onOpenSearch={() => { nav('search'); navigateSearch(searchRoute); }} savedIds={Object.keys(decided).filter(id => decided[id] === 'save')} onToggleSaved={toggleSaved} />}
+                  {screen === 'map' && <MapScreen command={sheetCmd} onOpenVenue={openVenue} onOpenSearch={openSearchTyping} savedIds={Object.keys(decided).filter(id => decided[id] === 'save')} onToggleSaved={toggleSaved} />}
                   {screen === 'profile' && <Profile onScroll={setHomeScroll} savedCount={savedCount} savedPlaces={savedPlaces} modes={modes} activeId={activeMode} onPickMode={setActiveMode} onEditMode={id => editMode(id, 'profile')} onAddMode={() => editMode('new', 'profile')} onOpenVenue={openVenue} />}
                 </ScreenLayer>}</AnimatePresence>
                 <motion.div className="abs" style={{ inset: 0, display: screen === 'search' ? 'block' : 'none' }} aria-hidden={screen !== 'search'} initial={false} animate={{ opacity: screen === 'search' ? 1 : 0 }} transition={GENTLE}>
-                  <Search route={searchRoute} active={screen === 'search' && !venueOpen} onNavigate={navigateSearch} onBack={backSearch} onOpenVenue={openSearchVenue} hasSaved={decided.foxy === 'save'} activeMode={activeM} booking={booking} />
+                  <Search route={searchRoute} active={screen === 'search' && !venueOpen} shown={screen === 'search'} onNavigate={navigateSearch} onBack={backSearch} onOpenVenue={openSearchVenue} hasSaved={decided.foxy === 'save'} activeMode={activeM} booking={booking} focusRef={searchFocus} />
                 </motion.div>
                 {exploreOpen && <ExplorePost onBack={closeExplore} onOpenVenue={openVenue} liked={exploreLiked} setLiked={setExploreLiked} saved={exploreSaved} setSaved={setExploreSaved} follow={exploreFollow} setFollow={setExploreFollow} replies={exploreReplies} setReplies={setExploreReplies}/>}
                 <AnimatePresence>
