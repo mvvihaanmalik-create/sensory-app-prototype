@@ -60,7 +60,7 @@ export function sortRows(rows, sorts) {
   });
 }
 
-const FOXY = { id: 'foxy', name: 'Foxy Loxy Cafe', venue: true, s: 4, l: 3, c: 4, t: 3, seat: ['outdoor'] };
+const FOXY = { id: 'foxy', name: 'Fern & Fable', venue: true, s: 4, l: 3, c: 4, t: 3, seat: ['outdoor'] };
 const SENTIENT = { id: 'sentient', name: 'The Sentient', s: 2, l: 4, c: 2, t: 3, seat: null };
 const GALLERY = { id: 'gallery', name: 'Gallery Café', s: null, l: 4, c: 3, t: 3, seat: ['booth'] };
 

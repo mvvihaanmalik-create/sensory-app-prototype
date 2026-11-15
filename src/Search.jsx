@@ -7,9 +7,9 @@ import { AdjustSearchPage, ADJUST_DEFAULT } from './SettingsPages.jsx';
 import './search.css';
 
 const CHIPS = [['All', 61], ['Made for you', 133], ['Moods', 89], ['Activities', 107], ['Events', 89]];
-const RECENTS = [['Quiet cafés', { category: 'Cafés', filters: ['Quiet'] }], ['Foxy Loxy Café', { query: 'Foxy Loxy' }], ['Outdoor seating', { category: 'Outdoor seating' }]];
-const SUGGESTED = [['Quiet spaces', 'Quiet now'], ['Natural light', 'Natural light'], ['Less crowded', 'Low-key'], ['Booth seating', 'Booths & corners']];
-const prefFilters = p => [p.sound === 'Quiet' && 'Quiet', p.sound === 'Lively' && 'Lively', p.light === 'Soft' && 'Soft light', p.light === 'Bright' && 'Bright light', p.crowd === 'Relaxed' && 'Less crowded', p.crowd === 'Busy' && 'Busy'].filter(Boolean);
+const RECENTS = [['Quiet cafés', { category: 'Cafés', filters: ['Quiet'] }], ['Fern & Fable', { query: 'Fern & Fable' }], ['Outdoor seating', { category: 'Outdoor seating' }]];
+const SUGGESTED = [['Quiet spaces', 'Quiet now'], ['Natural light', 'Natural light'], ['Relaxed', 'Low-key'], ['Booth seating', 'Booths & corners']];
+const prefFilters = p => [['Quiet', 'Low'].includes(p.sound) && 'Quiet', p.sound === 'Lively' && 'Lively', ['Dim', 'Soft'].includes(p.light) && 'Soft light', p.light === 'Bright' && 'Bright light', ['Empty', 'Light'].includes(p.crowd) && 'Less crowded', p.crowd === 'Busy' && 'Busy'].filter(Boolean);
 const FILTER_PREF = { 'Quiet': ['sound', 'Any'], 'Lively': ['sound', 'Any'], 'Soft light': ['light', 'Any'], 'Bright light': ['light', 'Any'], 'Less crowded': ['crowd', 'Any'], 'Busy': ['crowd', 'Any'] };
 const asset = name => searchAssets[`imgIllustration${name}`];
 function Pill({ children, selected, className = '', ...props }) {

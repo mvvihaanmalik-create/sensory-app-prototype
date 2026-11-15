@@ -11,7 +11,7 @@ export const PLACES = [
   { id: 'gallery', name: 'Gallery Café', cat: 'Café', dist: '1.1 mi', level: 1, s: null, l: 4, c: 3, seat: ['booth'], scene: 'gallery', tone: 'warm' },
   { id: 'graveface', name: 'Graveface Books', cat: 'Bookstore', dist: '0.6 mi', level: 1, s: 1, l: null, c: null, seat: ['indoor'], scene: 'books', tone: 'cool', illustrative: true },
   { id: 'grey', name: 'The Grey', cat: 'Dining', dist: '0.7 mi', level: 2, s: 2, l: 2, c: 2, seat: ['indoor'], scene: 'dining', illustrative: true },
-  { id: 'foxy', name: 'Foxy Loxy Cafe', cat: 'Café', dist: '0.5 mi', level: 2, s: 4, l: 3, c: 4, seat: ['outdoor'], scene: 'awning', venue: true, perk: 'Back patio and a gallery feel' },
+  { id: 'foxy', name: 'Fern & Fable', cat: 'Café', dist: '0.5 mi', level: 2, s: 4, l: 3, c: 4, seat: ['outdoor'], scene: 'awning', venue: true, perk: 'Back patio and a gallery feel' },
   { id: 'rocks', name: 'Rocks on the Roof', cat: 'Nightlife', dist: '0.4 mi', level: 4, s: 5, l: 2, c: 5, seat: ['outdoor'], scene: 'night', tone: 'indigo', illustrative: true, perk: 'Rooftop seating' },
   { id: 'lanie', name: "Lanie's", cat: 'Nightlife', dist: '0.8 mi', level: 3, s: 4, l: null, c: 4, seat: ['booth'], scene: 'night', tone: 'plum', illustrative: true, perk: 'Live jazz' },
 ];

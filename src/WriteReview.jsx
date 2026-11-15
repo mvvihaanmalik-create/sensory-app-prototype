@@ -35,7 +35,7 @@ function Stars({ value, onChange }) {
 // Stepped slider (Figma "Review / Sound slider"). Stop 0 is "Didn't notice".
 // value = null means not set yet: no thumb, every stop shows a marker.
 const INK = '#2a2650';
-function Scale({ title, steps, value, onChange }) {
+export function Scale({ title, steps, value, onChange }) {
   const ref = useRef(null);
   const drag = useRef(false);
   const n = steps.length;
