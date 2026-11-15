@@ -69,19 +69,19 @@ export default function Search({ route, active, shown = true, onNavigate, onBack
   }, [route, modal, active]);
 
   const navigateResults = () => { if (route !== 'search-results') onNavigate('search-results'); };
-  const chooseCategory = label => { setCategory(label); setQuery(''); resultsRef.current?.scrollTo(0, 0); navigateResults(); };
+  const clearFilters = () => { setFilters([]); setPrefs(ADJUST_DEFAULT); setDraft(ADJUST_DEFAULT); };
+  const chooseCategory = label => { clearFilters(); setCategory(label); setQuery(''); resultsRef.current?.scrollTo(0, 0); navigateResults(); };
   const chooseGroup = label => {
     setGroup(label);
     if (label === 'Events') chooseCategory('Events');
-    else { setQuery(''); setCategory(''); onNavigate('search', route === 'search-results'); browseRef.current?.scrollTo(0, 0); }
+    else { clearFilters(); setQuery(''); setCategory(''); onNavigate('search', route === 'search-results'); browseRef.current?.scrollTo(0, 0); }
   };
   const openFilters = e => { openerRef.current = e.currentTarget; inputRef.current?.blur(); returnRoute.current = route; setDraft(prefs); onNavigate('search-filters'); };
   const openPlace = (p, trigger) => {
-    if (p.id === 'foxy') onOpenVenue();
-    else { openerRef.current = trigger; setPlace(p); returnRoute.current = route; onNavigate('search-place'); }
+    onOpenVenue();
   };
   const reset = () => { setQuery(''); setCategory(''); setFilters([]); setPrefs(ADJUST_DEFAULT); setGroup('All'); onNavigate('search', true); };
-  const goBack = () => { setQuery(''); setCategory(''); onNavigate('search', true); };
+  const goBack = () => { clearFilters(); setQuery(''); setCategory(''); onNavigate('search', true); };
   const apply = () => {
     if (dismissing.current) return;
     dismissing.current = true;
@@ -137,9 +137,9 @@ export default function Search({ route, active, shown = true, onNavigate, onBack
     <AnimatePresence>{showRecent && <motion.div key="recent" className="s-recent" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .18 }} onMouseDown={e => e.preventDefault()}>
       <h2>Recent searches</h2>
       <div className="s-recent-list">{RECENTS.map(([label, o]) => <motion.button key={label} type="button" whileTap={{ scale: .98 }} transition={GENTLE} onClick={() => pickRecent(o)}>
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3 8.5C3 5.7 5.2 3.5 8 3.5s5 2.2 5 5-2.2 5-5 5H5" stroke="#2f6b57" strokeWidth="1.6" strokeLinecap="round"/><path d="M5.5 6.5 3 8.7l2.7 2.3" stroke="#2f6b57" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        <i aria-hidden="true">↶</i>
         <span>{label}</span>
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 9 9 3M4 3h5v5" stroke="#2a2650" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        <i className="go" aria-hidden="true">↗</i>
       </motion.button>)}</div>
       <h2 className="s-sugg-h">Suggested searches</h2>
       <div className="s-sugg">{SUGGESTED.map(([label, cat]) => <motion.button key={label} type="button" whileTap={{ scale: .97 }} transition={GENTLE} onClick={() => pickRecent({ category: cat })}>{label}</motion.button>)}</div>

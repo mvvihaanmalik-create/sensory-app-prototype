@@ -25,10 +25,10 @@ export const metaOf = (p) => [p.cat, p.dist, p.illustrative ? 'illustrative' : n
 // 1 when v sits inside [lo, hi], otherwise falls off over two steps. null (unknown) is neutral.
 const fit = (v, lo, hi) => (v == null ? null : v >= lo && v <= hi ? 1 : Math.max(0, 1 - (v < lo ? lo - v : v - hi) / 2));
 const RANGE = {
-  sound: { Quiet: [1, 2], 'Easy to talk': [2, 3], Moderate: [3, 3], Lively: [4, 4], Loud: [5, 5] },
-  bright: { Dim: [1, 2], Soft: [3, 3], Bright: [4, 5] },
+  sound: { Quiet: [1, 2], Low: [2, 3], 'Easy to talk': [2, 3], Moderate: [3, 3], Lively: [4, 5], Loud: [5, 5] },
+  bright: { Dim: [1, 2], Soft: [3, 3], Moderate: [3, 4], Bright: [4, 5] },
   src: { 'Natural daylight': [4, 5], 'Indirect light': [2, 3] },
-  crowd: { Relaxed: [1, 2], Moderate: [3, 3], Busy: [4, 5] },
+  crowd: { Empty: [1, 1], Light: [1, 2], Relaxed: [1, 2], Moderate: [3, 3], Busy: [4, 5] },
 };
 
 // One entry per preference the active mode actually sets: { k, fit (null = unknown) }
@@ -39,7 +39,7 @@ function checks(p, prefs) {
   if (prefs.light?.b) add('light', fit(p.l, ...RANGE.bright[prefs.light.b]));
   else if (prefs.light?.src) add('light', fit(p.l, ...RANGE.src[prefs.light.src]));
   if (prefs.crowd) add('crowd', fit(p.c, ...RANGE.crowd[prefs.crowd]));
-  if (prefs.temp) { const t = Object.values(PAGES).flatMap(page => page.rows).find(row => row.id === p.id)?.t; const range = { Cool: [1, 2], Mild: [3, 3], Warm: [4, 5] }[prefs.temp]; add('temp', fit(t, ...range)); }
+  if (prefs.temp) { const t = Object.values(PAGES).flatMap(page => page.rows).find(row => row.id === p.id)?.t; const range = { Cold: [1, 1], Cool: [2, 2], Mild: [3, 3], Warm: [4, 5] }[prefs.temp]; add('temp', fit(t, ...range)); }
   const pos = prefs.seat?.pos;
   if (pos === 'Corner seat' || pos === 'Booth') add('seat', p.seat ? (p.seat.includes('booth') ? 1 : 0.3) : null);
   if (pos === 'Patio') add('seat', p.seat ? (p.seat.includes('outdoor') ? 1 : 0.2) : null);

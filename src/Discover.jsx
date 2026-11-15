@@ -9,6 +9,8 @@ import { PAGES } from './listData.js';
 import { SENSE_VALUES } from './Venue.jsx';
 import { discoverAssets as A } from './discoverAssets.js';
 import { PHOTO } from './remainingPhotos.js';
+import { CAROUSEL } from './venueFinalPhotos.js';
+import { Ph } from './phosphor.jsx';
 import './discover.css';
 import { SOUND_W, LIGHT_W, CROWD_W, metaOf, rankPlaces } from './discoverData.js';
 
@@ -108,48 +110,72 @@ function Backdrop() {
   </div>;
 }
 
+const PHOTO_OF = { stories: PHOTO.p0607, sentient: PHOTO.p0609, foxy: CAROUSEL[0], gallery: PHOTO.p0608, grey: PHOTO.p0610, rocks: PHOTO.p0804, lanie: PHOTO.p0805, white: PHOTO.p0910, page: PHOTO.p0908, graveface: PHOTO.p0908, walk: PHOTO.p0903 };
+// Figma 1379:13438 first card of the Easter egg
+const STORIES = { id: 'stories', name: 'COFFEE & STORIES', cat: 'Café', dist: '0.8 mi', level: 2, sense: { sound: 'Quiet', light: 'Natural light', crowd: 'Relaxed', seating: 'Booth · Corner' } };
+
 function senseValues(p) {
+  if (p.sense) return p.sense;
   if (p.id === 'foxy') return SENSE_VALUES;
   const canonical = Object.values(PAGES).flatMap(page => page.rows).find(row => row.id === p.id);
   const seat = p.seat || canonical?.seat;
+  const light = LIGHT_W[p.l] === 'Very dim' ? 'Dim' : LIGHT_W[p.l] === 'Natural' ? 'Natural light' : LIGHT_W[p.l];
   return {
-    sound: (SOUND_W[p.s] === 'Very quiet' ? 'Quiet' : SOUND_W[p.s]) || '', light: (LIGHT_W[p.l] === 'Very dim' ? 'Dim' : LIGHT_W[p.l]) || '', crowd: (['Very calm', 'Calm'].includes(CROWD_W[p.c]) ? 'Relaxed' : CROWD_W[p.c]) || '',
-    temp: canonical?.t == null ? '' : canonical.t <= 2 ? 'Cool' : canonical.t >= 4 ? 'Warm' : 'Mild',
-    seating: seat?.includes('outdoor') ? 'Patio' : seat?.includes('booth') ? 'Booths' : seat?.includes('indoor') ? 'Indoor' : '',
+    sound: (SOUND_W[p.s] === 'Very quiet' ? 'Quiet' : SOUND_W[p.s]) || 'Unknown', light: light || 'Unknown', crowd: (['Very calm', 'Calm'].includes(CROWD_W[p.c]) ? 'Relaxed' : CROWD_W[p.c]) || 'Unknown',
+    seating: seat?.includes('outdoor') ? 'Patio' : seat?.includes('booth') ? 'Booths' : seat?.includes('indoor') ? 'Indoor' : 'Unknown',
   };
 }
-const SENSE_TILES = [['sound', 'Sound', 'imgPhosphorSpeakerHigh'], ['light', 'Light', 'imgPhosphorSun'], ['crowd', 'Crowd', 'imgPhosphorUsers'], ['temp', 'Temperature', 'imgPhosphorThermometer'], ['seating', 'Seating', 'imgPhosphorChair']];
+const SENSE_TILES = [['sound', 'Sound', 'imgPhosphorSpeakerHigh'], ['light', 'Light', 'imgPhosphorSun'], ['crowd', 'Crowd', 'imgPhosphorUsers'], ['seating', 'Seating', 'imgPhosphorChair']];
+const TILE_GLASS = { position: 'relative', flex: '1 0 0', minWidth: 0 };
+const TILE_CONTENT = { flexDirection: 'row', justifyContent: 'flex-start', gap: 8, padding: '8px 12px' };
 function CardFace({ p }) {
   const senses = senseValues(p);
-  return <div className="abs" data-discover-face={p.id} style={{ inset: 0, borderRadius: 48.32, overflow: 'hidden', background: 'rgba(255,255,255,.85)', border: '1.51px solid rgba(20,24,31,.08)', boxShadow: '0 18.12px 48.32px rgba(27,42,68,.06)', userSelect: 'none' }}>
-    <div className="abs" style={{ left: -1.51, top: 434.49, width: 393, height: 192, borderRadius: 25, background: 'rgba(20,24,31,.06)' }} />
-    <div className="abs" style={{ left: -1.51, top: -1.51, width: 393, height: 628, overflow: 'hidden', background: 'rgba(20,24,31,.06)' }}>
-      {p.id === 'sentient' && <img src={PHOTO.p0609} alt="" draggable={false} className="abs" style={{ left: 0, top: 0, width: 393, height: 434.49, objectFit: 'cover', pointerEvents: 'none' }} />}
-      <div className="abs" style={{ left: 18, top: 451, width: 355, display: 'flex', flexDirection: 'column', gap: 8, color: MUTED, textAlign: 'left' }}>
-        <p className="nowrap" style={{ fontSize: 28, fontWeight: 600, lineHeight: 'normal', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</p>
-        <p className="nowrap" style={{ fontSize: 14, fontWeight: 400, lineHeight: 'normal', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.id === 'foxy' ? '4.6 ★ · 2,600 reviews · $ · Café · Tex-Mex' : p.event ? `${metaOf(p)} · ${p.event}` : metaOf(p)}</p>
+  return <div className="abs" data-discover-face={p.id} style={{ left: 0, top: 0, width: 392, boxSizing: 'border-box', padding: '9px 8px 16px', borderRadius: 32, overflow: 'hidden', background: '#f7f5f1', border: '1px solid rgba(76,74,103,.26)', boxShadow: '0 12px 32px rgba(27,42,68,.06)', userSelect: 'none', textAlign: 'left' }}>
+    <div style={{ position: 'relative', height: 226, borderRadius: 25, overflow: 'hidden', background: 'rgba(20,24,31,.06)' }}>
+      <img src={PHOTO_OF[p.id]} alt="" draggable={false} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', left: 6, top: 6, height: 32, width: 82, boxSizing: 'border-box', display: 'flex', alignItems: 'center', padding: '4px 8px', borderRadius: 999, background: '#f7f5f1', boxShadow: '0 12px 32px rgba(27,42,68,.06)' }}>
+        <img src={A.imgLevelRipple} alt="" width="28" height="28" draggable={false} style={{ marginRight: -6 }} />
+        <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: '#2a2650' }}>Level {p.level}</span>
       </div>
     </div>
-    <div className="abs" style={{ left: 16.61, top: 16.61, display: 'flex', alignItems: 'center', gap: 6.04, padding: '6.04px 12.08px', borderRadius: 1508.49, background: '#f7f5f1', WebkitBackdropFilter: 'blur(12.08px)', backdropFilter: 'blur(12.08px)', boxShadow: '0 6.04px 21.14px rgba(27,42,68,.05)' }}>
-      <img src={A.imgLevelRipple} alt="" width="42.28" height="42.28" draggable={false} />
-      <p className="nowrap" style={{ fontSize: 19.63, fontWeight: 700, lineHeight: 'normal', color: INK }}>Level {p.level}</p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 15, padding: '16px 6px 0' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+        <p className="nowrap" style={{ fontSize: 26, fontWeight: 700, color: '#2a2650', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: MUTED }}>
+          <span className="nowrap" style={{ fontSize: 15, fontWeight: 500 }}>{p.cat} · {p.dist}</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Ph n="clock" size={15} fill={MUTED} /><span className="nowrap" style={{ fontSize: 14, fontWeight: 500 }}>Open now</span></span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '2px 0' }}><span style={{ width: 8, height: 8, borderRadius: 4, background: MUTED }} /><span className="nowrap" style={{ fontSize: 13, fontWeight: 700 }}>Fits you</span></span>
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <p className="nowrap" style={{ fontSize: 14, fontWeight: 700, color: '#2a2650' }}>Sensory details</p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          {SENSE_TILES.map(([key, label, icon]) => <Glass key={key} radius={24} angle="163.7deg" style={TILE_GLASS} contentStyle={TILE_CONTENT}>
+            <img src={A[icon]} alt="" width="24" height="24" draggable={false} />
+            <span style={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0, color: MUTED, textAlign: 'left', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: 12, fontWeight: 400 }}>{label}</span>
+              <span style={{ fontSize: 15, fontWeight: 500 }}>{senses[key]}</span>
+            </span>
+          </Glass>)}
+        </div>
+      </div>
+      <Glass radius={24} angle="171.9deg" style={{ position: 'relative', height: 52 }} contentStyle={{ justifyContent: 'space-between', padding: '10px 14px' }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: MUTED }}>Reviews</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: MUTED }}><VIcon name="starFill" size={15} fill={MUTED} /><span style={{ fontSize: 17, fontWeight: 600 }}>4.6 / 5</span></span>
+      </Glass>
     </div>
-    <div className="abs" style={{ left: 16.49, top: 523.49, width: 355, height: 85, display: 'flex', gap: 10 }}>
-      {SENSE_TILES.map(([key, label, icon]) => <Glass key={key} radius={24} angle="126.545deg" style={{ position: 'relative', flex: '1 0 0', minWidth: 0, height: 85 }} contentStyle={{ flexDirection: 'column', gap: 8, padding: '14.5px 2.5px' }}>
-        <img src={A[icon]} alt="" width="24" height="24" draggable={false} />
-        <span className="nowrap" aria-label={`${label}: ${senses[key]}`} style={{ maxWidth: '100%', whiteSpace: 'nowrap', fontSize: senses[key].length > 7 ? 12 : 15, fontWeight: 500, lineHeight: '18px', color: MUTED }}>{senses[key]}</span>
-      </Glass>)}
-    </div>
-
   </div>;
 }
-function DiscoverAction({ label, icon, left, top, dark = false, onClick }) {
+function DiscoverAction({ label, icon, left, top, solid = false, onClick }) {
   return <motion.button type="button" aria-label={label} onClick={onClick} whileTap={{ scale: .9 }} transition={TAP} className="abs" style={{ left, top, width: 48, height: 48, borderRadius: 24 }}>
-    <Glass className={dark ? 'discover-dark-action' : ''} radius={24} style={{ inset: 0, ...(dark ? { border: 'none' } : {}) }} contentStyle={{ justifyContent: 'center' }}><img src={A[icon]} alt="" draggable={false} /></Glass>
+    {solid
+      ? <div className="abs" style={{ inset: 0, borderRadius: 24, background: 'rgba(255,255,255,.85)', filter: 'drop-shadow(0 2px 4px rgba(42,38,80,.06))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Ph n="bookmark-simple" size={24} fill={MUTED} /></div>
+      : <Glass radius={24} style={{ inset: 0 }} contentStyle={{ justifyContent: 'center' }}><img src={A[icon]} alt="" draggable={false} /></Glass>}
   </motion.button>;
 }
 
-const SLOT = [{ s: 1, y: 0, o: 1 }, { s: .97, y: 0, o: 0 }, { s: .94, y: 0, o: 0 }];
+// Figma: front card 392 wide at y 192, then 369 wide at y 238 and 331 wide at y 307, both blurred at 80%
+const SLOT = [{ s: 1, y: 0, o: 1, b: 0 }, { s: 369 / 392, y: 46, o: .8, b: .94 }, { s: 331 / 392, y: 115, o: .8, b: .84 }];
 const STACK_SPRING = { type: 'spring', stiffness: 260, damping: 28 };
 
 function StackCard({ p, depth, cmd, onDecide, onTap }) {
@@ -183,8 +209,8 @@ function StackCard({ p, depth, cmd, onDecide, onTap }) {
     <motion.div className="abs" data-card={p.id}
       role={front ? 'button' : undefined} tabIndex={front ? 0 : -1} aria-hidden={front ? undefined : true}
       aria-label={front ? `${p.name}. Tap for details. Swipe right to save, left to pass.` : undefined}
-      style={{ left: 0, top: 0, width: 393, height: 628, x, rotate, zIndex: 10 - depth, cursor: front ? 'grab' : 'default', pointerEvents: front ? 'auto' : 'none', transformOrigin: '50% 60%' }}
-      initial={false} animate={{ scale: SLOT[depth].s, y: SLOT[depth].y, opacity: SLOT[depth].o }} transition={STACK_SPRING}
+      style={{ left: 0, top: 0, width: 392, height: 543, x, rotate, zIndex: 10 - depth, cursor: front ? 'grab' : 'default', pointerEvents: front ? 'auto' : 'none', transformOrigin: '50% 0%' }}
+      initial={false} animate={{ scale: SLOT[depth].s, y: SLOT[depth].y, opacity: SLOT[depth].o, filter: `blur(${SLOT[depth].b}px)` }} transition={STACK_SPRING}
       drag={front ? 'x' : false} dragMomentum={false} dragElastic={1}
       onPointerDown={() => { dragged.current = false; }} onDragStart={() => { dragged.current = true; }} onDragEnd={end}
       onTap={() => { if (front && !dragged.current) onTap(p); }}>
@@ -195,7 +221,7 @@ function StackCard({ p, depth, cmd, onDecide, onTap }) {
 
 /* ---------- The layer ---------- */
 export default function DiscoverLayer({ pull, open, onClose, mode, decided, onDecide, onShowPassed, onOpenVenue, blocked }) {
-  const deck = useMemo(() => rankPlaces(mode.prefs).filter((p) => !decided[p.id]), [mode, decided]);
+  const deck = useMemo(() => [STORIES, ...rankPlaces(mode.prefs)].filter((p) => !decided[p.id]), [mode, decided]);
   const [cmd, setCmd] = useState({ n: 0, dir: 1 });
   const visibility = useTransform(pull, (v) => (v > 0.5 ? 'visible' : 'hidden'));
   // Content rides just above the sheet edge while pulling, then settles at its resting place
@@ -223,10 +249,10 @@ export default function DiscoverLayer({ pull, open, onClose, mode, decided, onDe
     <motion.div className="abs" style={{ inset: 0, visibility, pointerEvents: open ? 'auto' : 'none', overflow: 'hidden' }}>
       <Backdrop />
       <motion.div className="abs" style={{ inset: 0, y: lift, opacity: fade }}>
-        <DiscoverAction label="Back to Home" icon="imgPhosphorCaretLeft" left={24} top={52} onClick={onClose} />
-        <p className="abs nowrap" style={{ left: 84, top: 62, fontSize: 24, fontWeight: 700, color: INK, lineHeight: '29px', pointerEvents: 'none' }}>Discover</p>
+        <DiscoverAction label="Back to Home" icon="imgPhosphorCaretLeft" left={24} top={70} onClick={onClose} />
+        <p className="abs nowrap" style={{ left: 84, top: 80, fontSize: 24, fontWeight: 600, color: INK, lineHeight: '29px', pointerEvents: 'none' }}>Discover</p>
 
-        <div className="abs" style={{ left: 23, top: 135, width: 393, height: 628 }}>
+        <div className="abs" style={{ left: 24, top: 192, width: 392, height: 543 }}>
           {deck.slice(0, 3).map((p, i) => ({ p, i })).reverse().map(({ p, i }) => (
             <StackCard key={p.id} p={p} depth={i} cmd={cmd} onDecide={decide} onTap={tapCard} />
           ))}
@@ -236,7 +262,7 @@ export default function DiscoverLayer({ pull, open, onClose, mode, decided, onDe
         {deck.length > 0 && (
           <>
             <DiscoverAction label="Pass" icon="imgX" left={152} top={817} onClick={() => fling(-1)} />
-            <DiscoverAction label="Save" icon="imgHeart" left={240} top={817} dark onClick={() => fling(1)} />
+            <DiscoverAction label="Save" icon="imgBookmark" left={240} top={817} solid onClick={() => fling(1)} />
 
           </>
         )}

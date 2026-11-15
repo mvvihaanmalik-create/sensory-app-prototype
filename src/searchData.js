@@ -40,7 +40,7 @@ for (const [key, page] of Object.entries(PAGES)) {
   }
 }
 // Real photos from the Figma image cluster, matched by place. Places without a supplied photo borrow a sample.
-const PHOTO_BY_ID = { foxy: CAROUSEL[0], sentient: PHOTO.p0606, gallery: PHOTO.p0608, bean: PHOTO.p0602, grey: PHOTO.p0610, husk: PHOTO.p0801, cotton: PHOTO.p0802, kitchen: PHOTO.p0803, rocks: PHOTO.p0804, lanie: PHOTO.p0805, alligator: PHOTO.p0806, treehouse: PHOTO.p0807 };
+const PHOTO_BY_ID = { foxy: CAROUSEL[0], sentient: PHOTO.p0609, graveface: PHOTO.p0908, gallery: PHOTO.p0608, bean: PHOTO.p0602, grey: PHOTO.p0610, husk: PHOTO.p0801, cotton: PHOTO.p0802, kitchen: PHOTO.p0803, rocks: PHOTO.p0804, lanie: PHOTO.p0805, alligator: PHOTO.p0806, treehouse: PHOTO.p0807 };
 const SAMPLES = [PHOTO.p0603, PHOTO.p0604, PHOTO.p0602, PHOTO.p0908];
 let sampleAt = 0;
 const photoFor = (p) => PHOTO_BY_ID[p.id] || p.img || SAMPLES[sampleAt++ % SAMPLES.length];
