@@ -290,7 +290,7 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
         <Hero reduce={reduceMotion} pull={pull} scene={sc} />
         <p className="abs nowrap" style={{ left: 24, top: 59, fontSize: 15, fontWeight: 500, color: sc.dark ? 'rgba(255,255,255,0.8)' : INK2 }}>Savannah, GA</p>
         <motion.button className="abs nowrap" onClick={onOpenModes} whileTap={{ scale: 0.95 }} transition={GENTLE}
-          style={{ right: 22, top: 46, height: 44, padding: '0 16px', borderRadius: 999, ...lightGlass, fontSize: 15, fontWeight: 500, color: INK }}>
+          style={{ right: 22, top: 56, height: 44, padding: '0 16px', borderRadius: 999, ...lightGlass, fontSize: 15, fontWeight: 500, color: INK }}>
           {pill}
         </motion.button>
         <p className="abs nowrap" style={{ left: 24, top: 90, fontSize: 40, fontWeight: 600, lineHeight: '44px', letterSpacing: -1, color: sc.dark ? '#fff' : INK }}>{sc.greeting}</p>
