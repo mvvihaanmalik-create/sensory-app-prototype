@@ -23,7 +23,7 @@ function SheetLayer({ children }) {
   return <motion.div className="s-overlay" aria-hidden={!present || undefined} style={{ pointerEvents: present ? 'auto' : 'none' }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={GENTLE}>{children}</motion.div>;
 }
 
-export default function Search({ route, active, onNavigate, onBack, onOpenVenue, hasSaved = false, activeMode, booking }) {
+export default function Search({ route, active, shown = true, onNavigate, onBack, onOpenVenue, hasSaved = false, activeMode, booking, focusRef }) {
   const [query, setQuery] = useState('');
   const [group, setGroup] = useState('All');
   const [category, setCategory] = useState('');
@@ -38,6 +38,7 @@ export default function Search({ route, active, onNavigate, onBack, onOpenVenue,
   const dismissing = useRef(false);
   const dragControls = useDragControls();
   const reduce = useReducedMotion();
+  if (focusRef) focusRef.current = () => inputRef.current?.focus({ preventScroll: true });
   const modal = route === 'search-filters' || route === 'search-place';
   const showRecent = focused && !query.trim() && route === 'search';
   const underlying = modal ? returnRoute.current : route;
@@ -51,6 +52,13 @@ export default function Search({ route, active, onNavigate, onBack, onOpenVenue,
     if (route === 'search-filters') setDraft(prefs);
     if (route !== 'search') setFocused(false);
   }, [route]); // Drafts are initialized once on entry, then committed only by Apply.
+
+  // Leaving the Search tab clears the search, so filters don't carry over to the next visit
+  useEffect(() => {
+    if (shown) return;
+    setQuery(''); setCategory(''); setFilters([]); setPrefs(ADJUST_DEFAULT); setDraft(ADJUST_DEFAULT); setGroup('All'); setFocused(false);
+    browseRef.current?.scrollTo(0, 0); resultsRef.current?.scrollTo(0, 0);
+  }, [shown]);
 
   useEffect(() => {
     dismissing.current = false;
@@ -102,7 +110,7 @@ export default function Search({ route, active, onNavigate, onBack, onOpenVenue,
         </Glass>
       </form>
       <motion.button className="s-filter" type="button" aria-label={filters.length ? `Filters, ${filters.length} active` : 'Filters'} onClick={openFilters} whileTap={{ scale: .94 }} transition={GENTLE}>
-        <Glass radius={26} style={{ inset: 0 }} contentStyle={{ justifyContent: 'center' }}><img src={searchAssets.imgFilters} width="22" height="22" alt="" />{filters.length > 0 && <span className="s-badge">{filters.length}</span>}</Glass>
+        <Glass radius={26} style={{ inset: 0 }} contentStyle={{ justifyContent: 'center' }}><img src={searchAssets.imgFilters} width="22" height="22" alt="" /></Glass>{filters.length > 0 && <span className="s-badge">{filters.length}</span>}
       </motion.button>
       <nav className="s-chips hscroll" aria-label="Search categories"><div>{CHIPS.map(([label, width]) => <Pill key={label} selected={group === label} aria-pressed={group === label} style={{ width }} onClick={e => { chooseGroup(label); e.currentTarget.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: reduce ? 'instant' : 'smooth' }); }}>{label}</Pill>)}</div></nav>
 

@@ -5,7 +5,8 @@ import { GENTLE, Icon } from './ui.jsx';
 import { paths } from './svgs.js';
 import { VIcon } from './venueIcons.jsx';
 import { VP, ZONES, GRID } from './venuePhotos.js';
-import { G, CircleBtn, Chip, SenseTiles, InfoList, ReviewSummary, AISummary, ReviewCard, H, PrimaryCTA, Toast, DayChart, weekFrom, NAVY, MUTED, PURPLE, DIV, TAP, t } from './flow.jsx';
+import Lightbox, { useLightbox } from './Lightbox.jsx';
+import { G, CircleBtn, Chip, SenseTiles, InfoList, ReviewSummary, AISummary, ReviewCard, KEYWORDS, H, PrimaryCTA, RESERVE_TOP, Toast, DayChart, weekFrom, NAVY, MUTED, PURPLE, DIV, TAP, t } from './flow.jsx';
 
 export const VENUE = {
   name: 'Fern & Fable',
@@ -63,18 +64,18 @@ function Overview({ onReviews, firstReview }) {
 
 const MENU_PHOTOS = [[128, VP.counter], [188, VP.pie], [199, VP.tacos], [199, VP.store]];
 const HIGHLIGHTS = [[VP.patio, 'Iced Strawberry and Matcha Latte'], [VP.indoor, 'Iced Americano'], [VP.garden], [VP.bar], [VP.hero]];
-function Menu() {
+function Menu({ onPhoto }) {
   const tile = (src, label, i) => (
-    <motion.div key={i} whileTap={{ scale: 0.97 }} transition={TAP} style={{ position: 'relative', height: 251, borderRadius: 16, overflow: 'hidden', background: `#dbdbde url(${src}) center / cover` }}>
+    <motion.button key={i} type="button" aria-label="Open photo" onClick={() => onPhoto(HIGHLIGHTS.map((h) => h[0]), i)} whileTap={{ scale: 0.97 }} transition={TAP} style={{ position: 'relative', display: 'block', width: '100%', height: 251, borderRadius: 16, overflow: 'hidden', background: `#dbdbde url(${src}) center / cover` }}>
       {label && <span className="abs" style={{ left: 10, right: 10, bottom: 10, alignSelf: 'flex-start', width: 'fit-content', maxWidth: 168, padding: '6px 12px', borderRadius: 14,
         background: 'rgba(255,255,255,0.88)', border: '1.5px solid rgba(255,255,255,0.95)', boxShadow: '0 4px 12px rgba(42,38,80,0.12)', ...t(13, 600, NAVY, { lineHeight: 1.25 }) }}>{label}</span>}
-    </motion.div>
+    </motion.button>
   );
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <H>Menu photos</H>
       <div className="hscroll" style={{ margin: '0 -24px', padding: '0 24px', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-        {MENU_PHOTOS.map(([w, src], i) => <motion.div key={i} whileTap={{ scale: 0.97 }} transition={TAP} style={{ width: w, height: i ? 266 : 262, flex: 'none', borderRadius: 16, background: `#dbdbde url(${src}) center / cover` }} />)}
+        {MENU_PHOTOS.map(([w, src], i) => <motion.button key={i} type="button" aria-label="Open photo" onClick={() => onPhoto(MENU_PHOTOS.map((m) => m[1]), i)} whileTap={{ scale: 0.97 }} transition={TAP} style={{ width: w, height: i ? 266 : 262, flex: 'none', borderRadius: 16, background: `#dbdbde url(${src}) center / cover` }} />)}
         <motion.button whileTap={{ scale: 0.97 }} transition={TAP} style={{ width: 156, height: 266, flex: 'none', borderRadius: 16, background: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
           <VIcon name="plusBold" size={24} />
           <span className="nowrap" style={t(14, 600)}>Add menu photos</span>
@@ -103,13 +104,16 @@ const FILTERS = ['All', 'Sound', 'Light', 'Crowd', 'Temperature', 'Seating', 'Se
 function Reviews({ onWrite, mine }) {
   const [f, setF] = useState('All');
   const [sort, setSort] = useState('Most relevant');
+  const [kw, setKw] = useState(null);
+  const re = KEYWORDS.find((k) => k.label === kw)?.re;
   let list = [...(mine ? [mine] : []), ...REVIEWS];
   if (f !== 'All') list = list.filter((r) => r.tags?.some((x) => x.startsWith(f)));
+  if (re) list = list.filter((r) => r.text && new RegExp(re.source, 'i').test(r.text));
   if (sort === 'Newest') list = [...list].sort((a, b) => a.age - b.age);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <ReviewSummary />
-      <AISummary />
+      <AISummary keyword={kw} onKeyword={setKw} />
       <G as="button" r={26} onClick={onWrite} whileTap={{ scale: 0.98 }} transition={TAP}
         style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
         <VIcon name="pencil" />
@@ -128,7 +132,7 @@ function Reviews({ onWrite, mine }) {
         <AnimatePresence mode="popLayout" initial={false}>
           {list.map((r) => (
             <motion.div key={r.name} layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }} transition={GENTLE}>
-              <ReviewCard r={r} />
+              <ReviewCard r={r} mark={re} />
             </motion.div>
           ))}
         </AnimatePresence>
@@ -140,10 +144,12 @@ function Reviews({ onWrite, mine }) {
 
 const PHOTO_CHIPS = ['All', 'Latest', 'Food & drink', 'Vibe', 'Menu', 'By owner'];
 const COLS = [[240, 180, 260, 200], [180, 260, 200, 240]];
-function Photos() {
+function Photos({ onPhoto }) {
   const [c, setC] = useState('All');
   const k = PHOTO_CHIPS.indexOf(c);
   const cols = k % 2 ? [COLS[1], COLS[0]] : COLS;
+  const shown = [0, 1].map((ci) => GRID[(ci + (k % 2)) % 2]);
+  const flat = [...shown[0], ...shown[1]];
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
       <div className="hscroll" style={{ margin: '0 -24px -20px', padding: '4px 24px 40px', display: 'flex', gap: 8 }}>
@@ -153,8 +159,8 @@ function Photos() {
         {cols.map((col, ci) => (
           <div key={ci} style={{ width: 188, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {col.map((h, i) => (
-              <motion.div key={`${ci}-${i}`} layout initial={false} animate={{ height: h }} transition={GENTLE} whileTap={{ scale: 0.97 }}
-                style={{ borderRadius: 24, background: `#dbdbde url(${GRID[(ci + (k % 2)) % 2][i]}) center / cover` }} />
+              <motion.button key={`${ci}-${i}`} aria-label="Open photo" onClick={() => onPhoto(flat, ci * 4 + i)} layout initial={false} animate={{ height: h }} transition={GENTLE} whileTap={{ scale: 0.97 }}
+                style={{ display: 'block', width: '100%', borderRadius: 24, background: `#dbdbde url(${shown[ci][i]}) center / cover` }} />
             ))}
           </div>
         ))}
@@ -168,6 +174,7 @@ const TABS = [['overview', 'Overview'], ['menu', 'Menu'], ['reviews', 'Reviews']
 export default function Venue({ tab, setTab, onBack, backLabel = 'Back', saved = false, onToggleSaved, onReserve, onWriteReview, onSense, booking, mine, onScroll, toast, reviewsCmd }) {
   const scroller = useRef(null);
   const tabsRef = useRef(null);
+  const lb = useLightbox();
   const sy = useMotionValue(0);
   const heroY = useTransform(sy, (v) => (v > 0 ? v * 0.45 : 0));
   const heroScale = useTransform(sy, (v) => (v < 0 ? 1 - v / 320 : 1));
@@ -194,7 +201,7 @@ export default function Venue({ tab, setTab, onBack, backLabel = 'Back', saved =
           <SenseTiles values={SENSE_VALUES} onOpen={onSense} />
           <div className="hscroll" style={{ margin: '0 -24px', padding: '0 24px', display: 'flex', gap: 12 }}>
             {[[220, VP.hero], [210, VP.patio], [210, VP.indoor], [210, VP.bar], [210, VP.garden]].map(([w, src], i) => (
-              <motion.button key={i} aria-label="See photos" onClick={() => goTab('photos', true)} whileTap={{ scale: 0.97 }} transition={TAP}
+              <motion.button key={i} aria-label="Open photo" onClick={() => lb.open([VP.hero, VP.patio, VP.indoor, VP.bar, VP.garden], i)} whileTap={{ scale: 0.97 }} transition={TAP}
                 style={{ width: w, height: 280, borderRadius: 24, background: `#dbdbde url(${src}) center / cover`, flex: 'none' }} />
             ))}
           </div>
@@ -215,9 +222,9 @@ export default function Venue({ tab, setTab, onBack, backLabel = 'Back', saved =
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.2 }} style={{ paddingTop: 8 }}>
               {tab === 'overview' && <Overview onReviews={() => goTab('reviews', true)} firstReview={mine || REVIEWS[0]} />}
-              {tab === 'menu' && <Menu />}
+              {tab === 'menu' && <Menu onPhoto={lb.open} />}
               {tab === 'reviews' && <Reviews onWrite={onWriteReview} mine={mine} />}
-              {tab === 'photos' && <Photos />}
+              {tab === 'photos' && <Photos onPhoto={lb.open} />}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -231,9 +238,10 @@ export default function Venue({ tab, setTab, onBack, backLabel = 'Back', saved =
       </CircleBtn>
       <CircleBtn icon="export" label="Share" style={{ position: 'absolute', left: 368, top: 56, zIndex: 10 }} />
 
-      <PrimaryCTA icon="calendarCheck" onClick={onReserve}
+      <PrimaryCTA icon="calendarCheck" onClick={onReserve} top={RESERVE_TOP}
         label={booking ? `Booked · ${booking.dayShort}, ${booking.time}` : 'Reserve'} />
       <Toast text={toast} />
+      <Lightbox box={lb.box} onClose={lb.close} setI={lb.setI} />
     </div>
   );
 }

@@ -202,7 +202,8 @@ export default function DiscoverLayer({ pull, open, onClose, mode, decided, onDe
 
   const decide = onDecide;
   const fling = (dir) => { if (deck.length) setCmd((c) => ({ n: c.n + 1, dir })); };
-  const tapCard = (p) => { if (p.venue) onOpenVenue(); };
+  // Every card opens the venue page (Foxy Loxy is the one venue page built so far)
+  const tapCard = () => onOpenVenue();
 
   useEffect(() => {
     if (!open || blocked) return undefined;

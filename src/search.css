@@ -2,10 +2,9 @@
 .s-search{position:absolute;left:24px;top:80px;width:328px;height:52px}
 .s-search input{font:500 16px Figtree,sans-serif;color:#2a2650;background:transparent;border:0;outline:0;min-width:0;width:100%;height:100%}
 .s-search input::placeholder{color:#2a2650;opacity:1}
-.s-search:focus-within .glass{outline:2px solid #5e5a7e;outline-offset:2px}
 .s-clear{font-size:25px;min-width:24px;height:32px;line-height:28px}
 .s-filter{position:absolute;left:364px;top:80px;width:52px;height:52px}
-.s-badge{position:absolute;right:-3px;top:-5px;min-width:20px;height:20px;line-height:20px;background:#2a2650;color:#fff8ef;border-radius:10px;font-size:12px}
+.s-badge{position:absolute;z-index:2;text-align:center;padding:0 5px;right:-3px;top:-5px;min-width:20px;height:20px;line-height:20px;background:#2a2650;color:#fff8ef;border-radius:10px;font-size:12px}
 .s-chips{position:absolute;left:0;top:138px;width:440px;height:73px}
 .s-chips>div{display:flex;gap:8px;padding:8px 24px 21px;width:max-content}
 .s-pill{position:relative;height:44px;flex:none;font-size:15px;font-weight:500;white-space:nowrap;border-radius:22px}

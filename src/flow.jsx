@@ -134,6 +134,9 @@ export function ChipGroup({ options, value, onChange, single, other = true }) {
   );
 }
 
+// Reserve / booking buttons sit a little higher than the default so they clear the phone's bottom edge
+export const RESERVE_TOP = 849;
+
 // Glass / Primary button: a hugging pill (h63, r30, 36px side padding) centred at the bottom.
 // Its width springs between labels. Disabled = faded; tapping it then calls onBlocked.
 export function PrimaryCTA({ label, icon, enabled = true, onClick, onBlocked, busy, top = 865, inline, color }) {
@@ -249,7 +252,14 @@ export function ReviewSummary({ onClick }) {
   );
 }
 
-export function AISummary() {
+// Review keywords (Google Maps style): tapping one filters the reviews and highlights the word in each review
+export const KEYWORDS = [
+  { label: 'Window tables', re: /tables?/gi },
+  { label: 'Daylight', re: /lights?|bright/gi },
+  { label: 'Warm lighting', re: /wall lights|warm|soft/gi },
+  { label: 'Counter noise', re: /counter|chatter|espresso machine/gi },
+];
+export function AISummary({ keyword, onKeyword }) {
   return (
     <G r={28} style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -260,18 +270,36 @@ export function AISummary() {
         Daylight filters through the glass blocks, while wall lights give the booths a warmer glow. The espresso counter can get lively, and the window tables are easier for conversation.
       </p>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-        {['Window tables', 'Daylight', 'Warm lighting', 'Counter noise'].map((m) => <Pill key={m}>{m}</Pill>)}
+        {KEYWORDS.map((k) => onKeyword
+          ? <motion.button key={k.label} type="button" aria-pressed={keyword === k.label} whileTap={{ scale: 0.95 }} transition={TAP}
+              onClick={() => onKeyword(keyword === k.label ? null : k.label)} style={{ padding: 0, borderRadius: 14 }}>
+              <Pill on={keyword === k.label}>{k.label}</Pill>
+            </motion.button>
+          : <Pill key={k.label}>{k.label}</Pill>)}
       </div>
       <span style={t(12, 400)}>Summarized by AI from 2,600 reviews</span>
     </G>
   );
 }
 
-export function Pill({ children, strong }) {
-  return <span className="nowrap" style={{ ...t(12, strong ? 600 : 500), background: 'rgba(255,255,255,0.8)', padding: '6px 12px', borderRadius: 14, display: 'inline-block' }}>{children}</span>;
+// Review text with the picked keyword marked
+export function Marked({ text, re }) {
+  if (!re) return text;
+  const parts = []; let last = 0; const rx = new RegExp(re.source, 'gi'); let m;
+  while ((m = rx.exec(text))) {
+    if (m.index > last) parts.push(text.slice(last, m.index));
+    parts.push(<mark key={m.index} style={{ background: 'rgba(94,90,126,0.16)', color: NAVY, fontWeight: 700, borderRadius: 4, padding: '0 2px', margin: '0 -2px' }}>{m[0]}</mark>);
+    last = m.index + m[0].length;
+  }
+  parts.push(text.slice(last));
+  return parts;
 }
 
-export function ReviewCard({ r }) {
+export function Pill({ children, strong, on }) {
+  return <span className="nowrap" style={{ ...t(12, strong || on ? 600 : 500, on ? '#fff' : NAVY), background: on ? NAVY : 'rgba(255,255,255,0.8)', padding: '6px 12px', borderRadius: 14, display: 'inline-block', transition: 'background-color .2s, color .2s' }}>{children}</span>;
+}
+
+export function ReviewCard({ r, mark }) {
   const [liked, setLiked] = useState(false);
   const ink = '#2a2650';
   return (
@@ -284,7 +312,7 @@ export function ReviewCard({ r }) {
         </div>
       </div>
       <Stars n={r.stars ?? 5} size={14} fill={ink} />
-      {r.text && <p style={t(15, 400, ink, { lineHeight: 1.4 })}>{r.text}</p>}
+      {r.text && <p style={t(15, 400, ink, { lineHeight: 1.4 })}><Marked text={r.text} re={mark} /></p>}
       {r.tags?.length > 0 && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>{r.tags.map((x) => <span key={x} className="nowrap" style={{ ...t(12, 500, ink), background: 'rgba(42,38,80,0.05)', padding: '6px 12px', borderRadius: 14 }}>{x}</span>)}</div>}
       {!r.mine && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 24, height: 22 }}>

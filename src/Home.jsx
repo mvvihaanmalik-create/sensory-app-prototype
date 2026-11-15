@@ -165,26 +165,22 @@ const ROLE = {
 const Z = { front: 3, right: 2, left: 1 };
 const DOT_FOR = { A: 1, B: 2, C: 0 };
 
+// Venue card / Feature, outlined version (Figma 1275:7232): cream card, inset photo, navy text below
 function VenueCard({ v }) {
   return (
     <>
-      <img src={v.photo} alt="" className="abs" style={{inset:0,width:260,height:350,objectFit:'cover'}} />
-      <div className="abs" style={{ left: 0, right: 0, top: 171, bottom: 0, borderRadius: '0 0 32px 32px', WebkitBackdropFilter: 'blur(14px)', backdropFilter: 'blur(14px)',
-        WebkitMaskImage: 'linear-gradient(180deg, transparent 0%, #000 62%)', maskImage: 'linear-gradient(180deg, transparent 0%, #000 62%)' }} />
-      <div className="abs" style={{ inset: 0, background: 'linear-gradient(180deg, rgba(6,6,6,0) 49%, rgba(6,6,6,0.18) 64%, rgba(6,6,6,0.37) 78%, rgba(6,6,6,0.61) 100%)' }} />
-      <div className="abs" style={{ left: 12, top: 12, height: 36, display: 'flex', alignItems: 'center', gap: 4, padding: '0 14px 0 8px', borderRadius: 999,
-        border: '1.5px solid rgba(255,255,255,0.95)', boxShadow: '0 8px 20px rgba(42,38,80,0.14), inset 0 1px 0 rgba(255,255,255,0.9)',
-        WebkitBackdropFilter: 'blur(24px)', backdropFilter: 'blur(24px)',
-        backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.55) 14%, rgba(255,255,255,0.08) 86%), linear-gradient(90deg, rgba(255,255,255,0.55), rgba(255,255,255,0.55))' }}>
-        <RippleIcon k="rippleCard" size={28} />
-        <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: '#2a2650' }}>{v.level}</span>
+      <img src={v.photo} alt="" className="abs" style={{ left: 8, top: 9, width: 244, height: 222, objectFit: 'cover', borderRadius: 25 }} />
+      <div className="abs" style={{ left: 14, top: 15, height: 32, display: 'flex', alignItems: 'center', gap: 2, padding: '0 12px 0 4px', borderRadius: 999,
+        background: 'rgba(255,248,240,0.2)', boxShadow: '0 4px 14px rgba(27,42,68,0.05)', WebkitBackdropFilter: 'blur(16px)', backdropFilter: 'blur(16px)' }}>
+        <RippleIcon k="rippleCard" size={28} color="#fff" />
+        <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{v.level}</span>
       </div>
-      <div className="abs" style={{ left: 12, top: 226, width: 236, height: 112, padding: 17, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
-        <p className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: '#fff' }}>{v.name}</p>
-        <p className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.86)' }}>{v.meta}</p>
+      <div className="abs" style={{ left: 14, top: 248, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+        <p className="nowrap" style={{ fontSize: 17, fontWeight: 700, lineHeight: '20px', color: '#2a2650' }}>{v.name}</p>
+        <p className="nowrap" style={{ fontSize: 13, fontWeight: 500, lineHeight: '16px', color: '#2a2650' }}>{v.meta}</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '2px 0' }}>
-          <span style={{ width: 8, height: 8, borderRadius: 4, background: '#fff', display: 'block' }} />
-          <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Fits you</span>
+          <span style={{ width: 8, height: 8, borderRadius: 4, background: '#5e5a7e', display: 'block' }} />
+          <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: '#5e5a7e' }}>Fits you</span>
         </div>
       </div>
     </>
@@ -232,8 +228,8 @@ function ForYouStack({ onOpenVenue }) {
             onPointerDown={isFront ? onDown : undefined} onPointerMove={isFront ? onMove : undefined}
             onPointerUp={isFront ? onUp : undefined} onPointerCancel={isFront ? onUp : undefined}
             whileTap={!isFront ? { scale: 0.78 } : undefined}>
-            <div className="abs" style={{ inset: 0, borderRadius: 32, overflow: 'hidden', background: 'rgba(255,255,255,0.85)',
-              border: '1px solid rgba(20,24,31,0.08)', boxShadow: '0 12px 32px rgba(27,42,68,0.06)',
+            <div className="abs" style={{ inset: 0, borderRadius: 32, overflow: 'hidden', background: '#f7f5f1',
+              boxShadow: '0 0 0 1px rgba(94,90,126,0.22), 0 12px 32px rgba(27,42,68,0.06)',
               isolation: 'isolate', transform: 'translateZ(0)', WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
               <VenueCard v={VENUES[k]} />
             </div>
@@ -268,13 +264,15 @@ function RankingRow({ top, n, name, meta, level, onClick, photo, wordmark }) {
   );
 }
 
-export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, reduceMotion, pull, onDiscover, pullOn = true, onOpenExplore, exploreLiked, scene = 'morning', onStepScene }) {
+export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, scrollTopKey, reduceMotion, pull, onDiscover, pullOn = true, onOpenExplore, exploreLiked, scene = 'morning', onStepScene }) {
   const sc = SCENES.find((x) => x.id === scene) || SCENES[0];
   const sub = sc.sub, left = sub ? 24 : 23;
   const promo = sc.promo || { tag: 'Quiet hour', title: 'The Sentient', detail: '2 – 4 pm · 10% off pastries' };
   const off = promo.cta ? 26 : 0;
   const pill = modeLabel === 'Study mode' && sc.pill ? sc.pill : modeLabel;
   const scrollRef = useRef(null);
+  // Coming back to Home from another tab starts at the top instead of where it was left
+  useEffect(() => { if (scrollTopKey && scrollRef.current) { scrollRef.current.scrollTop = 0; onScroll?.(0); } }, [scrollTopKey]); // eslint-disable-line react-hooks/exhaustive-deps
   usePullDown({ el: scrollRef, pull, enabled: pullOn, onCommit: onDiscover });
   useHeroSwipe(scrollRef, onStepScene);
   const r = useTransform(pull, [0, 24], [0, 32]);
