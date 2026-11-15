@@ -1,6 +1,6 @@
 // Shared building blocks for the Venue page and its flows (Figma section 789:3120).
 // v2 palette: all venue text, icons and accents use #5e5a7e.
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useContext, createContext } from 'react';
 import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/react';
 import { GENTLE, Icon } from './ui.jsx';
 import { paths } from './svgs.js';
@@ -361,10 +361,12 @@ export function Toast({ text, icon = 'check' }) {
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const AXIS = [['9a', 54], ['12p', 105], ['3p', 161], ['6p', 215], ['9p', 268]];
 export const hourLabel = (i) => { const h = 6 + i; return `${h % 12 || 12} ${h < 12 ? 'AM' : 'PM'}`; };
+export const InfoContext = createContext(null);
 export function DayChart({ icon, title, week, nowIdx = 11, liveText, info, describe, footnote }) {
   const [day, setDay] = useState('Sun');
   const [menu, setMenu] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const openInfo = useContext(InfoContext);
   const [sel, setSel] = useState(null);
   const bars = week[day];
   const live = day === 'Sun';
@@ -401,7 +403,7 @@ export function DayChart({ icon, title, week, nowIdx = 11, liveText, info, descr
             )}
           </AnimatePresence>
         </div>
-        <motion.button aria-label={`About ${title.toLowerCase()}`} whileTap={{ scale: 0.9 }} onClick={() => setShowInfo((i) => !i)}
+        <motion.button aria-label={`About ${title.toLowerCase()}`} whileTap={{ scale: 0.9 }} onClick={() => (openInfo ? openInfo(title) : setShowInfo((i) => !i))}
           style={{ width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 22, background: showInfo ? 'rgba(255,255,255,0.85)' : 'transparent' }}>
           <VIcon name="info" />
         </motion.button>

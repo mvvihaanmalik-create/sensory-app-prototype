@@ -10,6 +10,7 @@ import { REVIEW_PICS } from './venuePhotos.js';
 import { PHOTO } from './remainingPhotos.js';
 import { PHOTO_GRID, GRID_CROPS, photoBackground } from './venueFinalPhotos.js';
 import Lightbox, { useLightbox } from './Lightbox.jsx';
+import { InfoShareHost } from './InfoShare.jsx';
 
 const ICON = Object.fromEntries(SENSES.map((s) => [s.k, s.icon]));
 
@@ -228,6 +229,7 @@ export default function SenseReviews({ sense, setSense, onBack, onAll, onReserve
   const pick = (k) => { setSense(k); scroller.current?.scrollTo({ top: 0 }); };
   return (
     <div className="abs" style={{ inset: 0, background: '#f7f5f1' }}>
+      <InfoShareHost>
       <TopBar title="Reviews" back onClose={onBack} scrolled={scrolled} />
       <div ref={scroller} className="scroll" onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 8)}>
         <div style={{ padding: '124px 24px 140px', display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -241,6 +243,7 @@ export default function SenseReviews({ sense, setSense, onBack, onAll, onReserve
       </div>
       <PrimaryCTA icon="calendarCheck" onClick={onReserve} top={RESERVE_TOP} label={booking ? `Booked · ${booking.dayShort}, ${booking.time}` : 'Reserve'} />
       <Lightbox box={lb.box} onClose={lb.close} setI={lb.setI} />
+      </InfoShareHost>
     </div>
   );
 }

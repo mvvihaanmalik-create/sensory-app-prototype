@@ -39,14 +39,15 @@ export function FSwitch({ on, onChange, big }) {
     </motion.button>
   );
 }
-export function FRow({ icon, label, children, last }) {
+export function FRow({ icon, label, children, last, onClick }) {
+  const Tag = onClick ? 'button' : 'div';
   return (
     <>
-      <div style={{ height: 60, display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px 0 18px' }}>
+      <Tag onClick={onClick} style={{ width: '100%', height: 60, display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px 0 18px', textAlign: 'left' }}>
         <Ph n={icon} size={20} fill={INK} />
         <span className="nowrap" style={{ ...t(15, 500, INK), flex: '1 0 0' }}>{label}</span>
         {children}
-      </div>
+      </Tag>
       {!last && <div style={{ height: 1, margin: '0 20px', background: 'rgba(42,38,80,0.07)' }} />}
     </>
   );

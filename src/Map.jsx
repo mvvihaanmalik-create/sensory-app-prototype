@@ -6,6 +6,8 @@ import { Glass, GENTLE, NAVY, useScale } from './ui.jsx';
 import { TAP, t } from './flow.jsx';
 import { Ph } from './phosphor.jsx';
 import { FSeg, FSwitch, FRow, FHead, FCard, Any } from './settingsKit.jsx';
+import { SheetFrame } from './sheets.jsx';
+import { PLACES as SEARCH_PLACES } from './searchData.js';
 import { PHOTO } from './remainingPhotos.js';
 import mapTiles from './assets/map-tiles.jpg';
 
@@ -92,6 +94,13 @@ function PinLabel({ i, name, lx, sense, view }) {
 }
 
 const CHIPS = ['All', 'Cafés', 'Dining', 'Nightlife', 'Events'];
+// Pin slot k is always one category: Cafés, Dining, Nightlife, Events
+const SLOT_CHIP = ['Cafés', 'Dining', 'Nightlife', 'Events'];
+const CHIP_TYPE = { Cafés: 'Café', Dining: 'Restaurant', Nightlife: 'Bar', Events: 'Event' };
+const recsFor = (chip) => {
+  if (chip === 'All' || chip === 'Cafés') return RECS;
+  return SEARCH_PLACES.filter((p) => p.type === CHIP_TYPE[chip]).slice(0, 4).map((p) => ({ id: p.id, title: p.name, meta: `Level ${p.level} · ${p.distance} · Updated 1h ago`, reason: `${p.sound} · ${p.light}`, photo: p.photo }));
+};
 const SENSES = [
   { key: 'Sound', icon: 'speaker-high' },
   { key: 'Light', icon: 'sun' },
@@ -100,16 +109,31 @@ const SENSES = [
 ];
 
 // ---------- Filters (Figma 1378:326) ----------
-const F_DEFAULT = { mode: null, sort: 'Best fit', open: true, dist: 'Walk', price: 'Any', verified: false };
+const F_DEFAULT = { mode: null, sort: 'Best fit', open: true, dist: 'Walk', price: 'Any', verified: false, sound: 'Any', light: 'Any', crowd: 'Any', temp: 'Any', seat: 'Any', place: 'All', looking: 'Any', avoid: 'None', smell: 'None' };
+const PICK = {
+  sound: ['Any', 'Quiet', 'Easy to talk', 'Moderate', 'Lively', 'Loud'],
+  light: ['Any', 'Dim', 'Soft', 'Bright', 'Natural daylight'],
+  crowd: ['Any', 'Relaxed', 'Moderate', 'Busy'],
+  temp: ['Any', 'Cool', 'Mild', 'Warm'],
+  seat: ['Any', 'Booth', 'Corner seat', 'Patio'],
+  place: ['All', 'Cafés', 'Dining', 'Nightlife', 'Events'],
+  looking: ['Any', 'Quiet', 'Natural light', 'Outdoor seating', 'Less crowded'],
+  avoid: ['None', 'Loud', 'Crowded', 'Bright'],
+  smell: ['None', 'Smoke', 'Perfume', 'Cooking'],
+};
 function Filters({ value, onChange, onClose }) {
   const set = (k) => (v) => onChange({ ...value, [k]: v });
+  const [picker, setPicker] = useState(null);
+  const pick = (key, label, icon, last) => (
+    <FRow icon={icon} label={label} last={last} onClick={() => setPicker({ key, label })}><Any v={value[key]} /></FRow>
+  );
   return (
     <motion.div className="abs" style={{ inset: 0, background: '#f7f5f1', zIndex: 30 }}
       initial={{ x: 440 }} animate={{ x: 0 }} exit={{ x: 440 }} transition={GENTLE}>
       <div className="scroll" style={{ position: 'absolute', inset: 0 }}>
         <div style={{ padding: '124px 24px 150px', display: 'flex', flexDirection: 'column' }}>
           <FHead>MODE</FHead>
-          <div className="hscroll" style={{ margin: '18px -24px 0', padding: '6px 24px 20px', display: 'flex', gap: 8 }}>
+          <div className="hscroll" style={{ margin: '0 -24px -20px', padding: '24px 24px 40px', display: 'flex', gap: 8 }}>
             {['Everyday', 'Study', 'Hang out', 'Date', 'Night out', 'Family'].map((m) => {
               const on = value.mode === m;
               return (
@@ -134,20 +158,20 @@ function Filters({ value, onChange, onClose }) {
           <FHead>COMFORT</FHead>
           <div style={{ height: 24 }} />
           <FCard>
-            <FRow icon="speaker-high" label="Sound"><Any /></FRow>
-            <FRow icon="sun" label="Light"><Any /></FRow>
-            <FRow icon="users" label="Crowd"><Any /></FRow>
-            <FRow icon="thermometer-simple" label="Temperature"><Any /></FRow>
-            <FRow icon="armchair" label="Seating" last><Any /></FRow>
+            {pick('sound', 'Sound', 'speaker-high')}
+            {pick('light', 'Light', 'sun')}
+            {pick('crowd', 'Crowd', 'users')}
+            {pick('temp', 'Temperature', 'thermometer-simple')}
+            {pick('seat', 'Seating', 'armchair', true)}
           </FCard>
           <div style={{ height: 24 }} />
           <FHead>MORE</FHead>
           <div style={{ height: 24 }} />
           <FCard>
-            <FRow icon="squares-four" label="Place type"><Any v="All" /></FRow>
-            <FRow icon="check-circle" label="Looking for"><Any /></FRow>
-            <FRow icon="prohibit" label="Not for me"><Any v="None" /></FRow>
-            <FRow icon="wind" label="Smells I’d skip"><Any v="None" /></FRow>
+            {pick('place', 'Place type', 'squares-four')}
+            {pick('looking', 'Looking for', 'check-circle')}
+            {pick('avoid', 'Not for me', 'prohibit')}
+            {pick('smell', 'Smells I’d skip', 'wind')}
             <FRow icon="seal-check" label="Verified info only" last><FSwitch on={value.verified} onChange={set('verified')} /></FRow>
           </FCard>
         </div>
@@ -163,6 +187,25 @@ function Filters({ value, onChange, onClose }) {
         <motion.button whileTap={{ scale: 0.96 }} transition={TAP} onClick={onClose} className="gl"
           style={{ height: 63, padding: '0 36px', borderRadius: 32, boxShadow: '0 14px 36px rgba(42,38,80,0.1), inset 0 1px 0 rgba(255,255,255,0.9)', ...t(17, 600, INK) }}>Show 24 places</motion.button>
       </Glass>
+      <AnimatePresence>
+        {picker && (
+          <SheetFrame key="picker" z={40} height={80 + PICK[picker.key].length * 56 + 24} onClose={() => setPicker(null)}>
+            <p className="abs nowrap" style={{ left: 24, top: 36, ...t(20, 700, INK) }}>{picker.label}</p>
+            <div className="abs" style={{ left: 12, right: 12, top: 80 }}>
+              {PICK[picker.key].map((o) => {
+                const on = value[picker.key] === o;
+                return (
+                  <motion.button key={o} whileTap={{ scale: 0.98 }} transition={TAP} onClick={() => { set(picker.key)(o); setPicker(null); }}
+                    style={{ width: '100%', height: 56, padding: '0 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: 16, background: on ? 'rgba(42,38,80,0.05)' : 'transparent' }}>
+                    <span className="nowrap" style={t(16, on ? 600 : 500, INK)}>{o}</span>
+                    {on && <Ph n="check-circle" size={22} fill={INK} />}
+                  </motion.button>
+                );
+              })}
+            </div>
+          </SheetFrame>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
@@ -323,10 +366,10 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
 
       {/* Layer / pins: category pins by default, sense-coloured pins once a layer is on */}
       <AnimatePresence mode="popLayout">
-        {pins.map(([icon, ring, , , lvl], i) => <Pin key={sense + i} i={i} icon={icon} ring={ring} level={lvl} layer={sense} view={view} />)}
+        {pins.map(([icon, ring, , , lvl], i) => (chip !== 'All' && SLOT_CHIP[i] !== chip) ? null : <Pin key={sense + i} i={i} icon={icon} ring={ring} level={lvl} layer={sense} view={view} />)}
       </AnimatePresence>
       <AnimatePresence mode="popLayout">
-        {pins.map(([, , name, lx], i) => <PinLabel key={sense + 'l' + i} i={i} name={name} lx={lx} sense={sense} view={view} />)}
+        {pins.map(([, , name, lx], i) => (chip !== 'All' && SLOT_CHIP[i] !== chip) ? null : <PinLabel key={sense + 'l' + i} i={i} name={name} lx={lx} sense={sense} view={view} />)}
       </AnimatePresence>
       <Anchored wx={154} wy={478} view={view}><img src={uri('you')} alt="" className="abs" style={{ left: 0, top: 0, width: 44, height: 44 }} /></Anchored>
 
@@ -340,12 +383,12 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
       </motion.button>
 
       {/* Category chips */}
-      <div className="abs hscroll" style={{ left: 0, top: 138, width: 440, height: 100, pointerEvents: 'none' }}>
-        <div style={{ display: 'flex', gap: 8, padding: '8px 24px 40px', width: 'max-content' }}>
+      <div className="abs hscroll" style={{ left: 0, top: 118, width: 440, height: 140, pointerEvents: 'none' }}>
+        <div style={{ display: 'flex', gap: 8, padding: '28px 24px 48px', width: 'max-content' }}>
           {CHIPS.map((c) => {
             const on = chip === c;
             return (
-              <motion.button key={c} onClick={() => setChip(c)} whileTap={{ scale: 0.95 }} transition={GENTLE}
+              <motion.button key={c} onClick={() => { setChip(c); setFilters((f) => ({ ...f, place: c })); listRef.current && (listRef.current.scrollTop = 0); }} whileTap={{ scale: 0.95 }} transition={GENTLE}
                 className="glass" style={{ position: 'relative', height: 44, borderRadius: 22, pointerEvents: 'auto', borderColor: on ? '#fff' : 'rgba(255,255,255,.95)', '--ga': '157.6deg' }}>
                 <div className="g-bg" style={on ? { background: 'rgba(255,255,255,0.92)' } : undefined} />
                 <span className="g-c nowrap" style={{ padding: '0 22px', fontSize: 15, fontWeight: on ? 600 : 500, color: on ? INK : 'rgba(42,38,80,0.8)' }}>{c}</span>
@@ -391,12 +434,12 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
         <motion.div ref={listRef} className="abs scroll" {...handlers('list')}
           style={{ inset: 'auto', left: 0, top: listTop, opacity: listOp, bottom: 0, width: 440, overflowY: state === 'peek' ? 'hidden' : 'auto', touchAction: state === 'full' || state === 'tall' ? 'pan-y' : 'none' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24, padding: '0 20px 112px' }}>
-            {RECS.map((r, i) => <Recommendation key={r.id} r={r} saved={savedIds.includes(r.id)} onToggleSaved={onToggleSaved} onOpen={i === 0 ? onOpenVenue : undefined} />)}
+            {recsFor(chip).map((r, i) => <Recommendation key={chip + r.id} r={r} saved={savedIds.includes(r.id)} onToggleSaved={onToggleSaved} onOpen={r.id === 'foxy' ? onOpenVenue : undefined} />)}
           </div>
         </motion.div>
       </motion.div>
 
-      <AnimatePresence>{filtersOpen && <Filters value={filters} onChange={setFilters} onClose={() => setFiltersOpen(false)} />}</AnimatePresence>
+      <AnimatePresence>{filtersOpen && <Filters value={filters} onChange={(v) => { setFilters(v); if (v.place !== filters.place) setChip(v.place); }} onClose={() => setFiltersOpen(false)} />}</AnimatePresence>
     </div>
   );
 }

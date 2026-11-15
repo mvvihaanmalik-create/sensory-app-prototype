@@ -49,10 +49,10 @@ const seatLine = (seat) => (seat.length === 0 ? 'Any' : seat.length <= 2 ? seat.
 // Onboarding picks -> the app's mode shape (Modes.jsx scales: sound Quiet / Easy to talk / Lively, light Dim / Soft / Bright,
 // crowd Relaxed / Moderate / Busy, temperature Cool / Mild / Warm). Picks past the end of a mode scale fold into its last value.
 export function toMode(p) {
-  const sound = p.sound.any ? null : ['Quiet', 'Easy to talk', 'Lively', 'Lively'][p.sound.i];
+  const sound = p.sound.any ? null : ['Quiet', 'Low', 'Lively', 'Lively'][p.sound.i];
   const light = p.light.any ? { b: null, tone: null, src: null }
     : [{ b: 'Dim', tone: null, src: null }, { b: 'Soft', tone: 'Warm', src: null }, { b: 'Bright', tone: null, src: 'Natural daylight' }, { b: 'Bright', tone: null, src: null }][p.light.i];
-  const crowd = p.crowd.any ? null : ['Relaxed', 'Relaxed', 'Moderate', 'Busy', 'Busy'][p.crowd.i];
+  const crowd = p.crowd.any ? null : ['Light', 'Light', 'Moderate', 'Busy', 'Busy'][p.crowd.i];
   const temp = p.temp.any ? null : ['Cool', 'Mild', 'Warm'][p.temp.i];
   const pos = ['Booth', 'Corner seat', 'Bar seat', 'Outdoor'].find((s) => p.seat.includes(s));
   const layout = ['Table with space', 'Communal table'].find((s) => p.seat.includes(s));
