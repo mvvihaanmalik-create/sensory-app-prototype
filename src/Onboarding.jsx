@@ -41,7 +41,7 @@ const SEATS = ['Booth', 'Corner seat', 'Table with space', 'Bar seat', 'Couch or
 export const initialPicks = () => ({
   sound: { i: SLIDERS.sound.def, any: false }, light: { i: SLIDERS.light.def, any: false },
   crowd: { i: SLIDERS.crowd.def, any: false }, temp: { i: SLIDERS.temp.def, any: false },
-  seat: ['Booth', 'Corner seat'],
+  seat: [],
 });
 const labelOf = (k, p) => (p[k].any ? 'Any' : SLIDERS[k].steps[p[k].i]);
 const seatLine = (seat) => (seat.length === 0 ? 'Any' : seat.length <= 2 ? seat.join(' · ') : `${seat.slice(0, 2).join(' · ')} +${seat.length - 2}`);

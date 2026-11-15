@@ -184,8 +184,8 @@ export default function App() {
   const searchFocus = useRef(null);
   const openSearchTyping = () => { flushSync(() => { nav('search'); navigateSearch('search'); }); searchFocus.current?.(); };
   const openSearchVenue = () => { openVenue(); try { history.replaceState(null, '', '#venue'); } catch (_) {} };
-  // Back swipe (browser / iOS edge swipe) always returns to Home. In-app navigation doesn't add history entries;
-  // one guard entry is added whenever you leave a clean Home, and popping it brings you Home.
+  // Back swipe (browser / iOS edge swipe) returns to the previous screen. In-app navigation keeps its own stack of
+  // screen states; one guard history entry is kept while there is somewhere to go back to, and popping it restores the last state.
   const atHome = screen === 'home' && !venueOpen && !flow && !sense && !page && !sortSheet && !modesOpen && !editing && !exploreOpen && !discoverOpen;
   const armed = useRef(false);
   const goHome = () => {
@@ -193,16 +193,35 @@ export default function App() {
     nav('home');
     try { history.replaceState(null, '', '#home'); } catch (_) {}
   };
+  const snap = { screen, searchRoute, venueOpen, flow, bookStep, sense, page, sortSheet, modesOpen, editing, exploreOpen, discoverOpen, venueTab, hash: typeof location !== 'undefined' ? location.hash : '' };
+  const sameSnap = (x, y) => ['screen', 'searchRoute', 'venueOpen', 'flow', 'bookStep', 'sense', 'page', 'sortSheet', 'modesOpen', 'editing', 'exploreOpen', 'discoverOpen'].every((k) => x[k] === y[k]);
+  const stack = useRef([]);
+  const restoring = useRef(false);
+  useEffect(() => {
+    if (onboarding) return;
+    const st = stack.current, top = st[st.length - 1];
+    if (restoring.current) { restoring.current = false; return; }
+    if (atHome) { stack.current = [snap]; return; }
+    if (!top || !sameSnap(top, snap)) st.push(snap);
+    else st[st.length - 1] = snap;
+  });
   const backRef = useRef(null);
   backRef.current = () => {
     armed.current = false;
     if (onboarding) { try { history.pushState({ guard: true }, '', location.href); armed.current = true; } catch (_) {} return; }
-    if (!atHome) goHome(); else { try { history.replaceState(null, '', '#home'); } catch (_) {} }
+    const st = stack.current;
+    if (st.length < 2) { if (!atHome) goHome(); return; }
+    st.pop();
+    const p = st[st.length - 1];
+    restoring.current = true;
+    setScreen(p.screen); setSearchRoute(p.searchRoute); setVenueOpen(p.venueOpen); setFlow(p.flow); setBookStep(p.bookStep); setSense(p.sense);
+    setPage(p.page); setSortSheet(p.sortSheet); setModesOpen(p.modesOpen); setEditing(p.editing); setExploreOpen(p.exploreOpen); setDiscoverOpen(p.discoverOpen); setVenueTab(p.venueTab);
+    try { history.replaceState(null, '', p.hash || '#home'); } catch (_) {}
   };
   useEffect(() => {
     if (atHome || armed.current || onboarding) return;
     try { history.pushState({ guard: true }, '', location.href); armed.current = true; } catch (_) {}
-  }, [atHome, onboarding]);
+  });
   useEffect(() => {
     const back = () => backRef.current();
     window.addEventListener('popstate', back);
@@ -330,6 +349,7 @@ export default function App() {
                             onBooked={(b) => { setBooking(b); setFlow('confirmed'); }} />}
                           {flow === 'confirmed' && booking && <BookingConfirmed booking={booking}
                             onClose={() => { setFlow(null); setSense(null); setVenueTab('overview'); }}
+                            onDone={() => { setVenueTab('overview'); goHome(); }}
                             onChange={() => { setDraft({ ...booking }); setBookStep(3); setFlow('book'); }} />}
                           {flow === 'review' && <WriteReview mine={mine} onClose={() => setFlow(null)}
                             onPosted={(r) => { setMine(r); setVenueTab('reviews'); setFlow(null); }} />}

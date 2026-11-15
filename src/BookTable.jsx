@@ -260,8 +260,10 @@ function StepWhen({ draft, set, refs, ctl }) {
                 <G key={s.time} as="button" r={22} on={on} disabled={!s.ok} aria-disabled={!s.ok}
                   onClick={() => s.ok && set({ time: s.time })} whileTap={s.ok ? { scale: 0.95 } : undefined}
                   initial={false} animate={{ opacity: s.ok ? 1 : 0.45 }} transition={{ duration: 0.25, delay: date == null ? 0 : i * 0.03 }}
-                  style={{ height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: s.ok ? 'pointer' : 'default', ...(on ? { border: 0 } : null) }}>
-                  <span style={t(15, 600)}>{s.time}</span>
+                  aria-pressed={on}
+                  style={{ height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: s.ok ? 'pointer' : 'default', transition: 'background-color .2s, border-color .2s',
+                    ...(on ? { borderColor: NAVY, background: NAVY, boxShadow: '0 10px 22px rgba(94,90,126,0.28)' } : null) }}>
+                  <span style={t(15, 600, on ? '#fff' : NAVY)}>{s.time}</span>
                 </G>
               );
             })}
@@ -579,7 +581,7 @@ export default function BookTable({ draft, setDraft, step, setStep, onClose, onB
 const mins = (s) => { const [hm, ap] = s.split(' '); let [h, m] = hm.split(':').map(Number); if (ap === 'PM' && h !== 12) h += 12; return h * 60 + m; };
 const fmt = (m) => { const h = Math.floor(m / 60), mm = m % 60; return `${h % 12 || 12}:${String(mm).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`; };
 
-export function BookingConfirmed({ booking, onClose, onChange }) {
+export function BookingConfirmed({ booking, onClose, onDone, onChange }) {
   const [scrolled, setScrolled] = useState(false);
   const [added, setAdded] = useState(false);
   const b = booking;
@@ -641,7 +643,7 @@ export function BookingConfirmed({ booking, onClose, onChange }) {
           </motion.button>
 
           <motion.div {...rise(6)}>
-            <PrimaryCTA inline label="Done" onClick={onClose} />
+            <PrimaryCTA inline label="Done" onClick={onDone || onClose} />
           </motion.div>
         </div>
       </div>
