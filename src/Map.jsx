@@ -66,7 +66,8 @@ const mercPx = (lat, lng) => [((lng + 180) / 360) * WORLD, ((1 - Math.log(Math.t
 const [CPX, CPY] = mercPx(CENTER[0], CENTER[1]);
 const ORIGIN = [CPX - 220, CPY - 478];
 const TILE_HOSTS = ['a', 'b', 'c', 'd'];
-const tileUrl = (z, x, y) => `https://${TILE_HOSTS[(x + y) % 4]}.basemaps.cartocdn.com/light_all/${z}/${x}/${y}@2x.png`;
+// Tiles: OpenStreetMap needs no key. To use a CARTO key instead, swap this for the CARTO raster URL with {z}/{x}/{y}.
+const tileUrl = (z, x, y) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
 const MINZ = 0.3, MAXZ = 3.2, REACH = 2600;
 const bounds = (s) => ({ minX: 220 - s * (220 + REACH), maxX: 220 + s * (REACH - 220), minY: 478 - s * (478 + REACH), maxY: 478 + s * (REACH - 478) });
 
