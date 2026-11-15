@@ -75,12 +75,12 @@ export function EditMode({ mode, isNew, onBack, onSave }) {
   const [name, setName] = useState(isNew ? 'Slow weekend' : mode.name);
   const [prefs, setPrefs] = useState(() => isNew ? emptyPrefs() : structuredClone(mode.prefs));
   return <div className="abs mode-editor" style={{ inset: 0, background: '#f7f5f1' }} data-mode-editor={isNew ? 'new' : mode.id}>
-    <div className="scroll hide-sb" style={{ top: 112, bottom: 0 }}><div className="mode-editor-content">
+    <div className="scroll hide-sb" style={{ top: 130, bottom: 0 }}><div className="mode-editor-content">
       {nameable ? <div className="mode-name-field"><label htmlFor="mode-name">Mode name</label><div><input id="mode-name" value={name} maxLength={40} onChange={e => setName(e.target.value)} /></div></div> : <div className="mode-identity"><p>{mode.name}</p><p>{mode.desc}</p></div>}
       <div className="mode-preferences"><p className="mode-section-title">{nameable ? 'Sensory preferences' : `${mode.name} preferences`}</p>{SLIDERS.map(config => <PreferenceSlider key={config.key} config={config} prefs={prefs} onChange={setPrefs} />)}<SeatingPreferences prefs={prefs} onChange={setPrefs} /></div>
     </div></div>
-    <motion.button className="abs" aria-label="Back" onClick={onBack} whileTap={{ scale: .9 }} transition={TAP} style={{ left: 24, top: 52, width: 48, height: 48 }}><Glass radius={24} style={{ inset: 0 }} contentStyle={{ justifyContent: 'center' }}><img src={A.back} alt="" /></Glass></motion.button>
-    <p className="abs nowrap" style={{ left: 84, top: 62, fontSize: 24, fontWeight: 700, lineHeight: '29px', pointerEvents: 'none' }}>{isNew ? 'Add custom mode' : 'Edit mode'}</p>
+    <motion.button className="abs" aria-label="Back" onClick={onBack} whileTap={{ scale: .9 }} transition={TAP} style={{ left: 24, top: 70, width: 48, height: 48 }}><Glass radius={24} style={{ inset: 0 }} contentStyle={{ justifyContent: 'center' }}><img src={A.back} alt="" /></Glass></motion.button>
+    <p className="abs nowrap" style={{ left: 84, top: 80, fontSize: 24, fontWeight: 700, lineHeight: '29px', pointerEvents: 'none' }}>{isNew ? 'Add custom mode' : 'Edit mode'}</p>
     <div className="abs mode-save-wrap" style={{ top: nameable ? 814 : 836 }}><motion.button className="mode-save" disabled={!name.trim()} whileTap={{ scale: .96 }} transition={TAP} onClick={() => onSave({ id: isNew ? `custom-${Date.now()}` : mode.id, name: name.trim(), ...(nameable ? { custom: true } : { desc: mode.desc }), prefs })}>Save changes</motion.button></div>
   </div>;
 }

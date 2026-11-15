@@ -1,3 +1,10 @@
+## Navigation and Edit mode spacing - November 15, 2026
+
+- Navigation starts screen scroll areas at the top, including repeated taps on the active Home or Search tab and returns from overlays. Profile subpages also reset on entry and return. Existing component state is preserved.
+- Edit mode back button now starts at y=70, title y=80 and content scroller y=130, matching the Figma header spacing and clearing the 62px status bar.
+- Checked navigation resets, Explore return, and the back button's visible/clickable top edge in both builds.
+- Removed the extra Any toggle from the shared onboarding preference card (Sound, Lighting, Crowd and Temperature), matching the final Figma flow. Sliders and Skip retain their existing behavior.
+
 ## Status bar and confirmation spacing - November 15, 2026
 
 - Final flow audit: all 87 full-screen UI designs have one visible iOS/iPadOS 26 Status bar - iPhone instance, component key `51ddb19de206b67eae2d554b1d20c018feb754f4`. Eight gradient-only background variants are not screens.

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { AnimatePresence, animate, motion, MotionConfig, useMotionValue, useIsPresent } from 'motion/react';
 import Home from './Home.jsx';
@@ -154,7 +154,9 @@ export default function App() {
   const [profileOverlay, setProfileOverlay] = useState(false);
   const [sheetCmd, setSheetCmd] = useState(initial.startsWith('map-') && initial !== 'map-half' ? { state: initial.slice(4), n: 0 } : null);
   const [homeScroll, setHomeScroll] = useState(0);
-  const [homeTop, setHomeTop] = useState(0); // bumps when Home is re-entered from another tab, so it opens at the top
+  const [homeTop, setHomeTop] = useState(0); // resets Home on every Home tab tap
+  const viewportRef = useRef(null);
+  const [navigationRequest, setNavigationRequest] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [scene, setScene] = useState('morning');
   const stepScene = (d) => setScene((cur) => SCENES[(SCENES.findIndex((x) => x.id === cur) + d + SCENES.length) % SCENES.length].id);
@@ -170,8 +172,9 @@ export default function App() {
   const showPassed = () => setDecided((m) => Object.fromEntries(Object.entries(m).filter(([, v]) => v === 'save')));
 
   const nav = (to) => {
+    setNavigationRequest(n => n + 1);
     if (screen === 'search' && to !== 'search') { setSearchRoute('search'); try { history.replaceState(null, '', '#' + (to === 'map' ? 'map-half' : to)); } catch (_) {} }
-    if (to === 'home' && screen !== 'home') setHomeTop((n) => n + 1);
+    if (to === 'home') setHomeTop((n) => n + 1);
     if (discoverOpen) closeDiscover();
     setExploreOpen(false);
     if (page) setPage(null);
@@ -196,6 +199,12 @@ export default function App() {
     try { history.replaceState(null, '', '#home'); } catch (_) {}
   };
   const snap = { screen, searchRoute, venueOpen, flow, bookStep, sense, page, sortSheet, modesOpen, editing, exploreOpen, discoverOpen, venueTab, hash: typeof location !== 'undefined' ? location.hash : '' };
+  // Reset scrolling on navigation, including a repeat tap on the active tab.
+  // Keep component state (bookings, filters, drafts) intact.
+  useLayoutEffect(() => {
+    viewportRef.current?.querySelectorAll('.scroll, .s-sheet-body').forEach(el => { el.scrollTop = 0; });
+    setHomeScroll(0); setVenueScroll(0);
+  }, [navigationRequest, screen, searchRoute, venueOpen, flow, bookStep, sense, page, editing, exploreOpen, discoverOpen]);
   const sameSnap = (x, y) => ['screen', 'searchRoute', 'venueOpen', 'flow', 'bookStep', 'sense', 'page', 'sortSheet', 'modesOpen', 'editing', 'exploreOpen', 'discoverOpen'].every((k) => x[k] === y[k]);
   const stack = useRef([]);
   const restoring = useRef(false);
@@ -302,7 +311,7 @@ export default function App() {
               <div className="btn" style={{ left: -3, top: 256, height: 64 }} />
               <div className="btn" style={{ left: -3, top: 334, height: 64 }} />
               <div className="btn" style={{ right: -3, top: 290, height: 104 }} />
-              <div className="screen">
+              <div className="screen" ref={viewportRef}>
                 <div className="abs" style={{ inset: 0, display: screen === 'home' ? 'block' : 'none' }} aria-hidden={screen !== 'home'}>
                     {<DiscoverLayer pull={pull} open={discoverOpen} onClose={closeDiscover} mode={activeM} decided={decided}
                       onDecide={(id, d) => setDecided((m) => ({ ...m, [id]: d }))} onShowPassed={showPassed} onOpenVenue={openVenue} blocked={venueOpen || !!sense || !!flow} />}

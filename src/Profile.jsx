@@ -1,6 +1,6 @@
 // Profile section (Figma 737:2787): Default, Posts you liked, Saved collections, All saved, App comfort,
 // Reservations (ticket wallet) and Booking confirmed.
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Glass, GENTLE, useScale } from './ui.jsx';
 import { TAP, t } from './flow.jsx';
@@ -249,10 +249,15 @@ function Page({ title, sub, right, onBack, children, top = 151, bg = '#f7f5f1' }
 
 export default function Profile({ onScroll, modes, activeId, onPickMode, onEditMode, onAddMode, onOpenVenue, onOpenPost, booking, onOverlay = () => {} }) {
   const [stack, setStack] = useState([]);
+  const viewportRef = useRef(null);
   const [collection, setCollection] = useState(COLLECTIONS[0]);
   const [comfort, setComfort] = useState(COMFORT_DEFAULT);
   const [alerts, setAlerts] = useState(false);
   const top = stack[stack.length - 1];
+  useLayoutEffect(() => {
+    viewportRef.current?.querySelectorAll('.scroll').forEach(el => { el.scrollTop = 0; });
+    onScroll?.(0);
+  }, [top]);
   const push = (p) => setStack((s) => [...s, p]);
   const pop = () => setStack((s) => s.slice(0, -1));
   useEffect(() => {
@@ -265,7 +270,7 @@ export default function Profile({ onScroll, modes, activeId, onPickMode, onEditM
   useEffect(() => () => onOverlay(false), []);
 
   return (
-    <div className="abs" style={{ inset: 0, background: '#f7f5f1' }}>
+    <div ref={viewportRef} className="abs" style={{ inset: 0, background: '#f7f5f1' }}>
       <div className="scroll" onScroll={(e) => onScroll?.(e.currentTarget.scrollTop)} aria-hidden={!!top || undefined}>
         <div style={{ padding: '77px 24px 140px', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>

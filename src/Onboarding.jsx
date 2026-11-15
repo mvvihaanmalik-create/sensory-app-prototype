@@ -235,7 +235,6 @@ function Slider({ cfg, value, onChange }) {
 
 function SliderScreen({ k, picks, setPick, onNext, onBack, onSkip }) {
   const cfg = SLIDERS[k], v = picks[k], c = cfg.card;
-  const setAny = () => setPick(k, { ...v, any: !v.any });
   return (
     <>
       <CircleBtn label="Back" onClick={onBack} style={{ position: 'absolute', left: 24, top: 56 }}><VIcon name="caretLeft" fill={NAVY} /></CircleBtn>
@@ -246,10 +245,6 @@ function SliderScreen({ k, picks, setPick, onNext, onBack, onSkip }) {
         <div className="abs" style={{ left: 20, top: c.hy - 1.5, width: 315, height: 44, display: 'flex', alignItems: 'center', gap: 10 }}>
           <SenseGlyph k={cfg.icon} />
           <span className="nowrap" style={{ flex: '1 0 0', ...t(17, 600, NAVY, { lineHeight: 'normal' }) }}>{cfg.name}</span>
-          <motion.button onClick={setAny} aria-pressed={v.any} whileTap={{ scale: 0.95 }} transition={TAP} className={v.any ? 'gl-solid' : 'gl'}
-            style={{ height: 44, padding: '0 16px', borderRadius: 22, boxShadow: '0 14px 36px rgba(42,38,80,0.1), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
-            <span className="nowrap" style={t(14, v.any ? 600 : 500, NAVY, { lineHeight: 'normal' })}>Any</span>
-          </motion.button>
         </div>
         <div className="abs" style={{ left: 20, top: c.sy - 1.5, width: 315, height: 26, overflow: 'hidden' }}>
           <AnimatePresence mode="popLayout" initial={false}>
