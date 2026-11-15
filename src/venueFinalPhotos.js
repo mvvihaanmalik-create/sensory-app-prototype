@@ -28,7 +28,7 @@ export const PHOTO_GRID = [[p0301, p0302, p0303, p0304], [p0305, p0306, p0307, p
 export const MENU_CROPS = [null, null, null, null];
 export const GRID_CROPS = [[null,null,null,null],[null,null,null,null]];
 export function photoBackground(src, crop) {
- if (!crop) return { background: `#dbdbde url(${src}) center / cover` };
+ if (!crop) return { backgroundColor: '#dbdbde', backgroundImage: `url("${src}")`, backgroundPosition: 'center', backgroundSize: 'cover', backgroundRepeat: 'no-repeat' };
  const [a,d,x,y] = crop;
- return { backgroundColor: '#dbdbde', backgroundImage: `url(${src})`, backgroundRepeat: 'no-repeat', backgroundSize: `${100/a}% ${100/d}%`, backgroundPosition: `${a===1?50:100*x/(1-a)}% ${d===1?50:100*y/(1-d)}%` };
+ return { backgroundColor: '#dbdbde', backgroundImage: `url("${src}")`, backgroundRepeat: 'no-repeat', backgroundSize: `${100/a}% ${100/d}%`, backgroundPosition: `${a===1?50:100*x/(1-a)}% ${d===1?50:100*y/(1-d)}%` };
 }
