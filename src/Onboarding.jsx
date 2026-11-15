@@ -28,13 +28,13 @@ export const ONBOARDING_STEPS = ['welcome', 'sound', 'light', 'crowd', 'temp', '
 
 /* ---------- Data ---------- */
 const SLIDERS = {
-  sound: { title: 'How loud do you like it?', name: 'Sound', icon: 'sound', steps: ['Any', 'Quiet', 'Low', 'Moderate', 'Lively'], def: 0,
+  sound: { title: 'How loud do you like it?', name: 'Sound', icon: 'sound', steps: ['Any', 'Quiet', 'Low', 'Moderate', 'Lively'], colors: [null, '#3fa06b', '#3fa06b', '#f29a3a', '#d84b43'], def: 0,
     titleTop: 150, card: { top: 303, h: 481, hy: 173.5, sy: 233.5, sl: 385.5, ey: 445.5 }, art: { src: soundImg, left: 173, top: 177 } },
-  light: { title: 'What light do you like?', name: 'Light', icon: 'light', steps: ['Any', 'Dim', 'Soft', 'Moderate', 'Bright'], def: 0,
+  light: { title: 'What light do you like?', name: 'Light', icon: 'light', steps: ['Any', 'Dim', 'Soft', 'Moderate', 'Bright'], colors: [null, '#8e89a8', '#b79a72', '#ddb65c', '#f4d77a'], def: 0,
     titleTop: 150, card: { top: 250, h: 515, hy: 21.5, sy: 81.5, sl: 233.5, ey: 293.5 }, art: { src: lightImg, left: 176, top: 591 } },
-  crowd: { title: 'How busy is comfortable?', name: 'Crowd', icon: 'crowd', steps: ['Any', 'Empty', 'Light', 'Moderate', 'Busy'], def: 0,
+  crowd: { title: 'How busy is comfortable?', name: 'Crowd', icon: 'crowd', steps: ['Any', 'Empty', 'Light', 'Moderate', 'Busy'], colors: [null, '#3fa06b', '#3fa06b', '#f29a3a', '#d84b43'], def: 0,
     titleTop: 161, card: { top: 327, h: 506, hy: 157.5, sy: 217.5, sl: 369.5, ey: 429.5 }, art: { src: catchupImg, left: 143, top: 181 } },
-  temp: { title: 'How warm do you like it?', name: 'Temperature', icon: 'temp', steps: ['Any', 'Cold', 'Cool', 'Mild', 'Warm'], def: 0,
+  temp: { title: 'How warm do you like it?', name: 'Temperature', icon: 'temp', steps: ['Any', 'Cold', 'Cool', 'Mild', 'Warm'], colors: [null, '#3e73c9', '#8db8e8', '#b9b4cc', '#f2a65a'], def: 0,
     titleTop: 165, card: { top: 263, h: 502, hy: 21.5, sy: 81.5, sl: 233.5, ey: 293.5 }, art: { src: cozyImg, left: 176, top: 591 } },
 };
 const SEATS = ['Booth', 'Corner seat', 'Table with space', 'Bar seat', 'Couch or lounge', 'Communal table', 'Outdoor'];
@@ -184,6 +184,7 @@ const nearest = (x, n) => Math.max(0, Math.min(n - 1, Math.round(((x - EDGE) / (
 
 function Slider({ cfg, value, onChange }) {
   const n = cfg.steps.length, { i } = value, any = false;
+  const tone = cfg.colors[i] || INDIGO; // the same colours the map uses for each level
   const pos = useMotionValue(stepX(i, n));
   const fill = useTransform(pos, (v) => Math.max(0, v));
   const tipX = useTransform(pos, (v) => v - 9);
@@ -210,20 +211,20 @@ function Slider({ cfg, value, onChange }) {
       onPointerDown={down} onPointerMove={(e) => drag.current && move(e)} onPointerUp={up} onPointerCancel={up} onKeyDown={key}
       style={{ position: 'absolute', left: 0, top: 0, width: TRACK, height: 44, touchAction: 'none', cursor: 'pointer', outline: 'none' }}>
       <div className="abs" style={{ left: 0, top: 18, width: TRACK, height: 8, borderRadius: 4, background: 'rgba(42,38,80,0.1)' }} />
-      <motion.div className="abs" initial={false} animate={{ opacity: any ? 0 : 1 }} style={{ left: 0, top: 18, height: 8, borderRadius: 4, background: INDIGO, width: fill }} />
+      <motion.div className="abs" initial={false} style={{ left: 0, top: 18, height: 8, borderRadius: 4, width: fill }} animate={{ opacity: 1, backgroundColor: tone }} transition={{ duration: 0.2 }} />
       {cfg.steps.map((_, k) => (
         <div key={k} className="abs" style={{ left: x0(k), top: 19, width: 6, height: 6, borderRadius: 3, background: !any && k <= i ? '#fff' : 'rgba(42,38,80,0.22)' }} />
       ))}
-      <motion.div className="abs" initial={false} animate={{ opacity: any ? 0 : 1, scale: any ? 0.7 : 1 }} transition={{ duration: 0.2 }}
-        style={{ left: 0, top: 4, width: 36, height: 36, x: thumbX, borderRadius: 18, background: '#fff', border: `3px solid ${INDIGO}`, boxShadow: '0 4px 12px rgba(42,38,80,0.22)', boxSizing: 'border-box' }} />
-      <motion.div className="abs" initial={false} animate={{ opacity: any ? 0 : 1, y: any ? 8 : 0 }} transition={{ duration: 0.2 }}
+      <motion.div className="abs" initial={false} animate={{ opacity: 1, scale: 1, borderColor: tone }} transition={{ duration: 0.2 }}
+        style={{ left: 0, top: 4, width: 36, height: 36, x: thumbX, borderRadius: 18, background: '#fff', border: '3px solid', boxShadow: '0 4px 12px rgba(42,38,80,0.22)', boxSizing: 'border-box' }} />
+      <motion.div className="abs" initial={false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}
         style={{ left: 0, top: -98, pointerEvents: 'none', x: bubbleX, width: 104 }}>
-        <div style={{ position: 'relative', minHeight: 92, width: 104, borderRadius: 20, background: 'rgba(255,255,255,0.96)', border: '1.5px solid #fff', boxSizing: 'border-box',
+        <motion.div initial={false} animate={{ borderColor: tone }} transition={{ duration: 0.2 }} style={{ position: 'relative', minHeight: 92, width: 104, borderRadius: 20, background: 'rgba(255,255,255,0.96)', border: '2.5px solid', boxSizing: 'border-box',
           WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)', boxShadow: '0 10px 28px rgba(42,38,80,0.16)', padding: '14px 8px 12px',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
           <SenseGlyph k={cfg.icon} size={32} one />
           <span className="nowrap" style={t(14, 600, NAVY, { lineHeight: 1.2 })}>{cfg.steps[i]}</span>
-        </div>
+        </motion.div>
       </motion.div>
       <motion.svg className="abs" width="18" height="9" viewBox="0 0 18 9" initial={false} animate={{ opacity: any ? 0 : 1 }} style={{ left: 0, top: -7, x: tipX, pointerEvents: 'none' }}>
         <path d="M0 0H18L10.6 7.6a2.2 2.2 0 0 1-3.2 0L0 0Z" fill="rgba(255,255,255,0.96)" />
