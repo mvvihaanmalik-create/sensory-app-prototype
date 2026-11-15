@@ -300,12 +300,12 @@ function Done({ picks, onAdd, onFinish }) {
   return (
     <>
       <motion.div className="abs" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={GENTLE}
-        style={{ left: 130, top: 96, width: 180, height: 180, borderRadius: 90, background: 'rgba(255,255,255,0.55)', border: '1.5px solid #fff', boxSizing: 'border-box' }}>
-        <img src={fitsImg} alt="" draggable={false} style={{ position: 'absolute', left: 12, top: 12, width: 150, height: 150, objectFit: 'contain' }} />
+        style={{ left: 130, top: 114, width: 180, height: 180, borderRadius: 90, background: 'rgba(255,255,255,0.55)', border: '1.5px solid #fff', boxSizing: 'border-box' }}>
+        <img src={fitsImg} alt="" draggable={false} style={{ position: 'absolute', left: 13.5, top: 13.5, width: 150, height: 150, objectFit: 'contain' }} />
       </motion.div>
-      <Title top={300}>You’re all set</Title>
+      <Title top={318}>You’re all set</Title>
       <motion.div className="gl abs" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ ...GENTLE, delay: 0.08 }}
-        style={{ left: 24, top: 360, width: 392, borderRadius: 28, padding: '6px 0', boxSizing: 'border-box' }}>
+        style={{ left: 24, top: 378, width: 392, borderRadius: 28, padding: '6px 0', boxSizing: 'border-box' }}>
         {rows.map(([k, label, val], idx) => (
           <div key={k}>
             {idx > 0 && <div style={{ height: 1, margin: '0 20px', background: 'rgba(42,38,80,0.08)' }} />}
@@ -317,10 +317,10 @@ function Done({ picks, onAdd, onFinish }) {
           </div>
         ))}
       </motion.div>
-      <PrimaryCTA label="Add another profile" top={801} color={NAVY} onClick={onAdd} />
-      <motion.button className="abs" onClick={onFinish} whileTap={{ scale: 0.96 }} transition={TAP}
-        style={{ left: 120, top: 876, width: 200, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span className="nowrap" style={t(15, 500, MUTED, { lineHeight: 'normal' })}>Skip for now</span>
+      <PrimaryCTA label="Start exploring" top={801} color={NAVY} onClick={onFinish} />
+      <motion.button className="abs" onClick={onAdd} whileTap={{ scale: 0.96 }} transition={TAP}
+        style={{ left: 120, top: 872, width: 200, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span className="nowrap" style={t(15, 500, MUTED, { lineHeight: 'normal' })}>Add another mode</span>
       </motion.button>
     </>
   );
@@ -338,7 +338,7 @@ export default function Onboarding({ start = 0, onSkip, onFinish, onAddAnother }
   const shell = { skip: onSkip, back, next };
   return (
     <div className="abs" style={{ inset: 0, background: '#f7f5f1', overflow: 'hidden' }}>
-      <DiffuseGradient />
+      {id !== 'done' && <DiffuseGradient />}
       <AnimatePresence initial={false} custom={dir} mode="popLayout">
         <motion.div key={id} className="abs" style={{ inset: 0 }} custom={dir}
           initial={{ opacity: 0, x: 36 * dir }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -36 * dir }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}>

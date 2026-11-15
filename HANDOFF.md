@@ -1,3 +1,9 @@
+## Photo-only screenshots and onboarding completion - November 15, 2026
+
+- Ten captured screenshots now have SVG viewports that clip the original JPEG pixels to the photo. Menu, gallery, review reuse and the full-screen viewer share those assets. Original JPEGs remain available.
+- Updated all 27 matching image fills on Final flow with photo-only crops, preserving frame geometry.
+- Completion matches Figma 978:5767: illustration y114, heading y318, preferences y378, plain background, Start exploring primary action and Add another mode secondary action. Both actions retain their intended flow.
+
 ## Navigation and Edit mode spacing - November 15, 2026
 
 - Navigation starts screen scroll areas at the top, including repeated taps on the active Home or Search tab and returns from overlays. Profile subpages also reset on entry and return. Existing component state is preserved.
