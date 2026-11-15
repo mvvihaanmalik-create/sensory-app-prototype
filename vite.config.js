@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { viteSingleFile } from 'vite-plugin-singlefile';
 
 // `vite build --mode phone` makes the full-screen version for testing on phones: no iPhone frame, same app.
 // It also asks iPhones to open it full screen when added to the Home Screen.
@@ -18,7 +17,9 @@ const phoneHtml = () => ({
 export default defineConfig(({ mode }) => {
   const phone = mode === 'phone';
   return {
-    plugins: [react(), viteSingleFile(), ...(phone ? [phoneHtml()] : [])],
-    build: { assetsInlineLimit: 100000000, ...(phone ? { outDir: 'dist/phone', emptyOutDir: false } : {}) },
+    // Assets are emitted as separate hashed files (not inlined into one HTML) so the page loads fast and images are cached.
+    base: phone ? '/phone/' : '/',
+    plugins: [react(), ...(phone ? [phoneHtml()] : [])],
+    build: { assetsInlineLimit: 4096, ...(phone ? { outDir: 'dist/phone', emptyOutDir: false } : {}) },
   };
 });
