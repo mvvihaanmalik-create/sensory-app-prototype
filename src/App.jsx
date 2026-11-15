@@ -165,7 +165,9 @@ export default function App() {
     return () => { document.removeEventListener('focusin', on); document.removeEventListener('focusout', off); };
   }, []);
   const [reduceMotion, setReduceMotion] = useState(false);
-  const [scene, setScene] = useState('morning');
+  const [sceneBase, setScene] = useState('morning');
+  const [darkTheme, setDarkTheme] = useState(false); // Settings > App comfort > Theme > Dark
+  const scene = darkTheme ? 'night' : sceneBase;
   const stepScene = (d) => setScene((cur) => SCENES[(SCENES.findIndex((x) => x.id === cur) + d + SCENES.length) % SCENES.length].id);
   // Hidden Discovery Mode: Home slides down by `pull`, Discover sits underneath it
   const [discoverOpen, setDiscoverOpen] = useState(initial === 'discover');
@@ -304,7 +306,7 @@ export default function App() {
             </div>
             <div>
               <div className="label">Home hero</div>
-              <div className="jump">{SCENES.map((x) => <button key={x.id} className={x.id === scene ? 'on' : ''} onClick={() => { setScene(x.id); jump('home'); }}>{x.label}</button>)}</div>
+              <div className="jump">{SCENES.map((x) => <button key={x.id} className={x.id === sceneBase ? 'on' : ''} onClick={() => { setScene(x.id); jump('home'); }}>{x.label}</button>)}</div>
             </div>
             <div className="tools"><button onClick={() => { nav('search'); navigateSearch('search'); }}>Search</button>
               <button onClick={() => { try { history.replaceState(null, '', location.pathname); } catch (_) {} location.reload(); }}>Restart</button>
@@ -326,7 +328,7 @@ export default function App() {
                 </div>
                 <AnimatePresence>{!['home', 'search'].includes(screen) && <ScreenLayer key={screen} screen={screen}>
                   {screen === 'map' && <MapScreen command={sheetCmd} onOpenVenue={openVenue} onOpenSearch={openSearchTyping} savedIds={Object.keys(decided).filter(id => decided[id] === 'save')} onToggleSaved={toggleSaved} onOverlay={setMapOverlay} />}
-                  {screen === 'profile' && <Profile onScroll={setHomeScroll} savedCount={savedCount} savedPlaces={savedPlaces} modes={modes} activeId={activeMode} onPickMode={setActiveMode} onEditMode={id => editMode(id, 'profile')} onAddMode={() => editMode('new', 'profile')} onOpenVenue={openVenue} onOpenPost={openExplore} booking={booking || toBooking(SAMPLE_DRAFT)} onOverlay={setProfileOverlay} />}
+                  {screen === 'profile' && <Profile onTheme={setDarkTheme} onScroll={setHomeScroll} savedCount={savedCount} savedPlaces={savedPlaces} modes={modes} activeId={activeMode} onPickMode={setActiveMode} onEditMode={id => editMode(id, 'profile')} onAddMode={() => editMode('new', 'profile')} onOpenVenue={openVenue} onOpenPost={openExplore} booking={booking || toBooking(SAMPLE_DRAFT)} onOverlay={setProfileOverlay} />}
                 </ScreenLayer>}</AnimatePresence>
                 <motion.div className="abs" style={{ inset: 0, display: screen === 'search' ? 'block' : 'none' }} aria-hidden={screen !== 'search'} initial={false} animate={{ opacity: screen === 'search' ? 1 : 0 }} transition={GENTLE}>
                   <Search route={searchRoute} active={screen === 'search' && !venueOpen} shown={screen === 'search'} onNavigate={navigateSearch} onBack={backSearch} onOpenVenue={openSearchVenue} hasSaved={decided.foxy === 'save'} activeMode={activeM} booking={booking} focusRef={searchFocus} />

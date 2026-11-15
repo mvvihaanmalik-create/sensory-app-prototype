@@ -220,6 +220,7 @@ function Wallet({ booking, onOpenBooking }) {
 
 // ---------- App comfort ----------
 export const COMFORT_DEFAULT = { theme: 'Light', text: 'Default', colors: 'Soft', motion: 'Standard', haptics: true };
+let COMFORT_SAVED = COMFORT_DEFAULT; // survives leaving and re-opening the Profile tab
 function AppComfort({ value, onChange }) {
   const set = (k) => (v) => onChange({ ...value, [k]: v });
   return (
@@ -257,7 +258,7 @@ function Page({ title, sub, right, onBack, children, top = 151, bg = '#f7f5f1' }
   );
 }
 
-export default function Profile({ onScroll, modes, activeId, onPickMode, onEditMode, onAddMode, onOpenVenue, onOpenPost, booking, onOverlay = () => {} }) {
+export default function Profile({ onScroll, modes, activeId, onPickMode, onEditMode, onAddMode, onOpenVenue, onOpenPost, booking, onOverlay = () => {}, onTheme }) {
   const [stack, setStack] = useState([]);
   const viewportRef = useRef(null);
   const [collection, setCollection] = useState(COLLECTIONS[0]);
@@ -272,7 +273,7 @@ export default function Profile({ onScroll, modes, activeId, onPickMode, onEditM
     try { localStorage.setItem('sensory-custom-collections', JSON.stringify(next.filter(c => !COLLECTIONS.some(seed => seed.id === c.id)))); } catch {}
     setCreatingCollection(false);
   };
-  const [comfort, setComfort] = useState(COMFORT_DEFAULT);
+  const [comfort, setComfort] = useState(COMFORT_SAVED);
   const [alerts, setAlerts] = useState(false);
   const top = stack[stack.length - 1];
   useLayoutEffect(() => {
@@ -285,6 +286,8 @@ export default function Profile({ onScroll, modes, activeId, onPickMode, onEditM
     const r = document.documentElement;
     r.dataset.reduceMotion = comfort.motion === 'Reduced' ? 'on' : 'off';
     r.dataset.vivid = comfort.colors === 'Vivid' ? 'on' : 'off';
+    COMFORT_SAVED = comfort;
+    onTheme?.(comfort.theme === 'Dark'); // Dark shows the app's dark Home (the Good night scene)
   }, [comfort]);
   // App comfort and the booking screen cover the tab bar, as in Figma.
   useEffect(() => { onOverlay(top === 'comfort' || top === 'booking' || creatingCollection); }, [top, creatingCollection]);
