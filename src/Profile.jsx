@@ -210,7 +210,7 @@ function Wallet({ booking, onOpenBooking }) {
             onAnimationComplete={() => { if (id === front) moving.current = false; }} onClick={() => tap(id)}
             onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tap(id); } }}
             data-wallet-ticket={id} className="abs" style={{ left: 0, top: 0, zIndex: i, cursor: 'pointer', touchAction: 'pan-y', scale: '1', translate: 'none', filter: 'none', transition: 'none' }}>
-            <Ticket {...data} animatedArt />
+            <Ticket {...data} animatedArt nameTop />
           </motion.div>
         );
       })}

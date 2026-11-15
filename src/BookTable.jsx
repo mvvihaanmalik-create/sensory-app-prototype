@@ -595,7 +595,7 @@ export const TICKET_THEMES = {
   willow: { bg: '#c2e8d9', art: willowArt, ink: '#2a2650', perf: '#45b6a2', bar: 'rgba(42,38,80,0.8)' },
 };
 export const bookingWhen = (b) => `${b.dayLong.replace('Today, ', '').replace(/^(\w{3}) /, '$1, ')} · ${b.time}`;
-export function Ticket({ name = VENUE.name, when, guests, seat, held, theme = 'fern', motionProps, animatedArt = false, art, showArtText = true }) {
+export function Ticket({ name = VENUE.name, when, guests, seat, held, theme = 'fern', motionProps, animatedArt = false, art, showArtText = true, nameTop = false }) {
   const th = TICKET_THEMES[theme];
   const field = (x, label, value) => (
     <div className="abs" style={{ left: x, top: 338, display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -608,7 +608,7 @@ export function Ticket({ name = VENUE.name, when, guests, seat, held, theme = 'f
       <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: 26, background: th.bg, WebkitMask: NOTCH, mask: NOTCH }}>
         <div className="abs" style={{ left: 14, top: 14, width: 312, height: 290, borderRadius: 18, overflow: 'hidden', background: `#6b5a4e url(${art ?? th.art}) center / cover` }}>
           {animatedArt && <TicketArtwork src={th.art} tone={theme} />}
-          {showArtText && (th.big ? <>
+          {showArtText && (th.big && !nameTop ? <>
             <span className="abs nowrap" style={{ left: 0, right: 0, top: 26, textAlign: 'center', ...t(11, 700, '#fcfcfb'), letterSpacing: '0.14em' }}>TABLE FOR {guests}</span>
             <span className="abs nowrap" style={{ left: 41, top: 108, ...t(34, 600, '#fcfcfb'), letterSpacing: '-0.03em', lineHeight: '41px' }}>{name}</span>
             <span className="abs nowrap" style={{ left: 90, top: 156, ...t(15, 500, '#fcfcfb') }}>{when}</span>
