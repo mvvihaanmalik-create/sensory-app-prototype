@@ -2,21 +2,20 @@ import { PHOTO } from './remainingPhotos.js';
 import { useRef, useState } from 'react';
 import { Glass, INK, MUTED } from './ui.jsx';
 import { H } from './homeUpdateAssets.js';
+import { Ph } from './phosphor.jsx';
 import './explore.css';
 
 export const POSTS = [
- {id:'foxy',photo:PHOTO.p0404,avatar:H.himgEllipse15,user:'maya.sav',text:'My favorite courtyard reset. Coffee, shade, and room to breathe.',likes:128,height:321},
- {id:'dinner',photo:PHOTO.p0405,avatar:H.himgEllipse16,user:'eli.explores',text:'Dinner with a cozy corner booth.',likes:76,height:241},
+ {id:'foxy',photo:PHOTO.p0404,avatar:H.himgEllipse15,user:'maya.sav',text:'A slow morning at Fern & Fable',likes:128,height:321},
+ {id:'dinner',photo:PHOTO.p0405,avatar:H.himgEllipse16,user:'eli.explores',text:'Low lighting and a tucked-away dinner table.',likes:76,height:241},
  {id:'sunny',photo:PHOTO.p0408,avatar:H.himgEllipse17,user:'jules.jpg',text:'A sunny seat for a slow morning.',likes:94,height:241},
  {id:'clay',photo:PHOTO.p0407,avatar:H.himgEllipse18,user:'nina.makes',text:'An afternoon of clay, color, and a little creative reset.',likes:53,height:240},
 ];
 export function ExploreFeed({onOpen,liked,top=1662}) {
- const H_={foxy:340,dinner:325,sunny:325,clay:324};
- return <section className="abs explore-feed" style={{left:24,top,width:394}}><h2 style={{fontSize:24,fontWeight:600,lineHeight:'28px',color:INK}}>Explore</h2><div style={{display:'flex',gap:16,marginTop:20}}>{[[POSTS[0],POSTS[1]],[POSTS[2],POSTS[3]]].map((col,i)=><div key={i} style={{display:'flex',flexDirection:'column',gap:16}}>{col.map(p=><button key={p.id} onClick={p.id==='foxy'?onOpen:undefined} className="explore-feed-card ef-dark" style={{height:H_[p.id],cursor:p.id==='foxy'?'pointer':'default'}}>
+ return <section className="abs explore-feed" style={{left:24,top,width:396}}><h2 style={{fontSize:24,fontWeight:600,lineHeight:'28px',color:INK}}>Explore</h2><div style={{display:'flex',gap:16,marginTop:20}}>{[[POSTS[0],POSTS[1]],[POSTS[2],POSTS[3]]].map((col,i)=><div key={i} style={{display:'flex',flexDirection:'column',gap:16}}>{col.map(p=><button key={p.id} onClick={p.id==='foxy'?onOpen:undefined} className="explore-feed-card ef-outline" style={{cursor:p.id==='foxy'?'pointer':'default'}}>
   <img src={p.photo} alt="" className="ef-photo"/>
-  <span className="ef-blur" aria-hidden="true"/><span className="ef-shade" aria-hidden="true"/>
-  <span className="ef-copy"><span className="ef-text">{p.text}</span>
-   <span className="ef-meta"><img src={p.avatar} alt="" width="13" height="13"/><span>{p.user}</span><img src={H.himgHeart} alt="" width="13" height="13" className="ef-heart"/><span>{p.likes+(p.id==='foxy'&&liked?1:0)}</span></span></span>
+  <span className="ef-copy"><span className="ef-text" style={p.id==='sunny'?{color:'#15171f'}:undefined}>{p.text}</span>
+   <span className="ef-meta"><img src={p.avatar} alt="" width="13" height="13"/><span>{p.user}</span><Ph n="heart" size={13} fill="#5e5a7e" style={{marginLeft:'auto'}}/><span>{p.likes+(p.id==='foxy'&&liked?1:0)}</span></span></span>
  </button>)}</div>)}</div></section>;
 }
 const Pic=({src,size=22,...props})=><img src={src} alt="" width={size} height={size} {...props}/>;
