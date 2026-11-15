@@ -239,7 +239,7 @@ function ForYouStack({ onOpenVenue }) {
             onPointerUp={isFront ? onUp : undefined} onPointerCancel={isFront ? onUp : undefined}
             whileTap={!isFront ? { scale: 0.78 } : undefined}>
             <div className="abs" style={{ inset: 0, borderRadius: 32, overflow: 'hidden', background: '#f7f5f1',
-              boxShadow: '0 0 0 1px rgba(94,90,126,0.22), 0 12px 32px rgba(27,42,68,0.06)',
+              boxShadow: `0 0 0 1px rgba(94,90,126,0.22), ${isFront ? '0 16px 40px rgba(27,42,68,0.12)' : '0 12px 32px rgba(27,42,68,0.06)'}`, transition: 'box-shadow 0.3s',
               isolation: 'isolate', transform: 'translateZ(0)', WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
               <VenueCard v={VENUES[k]} />
             </div>
