@@ -224,10 +224,10 @@ let COMFORT_SAVED = COMFORT_DEFAULT; // survives leaving and re-opening the Prof
 function AppComfort({ value, onChange }) {
   const set = (k) => (v) => onChange({ ...value, [k]: v });
   const z = { Default: 1, Large: 1.12, Larger: 1.26 }[value.text] || 1;
-  const un = (n) => <div style={{ zoom: 1 / z }}>{n}</div>; // labels grow with Text size; the controls keep their size so rows never overflow
+  const un = (n) => <div style={{ transform: `scale(${1 / z})`, transformOrigin: 'right center' }}>{n}</div>; // labels grow with Text size; the controls keep their size so rows never overflow
   return (
     <div style={{ padding: '206px 24px 60px' }}>
-    <div style={{ display: 'flex', flexDirection: 'column', zoom: z }}>
+    <div style={{ display: 'flex', flexDirection: 'column', transform: `scale(${z})`, transformOrigin: 'top left', width: `${100 / z}%`, paddingBottom: 40 * z }}>
       <FHead>DISPLAY</FHead><div style={{ height: 24 }} />
       <FCard>
         <FRow icon="sun-dim" label="Theme">{un(<FSeg options={['Light', 'Dark', 'System']} value={value.theme} onChange={set('theme')} />)}</FRow>
