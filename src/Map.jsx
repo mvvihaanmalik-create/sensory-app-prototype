@@ -398,7 +398,6 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
         </div>
       </div>
 
-      <motion.p className="abs nowrap" style={{ left: 24, top: 839, fontSize: 11, fontWeight: 500, color: SUB }}>Map: Esri, HERE, Garmin, OpenStreetMap contributors</motion.p>
 
       {/* Sense layers rail + Recenter. Tap the active sense again to turn layers off. */}
       <motion.div className="abs" style={{ left: 364, top: 441, width: 67, opacity: ctrl, pointerEvents: ctrlEvents }}>
