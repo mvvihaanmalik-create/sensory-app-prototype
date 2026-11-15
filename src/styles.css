@@ -32,7 +32,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webki
 .device::before{content:'';position:absolute;inset:3px;border-radius:73px;background:#0b0b0d}
 .device .btn{position:absolute;width:4px;border-radius:2px;background:linear-gradient(90deg,#8f8c87,#c9c6c0)}
 .screen{position:absolute;left:14px;top:14px;width:440px;height:956px;border-radius:62px;overflow:clip;background:#f7f5f1;isolation:isolate}
-.island{position:absolute;left:50%;top:12px;width:86px;height:30px;margin-left:-43px;border-radius:15px;background:#000;z-index:60;pointer-events:none}
+.island{position:absolute;left:50%;top:11px;width:125px;height:37px;margin-left:-62.5px;border-radius:18.5px;background:#000;z-index:60;pointer-events:none}
 
 /* Phone build (vite --mode phone): the screen is the whole page */
 html.phone,html.phone body{background:#f7f5f1;overscroll-behavior:none;-webkit-touch-callout:none;touch-action:manipulation}
