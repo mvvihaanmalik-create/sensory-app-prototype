@@ -262,7 +262,7 @@ function Page({ title, sub, right, onBack, children, top = 151, bg = '#f7f5f1' }
   );
 }
 
-export default function Profile({ startPage, onScroll, modes, activeId, onPickMode, onEditMode, onAddMode, onOpenVenue, onOpenPost, booking, onOverlay = () => {}, onTheme }) {
+export default function Profile({ startPage, onExitToHome, onScroll, modes, activeId, onPickMode, onEditMode, onAddMode, onOpenVenue, onOpenPost, booking, onOverlay = () => {}, onTheme }) {
   const [stack, setStack] = useState(() => (startPage ? [startPage] : []));
   const viewportRef = useRef(null);
   const [collection, setCollection] = useState(COLLECTIONS[0]);
@@ -285,7 +285,8 @@ export default function Profile({ startPage, onScroll, modes, activeId, onPickMo
     onScroll?.(0);
   }, [top]);
   const push = (p) => setStack((s) => [...s, p]);
-  const pop = () => setStack((s) => s.slice(0, -1));
+  const fromHome = useRef(Boolean(startPage)); // opened from the Home bookmark: Back from its first page returns Home
+  const pop = () => { if (fromHome.current && stack.length <= 1) { fromHome.current = false; onExitToHome?.(); return; } setStack((s) => s.slice(0, -1)); };
   useEffect(() => {
     const r = document.documentElement;
     r.dataset.reduceMotion = comfort.motion === 'Reduced' ? 'on' : 'off';
