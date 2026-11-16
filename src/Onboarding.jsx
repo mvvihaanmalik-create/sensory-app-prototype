@@ -5,6 +5,7 @@ import { AnimatePresence, animate, motion, useMotionValue, useTransform } from '
 import { GENTLE, NAVY, MUTED, Icon } from './ui.jsx';
 import { paths } from './svgs.js';
 import { VIcon } from './venueIcons.jsx';
+import { Ph } from './phosphor.jsx';
 import { CircleBtn, G, OtherChip, PrimaryCTA, TAP, t } from './flow.jsx';
 import soundImg from './assets/onboarding/sound.png';
 import lightImg from './assets/onboarding/light.png';
@@ -12,7 +13,6 @@ import catchupImg from './assets/onboarding/catchup.png';
 import cozyImg from './assets/onboarding/cozy.png';
 import boothsImg from './assets/onboarding/booths.png';
 import fitsImg from './assets/onboarding/fits.png';
-import cafesImg from './assets/onboarding/cafes.png';
 import musicImg from './assets/onboarding/music.png';
 import { CONTOURS } from './contourData.js';
 
@@ -60,6 +60,12 @@ export function toMode(p) {
   return any ? { id: 'mine', name: 'My comfort', desc: '', custom: true, prefs } : null;
 }
 
+/* Ambio brand mark, exported from Figma 1640:8967 */
+const MARK_D = 'M53.1934 50.8393C58.4038 43.4958 56.8103 32.3726 46.9094 31.5639C41.5664 31.2243 37.3242 35.4609 36.6929 40.6853C35.5264 48.2171 40.3251 50.2389 41.1745 56.4727C41.4398 58.6952 41.0998 60.9285 40.5081 63.0861C38.3459 70.7429 33.4938 76.6124 28.2635 82.1948C23.172 87.5211 16.6929 92 9.18456 92C-8.79652 92 1.42 41.295 24.2928 13.6683C38.1232 -3.03586 62.5148 -6.90823 73.3748 16.1979C81.8301 35.9286 86.4443 62.2264 79.9119 83.09C78.8887 86.2138 76.8865 89.2713 73.8185 90.6434C70.6331 92.1003 66.9201 91.9923 63.6142 90.9829C55.8359 88.6555 51.8119 80.5156 49.4727 73.0533C46.6091 65.0215 48.355 57.5037 53.1766 50.8655L53.1934 50.8393Z';
+const AmbioMark = ({ w, style }) => (
+  <svg width={w} height={(w * 92) / 83} viewBox="0 0 83 92" fill="none" style={{ display: 'block', ...style }}><path d={MARK_D} fill="#255B4E" /></svg>
+);
+
 /* ---------- Small pieces ---------- */
 const Thermo = ({ size = 24, color = NAVY }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ display: 'block', flex: 'none' }}>
@@ -68,7 +74,15 @@ const Thermo = ({ size = 24, color = NAVY }) => (
   </svg>
 );
 // `one` swaps the crowd glyph for the single-person icon the Figma slider tooltip uses (header and summary keep the group icon).
-const SenseGlyph = ({ k, size = 24, color = NAVY, one }) => (k === 'temp' ? <Thermo size={size} color={color} />
+// `level` (1-4, past Any) picks the glyph for that step: speaker none/low/high, sun dim/horizon/full, one/two/three people.
+const LEVEL_ICON = {
+  sound: ['speaker-none', 'speaker-low', 'speaker-low', 'speaker-high'],
+  light: ['sun-dim', 'sun-horizon', 'sun-horizon', 'sun'],
+  crowd: ['user', 'users', 'users', 'users-three'],
+  temp: ['snowflake', 'snowflake', 'thermometer-simple', 'sun'],
+};
+const SenseGlyph = ({ k, size = 24, color = NAVY, one, level }) => (LEVEL_ICON[k] && level > 0 ? <Ph n={LEVEL_ICON[k][level - 1]} size={size} fill={color} />
+  : k === 'temp' ? <Thermo size={size} color={color} />
   : k === 'seat' ? <VIcon name="chair" size={size} fill={color} />
   : <Icon d={paths[k === 'sound' ? 'speaker' : k === 'light' ? 'sun' : one ? 'user' : 'users']} size={size} fill={color} />);
 
@@ -157,9 +171,9 @@ function Welcome({ onNext, onSkip }) {
     <>
       <ContourRipple />
       <SkipBtn onClick={onSkip} />
-      <motion.div className="abs" style={{ left: 132, top: 218, width: 176, height: 176, borderRadius: 88, background: 'rgba(255,255,255,0.85)', boxShadow: '0 2px 8px rgba(42,38,80,0.06)' }}
+      <motion.div className="gl abs" style={{ left: 147, top: 241, width: 147, height: 147, borderRadius: 74, boxShadow: '0 14px 36px rgba(42,38,80,0.1), inset 0 1px 0 rgba(255,255,255,0.9)' }}
         initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={GENTLE}>
-        <img src={cafesImg} alt="" draggable={false} style={{ position: 'absolute', left: 13, top: 13, width: 150, height: 150, objectFit: 'contain' }} />
+        <AmbioMark w={83} style={{ position: 'absolute', left: 29, top: 25 }} />
       </motion.div>
       {ORBIT.map((o, i) => (
         <motion.div key={i} className="abs" style={{ left: o.left, top: o.top, width: o.s, height: o.s }}
@@ -188,7 +202,7 @@ function Slider({ cfg, value, onChange }) {
   const pos = useMotionValue(stepX(i, n));
   const fill = useTransform(pos, (v) => Math.max(0, v));
   const tipX = useTransform(pos, (v) => v - 11);
-  const thumbX = useTransform(pos, (v) => v - 18);
+  const logoX = useTransform(pos, (v) => v - 9.5);
   const bubbleX = useTransform(pos, (v) => v - 52);
   const ref = useRef(null);
   const drag = useRef(false);
@@ -215,14 +229,13 @@ function Slider({ cfg, value, onChange }) {
       {cfg.steps.map((_, k) => (
         <div key={k} className="abs" style={{ left: x0(k), top: 19, width: 6, height: 6, borderRadius: 3, background: !any && k <= i ? '#fff' : 'rgba(42,38,80,0.22)' }} />
       ))}
-      <motion.div className="abs" initial={false} animate={{ opacity: 1, scale: 1, borderColor: tone }} transition={{ duration: 0.2 }}
-        style={{ left: 0, top: 4, width: 36, height: 36, x: thumbX, borderRadius: 18, background: '#fff', border: '3px solid', boxShadow: '0 4px 12px rgba(42,38,80,0.22)', boxSizing: 'border-box' }} />
+      <motion.div className="abs" aria-hidden style={{ left: 0, top: 11, x: logoX, pointerEvents: 'none', filter: 'drop-shadow(0 0 1.5px #fff)' }}><AmbioMark w={19} /></motion.div>
       <motion.div className="abs" initial={false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}
         style={{ left: 0, top: -98, pointerEvents: 'none', x: bubbleX, width: 104 }}>
         <motion.div initial={false} animate={{ borderColor: tone }} transition={{ duration: 0.2 }} style={{ position: 'relative', minHeight: 92, width: 104, borderRadius: 20, background: '#fff', border: '2.5px solid', boxSizing: 'border-box',
           WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)', boxShadow: '0 10px 28px rgba(42,38,80,0.16)', padding: '14px 8px 12px',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-          <SenseGlyph k={cfg.icon} size={32} one />
+          <SenseGlyph k={cfg.icon} size={32} one level={i} />
           <span className="nowrap" style={t(14, 600, NAVY, { lineHeight: 1.2 })}>{cfg.steps[i]}</span>
         </motion.div>
       </motion.div>
@@ -244,7 +257,7 @@ function SliderScreen({ k, picks, setPick, onNext, onBack, onSkip }) {
       <Title top={cfg.titleTop}>{cfg.title}</Title>
       <div className="gl abs" style={{ left: 41, top: c.top, width: 358, height: c.h, borderRadius: 28 }}>
         <div className="abs" style={{ left: 20, top: c.hy - 1.5, width: 315, height: 44, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <SenseGlyph k={cfg.icon} />
+          <SenseGlyph k={cfg.icon} level={v.i} />
           <span className="nowrap" style={{ flex: '1 0 0', ...t(17, 600, NAVY, { lineHeight: 'normal' }) }}>{cfg.name}</span>
         </div>
         <div className="abs" style={{ left: 20, top: c.sl - 1.5, width: TRACK, height: 44 }}>
