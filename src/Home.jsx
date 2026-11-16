@@ -246,7 +246,7 @@ function ForYouStack({ onOpenVenue }) {
             onPointerUp={isFront ? onUp : undefined} onPointerCancel={isFront ? onUp : undefined}
             whileTap={!isFront ? { scale: 0.78 } : undefined}>
             <div className="abs" style={{ inset: 0, borderRadius: 32, overflow: 'hidden', background: dk ? '#171a26' : '#f7f5f1',
-              boxShadow: `0 0 0 1px ${dk ? 'rgba(255,255,255,0.22)' : 'rgba(94,90,126,0.22)'}, ${isFront ? `0 16px 40px rgba(${dk ? '0,0,0,0.45' : '27,42,68,0.12'})` : `0 12px 32px rgba(${dk ? '0,0,0,0.3' : '27,42,68,0.06'})`}`, transition: 'box-shadow 0.3s',
+              boxShadow: `0 0 0 1px ${dk ? 'rgba(255,255,255,0.22)' : 'rgba(94,90,126,0.22)'}, ${isFront ? `0 16px 40px rgba(${dk ? '0,0,0,0.45' : '27,42,68,0.12'})` : `0 14px 36px rgba(${dk ? '0,0,0,0.38' : '27,42,68,0.10'})`}`, transition: 'box-shadow 0.3s',
               isolation: 'isolate', transform: 'translateZ(0)', WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
               <VenueCard v={VENUES[k]} />
             </div>
