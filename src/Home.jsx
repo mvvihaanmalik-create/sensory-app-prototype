@@ -267,6 +267,22 @@ function ForYouStack({ onOpenVenue }) {
   );
 }
 
+// Sound level badge for ranking rows: speaker icon on a tier-coloured disc (same green / amber as the map pins) with a soft pulse.
+const SOUND_TIER = ['#3FA06B', '#F29A3A', '#D84B43'];
+function SoundBadge({ level }) {
+  const c = SOUND_TIER[Math.min(Math.max(level, 1), 3) - 1];
+  return (
+    <span aria-label={`Sound level ${level}`} style={{ position: 'relative', width: 44, height: 44, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <motion.span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: 22, background: c }}
+        animate={{ scale: [1, 1.45], opacity: [0.28, 0] }} transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }} />
+      <span style={{ position: 'absolute', inset: 0, borderRadius: 22, background: `${c}26`, boxShadow: `inset 0 0 0 1.5px ${c}` }} />
+      <motion.span style={{ position: 'relative', display: 'flex' }} animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}>
+        <Ph n={level === 1 ? 'speaker-low' : 'speaker-high'} size={22} fill={c} />
+      </motion.span>
+    </span>
+  );
+}
+
 function RankingRow({ top, n, name, meta, level, onClick, photo, wordmark }) {
   const dk = useContext(DK);
   return (
@@ -278,9 +294,7 @@ function RankingRow({ top, n, name, meta, level, onClick, photo, wordmark }) {
         <span className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: dk ? '#fff' : INK }}>{name}</span>
         <span className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: dk ? 'rgba(255,255,255,0.75)' : INK2 }}>{meta}</span>
       </span>
-      <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <RippleIcon k={level === 1 ? 'ripple1' : 'ripple2'} size={36} color={dk ? '#fff' : undefined} />
-      </span>
+      <SoundBadge level={level} />
     </motion.button>
   );
 }
