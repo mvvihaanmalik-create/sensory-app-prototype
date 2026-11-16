@@ -305,11 +305,12 @@ function Seating({ picks, setSeat, onNext, onBack, onSkip }) {
 }
 
 /* ---------- Start exploring ---------- */
-function Done({ picks, onAdd, onFinish }) {
+function Done({ picks, onAdd, onFinish, onBack }) {
   const rows = [['sound', 'Sound', labelOf('sound', picks)], ['light', 'Light', labelOf('light', picks)], ['crowd', 'Crowd', labelOf('crowd', picks)],
     ['temp', 'Temperature', labelOf('temp', picks)], ['seat', 'Seating', seatLine(picks.seat)]];
   return (
     <>
+      <CircleBtn label="Back" onClick={onBack} style={{ position: 'absolute', left: 24, top: 56 }}><VIcon name="caretLeft" fill={NAVY} /></CircleBtn>
       <motion.div className="abs" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={GENTLE}
         style={{ left: 130, top: 114, width: 180, height: 180, borderRadius: 90, background: 'rgba(255,255,255,0.55)', border: '1.5px solid #fff', boxSizing: 'border-box' }}>
         <img src={fitsImg} alt="" draggable={false} style={{ position: 'absolute', left: 13.5, top: 13.5, width: 150, height: 150, objectFit: 'contain' }} />
@@ -356,7 +357,7 @@ export default function Onboarding({ start = 0, onSkip, onFinish, onAddAnother }
           {id === 'welcome' && <Welcome onNext={next} onSkip={onSkip} />}
           {SLIDERS[id] && <SliderScreen k={id} picks={picks} setPick={setPick} onNext={shell.next} onBack={shell.back} onSkip={onSkip} />}
           {id === 'seating' && <Seating picks={picks} setSeat={(s) => setPick('seat', s)} onNext={next} onBack={back} onSkip={onSkip} />}
-          {id === 'done' && <Done picks={picks} onAdd={() => onAddAnother(toMode(picks))} onFinish={() => onFinish(toMode(picks))} />}
+          {id === 'done' && <Done picks={picks} onBack={back} onAdd={() => onAddAnother(toMode(picks))} onFinish={() => onFinish(toMode(picks))} />}
         </motion.div>
       </AnimatePresence>
     </div>
