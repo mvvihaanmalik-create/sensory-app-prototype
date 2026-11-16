@@ -297,7 +297,7 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
     <motion.div className="abs" style={{ inset: 0, y: pull, overflow: 'hidden', background: dark ? '#0e1119' : '#f7f5f1', borderTopLeftRadius: r, borderTopRightRadius: r, boxShadow: sh, zIndex: 1, userSelect: 'none', WebkitUserSelect: 'none' }} onDragStart={(e) => e.preventDefault()}>
     <div ref={scrollRef} className="scroll" style={{ background: dark ? '#0e1119' : '#f7f5f1' }} onScroll={(e) => onScroll?.(e.currentTarget.scrollTop)}>
       <DK.Provider value={dark}>
-      <div className={dark ? 'home-dk' : undefined} style={{ position: 'relative', width: 440, height: 2681 + off }}>
+      <div className={dark ? 'home-dk' : undefined} style={{ position: 'relative', width: 440, height: 2540 + off }}>
         <Hero reduce={reduceMotion} pull={pull} scene={sc} />
         <p className="abs nowrap" style={{ left: 24, top: 59, fontSize: 15, fontWeight: 500, color: sc.dark ? 'rgba(255,255,255,0.8)' : INK2 }}>Savannah, GA</p>
         <motion.button className="abs nowrap" onClick={onOpenModes} whileTap={{ scale: 0.95 }} transition={GENTLE}
