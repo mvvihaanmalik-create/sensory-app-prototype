@@ -118,7 +118,7 @@ const ROWS = { venue: VenueRow, event: EventRow, more: MoreRow, pick: PickRow, r
 
 function FilterChips({ sorts, openSense, onOpen }) {
   return (
-    <div className="abs hide-sb" style={{ left: 0, top: 119, width: 440, height: 80, overflowX: 'auto', overflowY: 'hidden', padding: '6px 24px 30px', display: 'flex', gap: 8, zIndex: 6, pointerEvents: 'none', alignItems: 'flex-start' }}>
+    <div className="abs hide-sb" style={{ left: 0, top: 119, width: 440, height: 80, overflowX: 'auto', overflowY: 'hidden', padding: '6px 24px 30px', display: 'flex', gap: 8, zIndex: 6, pointerEvents: 'auto', touchAction: 'pan-x', alignItems: 'flex-start' }}>
       {SORT_ORDER.map((sense) => {
         const cur = (sorts.find((s) => s[0] === sense) || [])[1];
         return (

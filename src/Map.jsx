@@ -496,8 +496,8 @@ export default function MapScreen({ command, onOpenVenue, onOpenSearch, savedIds
       </motion.button>
 
       {/* Category chips */}
-      <div className="abs hscroll" style={{ left: 0, top: 118, width: 440, height: 140, pointerEvents: 'none' }}>
-        <div style={{ display: 'flex', gap: 8, padding: '28px 24px 48px', width: 'max-content' }}>
+      <div className="abs hscroll" style={{ left: 0, top: 118, width: 440, height: 104, pointerEvents: 'auto', touchAction: 'pan-x' }}>
+        <div style={{ display: 'flex', gap: 8, padding: '28px 24px 32px', width: 'max-content' }}>
           {CHIPS.map((c) => {
             const on = chip === c;
             return (
