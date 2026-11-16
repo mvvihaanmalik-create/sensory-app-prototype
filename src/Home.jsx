@@ -84,7 +84,7 @@ function Hero({ reduce, pull, scene }) {
   };
   const { off } = scene;
   return (
-    <motion.div className="abs" style={{ left: 0, top: 0, width: 440, height: 314, overflow: 'hidden', borderRadius: '0 0 32px 32px', boxShadow: '0 8px 12px rgba(13,15,26,0.12)', opacity: fade }}>
+    <motion.div className="abs" style={{ left: 0, top: 0, width: 440, height: 314, overflow: 'hidden', borderRadius: '0 0 32px 32px', opacity: fade }}>
       <AnimatePresence initial={false}>
       <motion.div key={scene.id} className="abs" style={{ inset: 0 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 1, transition: { duration: 0.35 } }} transition={{ duration: 0.3 }}>
       {/* Scene art + its Motion layer share one 440x550 frame at y -off, pulsing about its centre */}
