@@ -11,6 +11,7 @@ import { H } from './homeUpdateAssets.js';
 import { RippleIcon } from './venueIcons.jsx';
 import { VP } from './venuePhotos.js';
 import { PHOTO } from './remainingPhotos.js';
+import { CAROUSEL } from './venueFinalPhotos.js';
 import { photoBackground } from './venueFinalPhotos.js';
 import { ExploreFeed } from './Explore.jsx';
 import cafeCopper from './assets/home-update/fy-copper.jpg';
@@ -159,7 +160,7 @@ function SectionHeader({ top, title, onSeeAll }) {
 
 /* ---------- For you stack (component 685:328, variants Front=A/B/C) ---------- */
 const VENUES = {
-  A: { name: 'Fern & Fable', meta: 'Café · 0.5 mi', level: 'Level 2', photo: PHOTO.p0604, crop: [.6787142158,.9074382186,.2869078517,.0925617218] },
+  A: { name: 'Fern & Fable', meta: 'Café · 0.5 mi', level: 'Level 2', photo: CAROUSEL[0] }, // same photo as the venue page hero
   B: { name: 'Gallery Espresso', meta: 'Café · 1.1 mi', level: 'Level 1', photo: PHOTO.p0602 },
   C: { name: 'The Sentient', meta: 'Café · 0.8 mi', level: 'Level 2' , photo: PHOTO.p0603 },
   D: { name: 'Juniper Coffee', meta: 'Café · 1.1 mi', level: 'Level 3', photo: PHOTO.p0608 },
