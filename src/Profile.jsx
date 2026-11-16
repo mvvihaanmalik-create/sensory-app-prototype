@@ -262,8 +262,8 @@ function Page({ title, sub, right, onBack, children, top = 151, bg = '#f7f5f1' }
   );
 }
 
-export default function Profile({ onScroll, modes, activeId, onPickMode, onEditMode, onAddMode, onOpenVenue, onOpenPost, booking, onOverlay = () => {}, onTheme }) {
-  const [stack, setStack] = useState([]);
+export default function Profile({ startPage, onScroll, modes, activeId, onPickMode, onEditMode, onAddMode, onOpenVenue, onOpenPost, booking, onOverlay = () => {}, onTheme }) {
+  const [stack, setStack] = useState(() => (startPage ? [startPage] : []));
   const viewportRef = useRef(null);
   const [collection, setCollection] = useState(COLLECTIONS[0]);
   const [collections, setCollections] = useState(() => {

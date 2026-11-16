@@ -1,3 +1,4 @@
+import { Ph } from './phosphor.jsx';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useTransform } from 'motion/react';
 import { uri } from './svgs.js';
@@ -280,7 +281,7 @@ function RankingRow({ top, n, name, meta, level, onClick, photo, wordmark }) {
   );
 }
 
-export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, scrollTopKey, reduceMotion, pull, onDiscover, pullOn = true, onOpenExplore, exploreLiked, scene = 'morning', dark = false, onStepScene }) {
+export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, scrollTopKey, reduceMotion, pull, onDiscover, pullOn = true, onOpenSaved, onOpenExplore, exploreLiked, scene = 'morning', dark = false, onStepScene }) {
   const sc = SCENES.find((x) => x.id === scene) || SCENES[0];
   const sub = sc.sub, left = sub ? 24 : 23;
   const promo = sc.promo || { tag: 'Quiet hour', title: 'The Sentient', detail: '2 – 4 pm · 10% off pastries' };
@@ -310,9 +311,9 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
           <img src={uri('searchHome')} alt="" style={{ width: 20, height: 20, display: 'block' }} />
           <span style={{ fontSize: 16, color: sc.ph }}>Search places</span>
         </button>
-        <motion.button className="abs" whileTap={{ scale: 0.92 }} transition={GENTLE}
+        <motion.button className="abs" aria-label="Saved" onClick={onOpenSaved} whileTap={{ scale: 0.92 }} transition={GENTLE}
           style={{ left: sub ? 368 : 367, top: sub ? 177 : 147, width: 48, height: 48, borderRadius: 24, ...lightGlass }}>
-          <img src={uri('filterHome')} alt="" className="abs" style={{ left: 11, top: 11, width: 24, height: 24 }} />
+          <span className="abs" style={{ left: 12, top: 12, display: 'block' }}><Ph n="bookmark-simple" size={24} fill={sc.dark ? '#fff' : INK} /></span>
         </motion.button>
 
         <Categories onOpen={onOpenPage} />

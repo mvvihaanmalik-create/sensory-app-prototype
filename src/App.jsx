@@ -180,7 +180,9 @@ export default function App() {
   const closeDiscover = () => { setDiscoverOpen(false); animate(pull, 0, CLOSE_SPRING); };
   const showPassed = () => setDecided((m) => Object.fromEntries(Object.entries(m).filter(([, v]) => v === 'save')));
 
-  const nav = (to) => {
+  const [profileStart, setProfileStart] = useState(null);
+  const nav = (to, fromSaved) => {
+    if (!fromSaved) setProfileStart(null);
     setNavigationRequest(n => n + 1);
     if (screen === 'search' && to !== 'search') { setSearchRoute('search'); try { history.replaceState(null, '', '#' + (to === 'map' ? 'map-half' : to)); } catch (_) {} }
     if (to === 'home') setHomeTop((n) => n + 1);
@@ -324,11 +326,11 @@ export default function App() {
                 <div className="abs" style={{ inset: 0, display: screen === 'home' ? 'block' : 'none' }} aria-hidden={screen !== 'home'}>
                     {<DiscoverLayer pull={pull} open={discoverOpen} onClose={closeDiscover} mode={activeM} decided={decided}
                       onDecide={(id, d) => setDecided((m) => ({ ...m, [id]: d }))} onShowPassed={showPassed} onOpenVenue={openVenue} blocked={venueOpen || !!sense || !!flow} />}
-                    {<Home pull={pull} onOpenExplore={openExplore} exploreLiked={exploreLiked} pullOn={screen === 'home' && !discoverOpen && !exploreOpen} onDiscover={() => setDiscoverOpen(true)} onOpenMap={() => nav('map')} onOpenSearch={openSearchTyping} onOpenVenue={openVenue} onOpenPage={setPage} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} scrollTopKey={homeTop} reduceMotion={reduceMotion} scene={scene} dark={darkTheme} onStepScene={stepScene} />}
+                    {<Home pull={pull} onOpenExplore={openExplore} exploreLiked={exploreLiked} pullOn={screen === 'home' && !discoverOpen && !exploreOpen} onDiscover={() => setDiscoverOpen(true)} onOpenMap={() => nav('map')} onOpenSearch={openSearchTyping} onOpenVenue={openVenue} onOpenPage={setPage} onOpenSaved={() => { nav('profile', true); setProfileStart('collections'); }} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} scrollTopKey={homeTop} reduceMotion={reduceMotion} scene={scene} dark={darkTheme} onStepScene={stepScene} />}
                 </div>
                 <AnimatePresence>{!['home', 'search'].includes(screen) && <ScreenLayer key={screen} screen={screen} dk={darkTheme}>
                   {screen === 'map' && <MapScreen command={sheetCmd} onOpenVenue={openVenue} onOpenSearch={openSearchTyping} savedIds={Object.keys(decided).filter(id => decided[id] === 'save')} onToggleSaved={toggleSaved} onOverlay={setMapOverlay} />}
-                  {screen === 'profile' && <Profile onTheme={setDarkTheme} onScroll={setHomeScroll} savedCount={savedCount} savedPlaces={savedPlaces} modes={modes} activeId={activeMode} onPickMode={setActiveMode} onEditMode={id => editMode(id, 'profile')} onAddMode={() => editMode('new', 'profile')} onOpenVenue={openVenue} onOpenPost={openExplore} booking={booking || toBooking(SAMPLE_DRAFT)} onOverlay={setProfileOverlay} />}
+                  {screen === 'profile' && <Profile startPage={profileStart} onTheme={setDarkTheme} onScroll={setHomeScroll} savedCount={savedCount} savedPlaces={savedPlaces} modes={modes} activeId={activeMode} onPickMode={setActiveMode} onEditMode={id => editMode(id, 'profile')} onAddMode={() => editMode('new', 'profile')} onOpenVenue={openVenue} onOpenPost={openExplore} booking={booking || toBooking(SAMPLE_DRAFT)} onOverlay={setProfileOverlay} />}
                 </ScreenLayer>}</AnimatePresence>
                 <motion.div className={darkTheme ? 'abs dk-screen' : 'abs'} style={{ inset: 0, display: screen === 'search' ? 'block' : 'none' }} aria-hidden={screen !== 'search'} initial={false} animate={{ opacity: screen === 'search' ? 1 : 0 }} transition={GENTLE}>
                   <Search route={searchRoute} active={screen === 'search' && !venueOpen} shown={screen === 'search'} onNavigate={navigateSearch} onBack={backSearch} onOpenVenue={openSearchVenue} hasSaved={decided.foxy === 'save'} activeMode={activeM} booking={booking} focusRef={searchFocus} />
