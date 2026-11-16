@@ -21,7 +21,7 @@
 .mode-slider-fill{background:#5e5a7e;width:0}
 .mode-slider-stop{position:absolute;top:53px;width:6px;height:6px;border-radius:3px;background:rgba(42,38,80,.2);pointer-events:none}
 .mode-slider-thumb{position:absolute;left:16.5px;top:48.5px;width:15px;height:15px;border-radius:8px;background:#5e5a7e;pointer-events:none}
-.mode-slider-input{position:absolute;left:8px;top:40px;width:376px;height:32px;margin:0;padding:0;opacity:0;cursor:pointer;touch-action:pan-y}
+.mode-slider-input{position:absolute;left:8px;top:24px;width:376px;height:56px;margin:0;padding:0;opacity:0;cursor:pointer;touch-action:pan-y}
 .mode-slider:focus-within{outline:2px solid rgba(94,90,126,.35);outline-offset:2px}
 .mode-slider-label{position:absolute;top:77px;height:28px;font-size:12px;line-height:14px;color:rgba(42,38,80,.76);white-space:nowrap;transform:translateX(-50%);padding:0 6px}
 .mode-slider-label[data-on=true]{color:#5e5a7e;font-weight:600}
