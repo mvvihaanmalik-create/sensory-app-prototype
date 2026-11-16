@@ -77,7 +77,7 @@ const Thermo = ({ size = 24, color = NAVY }) => (
 // `level` (1-4, past Any) picks the glyph for that step: speaker none/low/high, sun dim/horizon/full, one/two/three people.
 const LEVEL_ICON = {
   sound: ['speaker-none', 'speaker-low', 'speaker-low', 'speaker-high'],
-  light: ['sun-dim', 'sun-horizon', 'sun-horizon', 'sun'],
+  light: ['sun-horizon', 'sun-horizon', 'sun-dim', 'sun'],
   crowd: ['user', 'users', 'users', 'users-three'],
   temp: ['snowflake', 'snowflake', 'thermometer-simple', 'sun'],
 };
@@ -206,6 +206,8 @@ function Slider({ cfg, value, onChange }) {
   const bubbleX = useTransform(pos, (v) => v - 52);
   const ref = useRef(null);
   const drag = useRef(false);
+  const [sliding, setSliding] = useState(false);
+  const showTip = i > 0 || sliding; // the tooltip stays hidden at Any until the person starts sliding
   useEffect(() => { if (!drag.current) animate(pos, stepX(i, n), { type: 'spring', stiffness: 420, damping: 34 }); }, [i]); // eslint-disable-line
 
   const at = (e) => {
@@ -213,8 +215,8 @@ function Slider({ cfg, value, onChange }) {
     return Math.max(EDGE, Math.min(TRACK - EDGE, ((e.clientX - r.left) / r.width) * TRACK));
   };
   const move = (e) => { const x = at(e); pos.set(x); const k = nearest(x, n); if (k !== i || any) onChange({ i: k, any: false }); };
-  const down = (e) => { drag.current = true; e.currentTarget.setPointerCapture(e.pointerId); move(e); };
-  const up = () => { if (!drag.current) return; drag.current = false; animate(pos, stepX(i, n), { type: 'spring', stiffness: 420, damping: 34 }); };
+  const down = (e) => { drag.current = true; setSliding(true); e.currentTarget.setPointerCapture(e.pointerId); move(e); };
+  const up = () => { if (!drag.current) return; drag.current = false; setSliding(false); animate(pos, stepX(i, n), { type: 'spring', stiffness: 420, damping: 34 }); };
   const key = (e) => {
     if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); onChange({ i: Math.min(n - 1, i + 1), any: false }); }
     if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); onChange({ i: Math.max(0, i - 1), any: false }); }
@@ -230,7 +232,7 @@ function Slider({ cfg, value, onChange }) {
         <div key={k} className="abs" style={{ left: x0(k), top: 19, width: 6, height: 6, borderRadius: 3, background: !any && k <= i ? '#fff' : 'rgba(42,38,80,0.22)' }} />
       ))}
       <motion.div className="abs" aria-hidden style={{ left: 0, top: 11, x: logoX, pointerEvents: 'none', filter: 'drop-shadow(0 0 1.5px #fff)' }}><AmbioMark w={19} /></motion.div>
-      <motion.div className="abs" initial={false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}
+      <motion.div className="abs" initial={false} animate={{ opacity: showTip ? 1 : 0, y: showTip ? 0 : 8 }} transition={{ duration: 0.2 }}
         style={{ left: 0, top: -98, pointerEvents: 'none', x: bubbleX, width: 104 }}>
         <motion.div initial={false} animate={{ borderColor: tone }} transition={{ duration: 0.2 }} style={{ position: 'relative', minHeight: 92, width: 104, borderRadius: 20, background: '#fff', border: '2.5px solid', boxSizing: 'border-box',
           WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)', boxShadow: '0 10px 28px rgba(42,38,80,0.16)', padding: '14px 8px 12px',
@@ -239,7 +241,7 @@ function Slider({ cfg, value, onChange }) {
           <span className="nowrap" style={t(14, 600, NAVY, { lineHeight: 1.2 })}>{cfg.steps[i]}</span>
         </motion.div>
       </motion.div>
-      <motion.svg className="abs" width="22" height="12" viewBox="0 0 22 12" initial={false} style={{ left: 0, top: -8.5, x: tipX, pointerEvents: 'none', overflow: 'visible' }}>
+      <motion.svg className="abs" width="22" height="12" viewBox="0 0 22 12" initial={false} animate={{ opacity: showTip ? 1 : 0 }} transition={{ duration: 0.2 }} style={{ left: 0, top: -8.5, x: tipX, pointerEvents: 'none', overflow: 'visible' }}>
         <path d="M1.2 -0.4H20.8V2.6L13.1 9.9a2.8 2.8 0 0 1-4.2 0L1.2 2.6Z" fill="#fff" />
         <motion.path d="M0.6 1.9L8.9 9.9a2.8 2.8 0 0 0 4.2 0L21.4 1.9" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" initial={false} animate={{ stroke: tone }} transition={{ duration: 0.2 }} />
       </motion.svg>
