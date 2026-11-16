@@ -302,7 +302,7 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
     <motion.div className="abs" style={{ inset: 0, y: pull, overflow: 'hidden', background: dark ? '#0e1119' : '#f7f5f1', borderTopLeftRadius: r, borderTopRightRadius: r, boxShadow: sh, zIndex: 1, userSelect: 'none', WebkitUserSelect: 'none' }} onDragStart={(e) => e.preventDefault()}>
     <div ref={scrollRef} className="scroll" style={{ background: dark ? '#0e1119' : '#f7f5f1' }} onScroll={(e) => onScroll?.(e.currentTarget.scrollTop)}>
       <DK.Provider value={dark}>
-      <div className={dark ? 'home-dk' : undefined} style={{ position: 'relative', width: 440, height: 2540 + off }}>
+      <div className={dark ? 'home-dk' : undefined} style={{ position: 'relative', width: 440, height: 2500 + off }}>
         <Hero reduce={reduceMotion} pull={pull} scene={sc} />
         <p className="abs nowrap" style={{ left: 24, top: 59, fontSize: 15, fontWeight: 500, color: sc.dark ? 'rgba(255,255,255,0.8)' : INK2 }}>Savannah, GA</p>
         <motion.button className="abs nowrap" onClick={onOpenModes} whileTap={{ scale: 0.95 }} transition={GENTLE}
@@ -324,6 +324,8 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
         <SectionHeader top={421.17} title="For you" />
         <ForYouStack onOpenVenue={onOpenVenue} />
 
+        {/* everything below For you sits 40px higher to tighten the gap above Popular */}
+        <div className="abs" style={{ left: 0, top: -40, width: 440, height: 0 }}>
         <SectionHeader top={964} title="Popular around you" onSeeAll={() => onOpenPage?.('popular')} />
         <RankingRow top={1016} n={1} photo={PHOTO.p0605} name="Gallery Espresso" meta="Café · 1.1 mi" level={1} />
         <RankingRow top={1124} n={2} wordmark name="Fern & Fable" meta="Café · 0.5 mi" level={2} onClick={onOpenVenue} />
@@ -344,6 +346,7 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
             style={{ width: 156, height: 47, borderRadius: 999, border: dark ? '1.5px solid rgba(255,255,255,0.7)' : '1.5px solid rgba(20,24,31,0.08)', fontSize: 13, fontWeight: 700, color: dark ? '#fff' : INK, whiteSpace: 'pre' }}>
             {'Open map  →'}
           </motion.button>
+        </div>
         </div>
       </div>
       </DK.Provider>
