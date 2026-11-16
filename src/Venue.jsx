@@ -145,7 +145,7 @@ function Reviews({ onWrite, mine }) {
   );
 }
 
-const PHOTO_CHIPS = ['All', 'Latest', 'Food & drink', 'Vibe', 'Menu', 'By owner'];
+const PHOTO_CHIPS = ['All', 'Latest', 'Food & drink', 'Menu', 'By owner'];
 const COLS = [[250.6667, 333.8044, 334.3065, 281.8282], [250.6667, 250.7561, 183.4084, 250.6667]];
 function Photos({ onPhoto }) {
   const [c, setC] = useState('All');
