@@ -245,8 +245,11 @@ function ForYouStack({ onOpenVenue }) {
             onPointerDown={isFront ? onDown : undefined} onPointerMove={isFront ? onMove : undefined}
             onPointerUp={isFront ? onUp : undefined} onPointerCancel={isFront ? onUp : undefined}
             whileTap={!isFront ? { scale: 0.78 } : undefined}>
+            {/* shadow lives on its own layer: the card below is masked, which would clip a shadow set on it */}
+            <div className="abs" aria-hidden style={{ inset: 0, borderRadius: 32, pointerEvents: 'none',
+              boxShadow: isFront ? `0 18px 44px rgba(${dk ? '0,0,0,0.55' : '27,42,68,0.2'})` : `0 12px 32px rgba(${dk ? '0,0,0,0.3' : '27,42,68,0.06'})`, transition: 'box-shadow 0.3s' }} />
             <div className="abs" style={{ inset: 0, borderRadius: 32, overflow: 'hidden', background: dk ? '#171a26' : '#f7f5f1',
-              boxShadow: `0 0 0 1px ${dk ? 'rgba(255,255,255,0.22)' : 'rgba(94,90,126,0.22)'}, ${isFront ? `0 18px 44px rgba(${dk ? '0,0,0,0.55' : '27,42,68,0.2'})` : `0 12px 32px rgba(${dk ? '0,0,0,0.3' : '27,42,68,0.06'})`}`, transition: 'box-shadow 0.3s',
+              boxShadow: `0 0 0 1px ${dk ? 'rgba(255,255,255,0.22)' : 'rgba(94,90,126,0.22)'}`,
               isolation: 'isolate', transform: 'translateZ(0)', WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
               <VenueCard v={VENUES[k]} />
             </div>
