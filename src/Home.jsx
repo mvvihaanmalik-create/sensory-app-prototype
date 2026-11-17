@@ -288,14 +288,15 @@ function ForYouStack({ onOpenVenue }) {
 // Sound level badge for ranking rows: speaker icon on a tier-coloured disc (same green / amber as the map pins) with a soft pulse.
 const SOUND_TIER = ['#3FA06B', '#F29A3A', '#D84B43'];
 function SoundBadge({ level }) {
+  const dk = useContext(DK);
   const c = SOUND_TIER[Math.min(Math.max(level, 1), 3) - 1];
   return (
     <span aria-label={`Sound level ${level}`} style={{ position: 'relative', width: 44, height: 44, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <motion.span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: 22, background: c }}
-        animate={{ scale: [1, 1.45], opacity: [0.28, 0] }} transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }} />
-      <span style={{ position: 'absolute', inset: 0, borderRadius: 22, background: `${c}26`, boxShadow: `inset 0 0 0 1.5px ${c}` }} />
+      <motion.span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: 22, boxShadow: `0 0 0 1.5px ${c}` }}
+        animate={{ scale: [1, 1.45], opacity: [0.5, 0] }} transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }} />
+      <span style={{ position: 'absolute', inset: 0, borderRadius: 22, background: dk ? '#171a26' : '#fff', boxShadow: `inset 0 0 0 2px ${c}` }} />
       <motion.span style={{ position: 'relative', display: 'flex' }} animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}>
-        <Ph n={level === 1 ? 'speaker-low' : 'speaker-high'} size={22} fill={c} />
+        <Ph n={level === 1 ? 'speaker-low' : 'speaker-high'} size={22} fill={dk ? '#fff' : '#1b2a44'} />
       </motion.span>
     </span>
   );
