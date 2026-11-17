@@ -128,11 +128,29 @@ function useHeroSwipe(el, onStep) {
       if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) cb.current?.(dx < 0 ? 1 : -1);
     };
     const tc = () => { g = null; };
+    // mouse drag (laptop): same gesture, and swallow the click that follows a swipe
+    let m = null, swiped = false;
+    const md = (e) => {
+      if (e.button !== 0) return;
+      const r = node.getBoundingClientRect();
+      m = (e.clientY - r.top) / sc.current + node.scrollTop < 314 ? { x: e.clientX, y: e.clientY } : null;
+      swiped = false;
+    };
+    const mu = (e) => {
+      if (!m) return;
+      const dx = (e.clientX - m.x) / sc.current, dy = (e.clientY - m.y) / sc.current;
+      m = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) { swiped = true; cb.current?.(dx < 0 ? 1 : -1); }
+    };
+    const ck = (e) => { if (swiped) { swiped = false; e.stopPropagation(); e.preventDefault(); } };
+    node.addEventListener('mousedown', md);
+    window.addEventListener('mouseup', mu);
+    node.addEventListener('click', ck, true);
     node.addEventListener('touchstart', ts, { passive: true });
     node.addEventListener('touchmove', tm, { passive: true });
     node.addEventListener('touchend', te, { passive: true });
     node.addEventListener('touchcancel', tc, { passive: true });
-    return () => { node.removeEventListener('touchstart', ts); node.removeEventListener('touchmove', tm); node.removeEventListener('touchend', te); node.removeEventListener('touchcancel', tc); };
+    return () => { node.removeEventListener('mousedown', md); window.removeEventListener('mouseup', mu); node.removeEventListener('click', ck, true); node.removeEventListener('touchstart', ts); node.removeEventListener('touchmove', tm); node.removeEventListener('touchend', te); node.removeEventListener('touchcancel', tc); };
   }, [el]);
 }
 
