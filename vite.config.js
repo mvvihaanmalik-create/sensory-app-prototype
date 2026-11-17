@@ -9,9 +9,9 @@ const phoneHtml = () => ({
     .replace('<meta name="viewport" content="width=device-width, initial-scale=1" />',
       '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />\n'
       + '<meta name="apple-mobile-web-app-capable" content="yes" />\n<meta name="mobile-web-app-capable" content="yes" />\n'
-      + '<meta name="apple-mobile-web-app-title" content="Sensory app" />\n<meta name="apple-mobile-web-app-status-bar-style" content="default" />\n'
+      + '<meta name="apple-mobile-web-app-status-bar-style" content="default" />\n'
       + '<meta name="theme-color" content="#f7f5f1" />')
-    .replace('<title>Sensory app · coded prototype</title>', '<title>Sensory app · phone</title>'),
+    .replace('<title>Sensory app · coded prototype</title>', '<title>Ambio</title>'),
 });
 
 export default defineConfig(({ mode }) => {
