@@ -8,7 +8,6 @@ import { GENTLE, INK, INK2, useScale } from './ui.jsx';
 import { SCENES } from './scenes.js';
 import { usePullDown } from './Discover.jsx';
 import { H } from './homeUpdateAssets.js';
-import { RippleIcon } from './venueIcons.jsx';
 import { VP } from './venuePhotos.js';
 import { PHOTO } from './remainingPhotos.js';
 import { CAROUSEL } from './venueFinalPhotos.js';
@@ -178,11 +177,11 @@ function SectionHeader({ top, title, onSeeAll }) {
 
 /* ---------- For you stack (component 685:328, variants Front=A/B/C) ---------- */
 const VENUES = {
-  A: { name: 'Fern & Fable', meta: 'Café · 0.5 mi', level: 'Level 2', photo: CAROUSEL[0] }, // same photo as the venue page hero
-  B: { name: 'Gallery Espresso', meta: 'Café · 1.1 mi', level: 'Level 1', photo: PHOTO.p0602 },
-  C: { name: 'The Sentient', meta: 'Café · 0.8 mi', level: 'Level 2' , photo: PHOTO.p0603 },
-  D: { name: 'Juniper Coffee', meta: 'Café · 1.1 mi', level: 'Level 3', photo: PHOTO.p0608 },
-  E: { name: 'Copper Window Café', meta: 'Café · 1.4 mi', level: 'Level 1', photo: cafeCopper },
+  A: { name: 'Fern & Fable', meta: 'Café · 0.5 mi', rating: '4.6', photo: CAROUSEL[0] }, // same photo as the venue page hero
+  B: { name: 'Gallery Espresso', meta: 'Café · 1.1 mi', rating: '4.8', photo: PHOTO.p0602 },
+  C: { name: 'The Sentient', meta: 'Café · 0.8 mi', rating: '4.5', photo: PHOTO.p0603 },
+  D: { name: 'Juniper Coffee', meta: 'Café · 1.1 mi', rating: '4.7', photo: PHOTO.p0608 },
+  E: { name: 'Copper Window Café', meta: 'Café · 1.4 mi', rating: '4.9', photo: cafeCopper },
 };
 const KEYS = ['A', 'B', 'D', 'E', 'C'];
 const ROLE = {
@@ -194,15 +193,19 @@ const ROLE = {
 const Z = { front: 3, right: 2, left: 1, hidden: 0 };
 
 // Venue card / Feature, outlined version (Figma 1275:7232): cream card, inset photo, navy text below
-function VenueCard({ v }) {
+function VenueCard({ v, reduceMotion }) {
   const dk = useContext(DK);
   return (
     <>
       <div className="abs" style={{ left: 8, top: 9, width: 244, height: 222, borderRadius: 25, ...photoBackground(v.photo, v.crop) }} />
       <div className="abs" style={{ left: 14, top: 15, height: 32, display: 'flex', alignItems: 'center', gap: 2, padding: '0 12px 0 4px', borderRadius: 999,
         background: 'rgba(255,248,240,0.2)', boxShadow: '0 4px 14px rgba(27,42,68,0.05)', WebkitBackdropFilter: 'blur(16px)', backdropFilter: 'blur(16px)' }}>
-        <RippleIcon k="rippleCard" size={28} color="#fff" />
-        <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{v.level}</span>
+        <motion.span aria-hidden="true" style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          animate={reduceMotion ? { scale: 1 } : { scale: [1, 1.05, 1] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" stroke="#fff" strokeWidth="1.2" strokeLinejoin="round"><path d="M12 2.5l2.9 5.9 6.5.95-4.7 4.58 1.11 6.47L12 17.35 6.19 20.4l1.11-6.47-4.7-4.58 6.5-.95z" /></svg>
+        </motion.span>
+        <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{v.rating}</span>
       </div>
       <div className="abs" style={{ left: 14, top: 248, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
         <p className="nowrap" style={{ fontSize: 17, fontWeight: 700, lineHeight: '20px', color: dk ? '#fff' : '#2a2650' }}>{v.name}</p>
@@ -216,7 +219,7 @@ function VenueCard({ v }) {
   );
 }
 
-function ForYouStack({ onOpenVenue }) {
+function ForYouStack({ onOpenVenue, reduceMotion }) {
   const dk = useContext(DK);
   const [front, setFront] = useState('A');
   const scale = useScale();
@@ -269,7 +272,7 @@ function ForYouStack({ onOpenVenue }) {
             <div className="abs" style={{ inset: 0, borderRadius: 32, overflow: 'hidden', background: dk ? '#171a26' : '#f7f5f1',
               boxShadow: `0 0 0 1px ${dk ? 'rgba(255,255,255,0.22)' : 'rgba(94,90,126,0.22)'}`,
               isolation: 'isolate', transform: 'translateZ(0)', WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
-              <VenueCard v={VENUES[k]} />
+              <VenueCard v={VENUES[k]} reduceMotion={reduceMotion} />
             </div>
           </motion.div>
         );
@@ -355,7 +358,7 @@ export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage,
 
         <Categories onOpen={onOpenPage} />
         <SectionHeader top={421.17} title="For you" />
-        <ForYouStack onOpenVenue={onOpenVenue} />
+        <ForYouStack onOpenVenue={onOpenVenue} reduceMotion={reduceMotion} />
 
         {/* everything below For you sits 40px higher to tighten the gap above Popular */}
         <div className="abs" style={{ left: 0, top: -40, width: 440, height: 0 }}>
