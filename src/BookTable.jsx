@@ -5,9 +5,14 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useAnimationControls } from 'motion/react';
 import { GENTLE, Icon } from './ui.jsx';
 import { paths } from './svgs.js';
-import { VIcon } from './venueIcons.jsx';
-import { G, CircleBtn, TopBar, Section, Chip, ChipGroup, PrimaryCTA, InfoList, Pill, NAVY, DIV, TAP, t } from './flow.jsx';
+import { VIcon, SpeakerWaves } from './venueIcons.jsx';
+import { G, CircleBtn, TopBar, Section, Chip, ChipGroup, PrimaryCTA, RESERVE_TOP, InfoList, Pill, NAVY, DIV, TAP, t } from './flow.jsx';
 import { VENUE } from './Venue.jsx';
+import ticketArt from './assets/ticket/panel.jpg';
+import TicketInteraction, { TicketArtwork } from './TicketInteraction.jsx';
+import { CAROUSEL } from './venueFinalPhotos.js';
+import greyArt from './assets/ticket/grey-hd.png';
+import willowArt from './assets/ticket/willow-hd.png';
 
 // ---------- Data ----------
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -19,8 +24,8 @@ export const DATES = Array.from({ length: 30 }, (_, i) => {
   return {
     i, dow, num: d.getDate(), month: d.toLocaleString('en-US', { month: 'long' }),
     label: i === 0 ? 'Today' : dow,
-    short: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : `${dow} ${mon} ${d.getDate()}`,
-    long: `${i === 0 ? 'Today, ' : i === 1 ? 'Tomorrow, ' : ''}${dow} ${mon} ${d.getDate()}`,
+    short: i === 0 ? 'Today' : `${dow} ${mon} ${d.getDate()}`,
+    long: `${i === 0 ? 'Today, ' : ''}${dow} ${mon} ${d.getDate()}`,
   };
 });
 const MONTHS = [...new Set(DATES.map((d) => d.month))];
@@ -48,13 +53,13 @@ const T = (id, x, y, w, h, top, bottom, tags, f = {}) => ({ id, x, y, w, h, top,
 export const ZONES = {
   Patio: {
     tables: [
-      T(1, 16, 96, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild', 'By the garden path'], { stepFree: true }),
-      T(2, 127, 96, 110, 56, 2, 2, ['Sound · Easy to talk', 'Light · Sunny', 'Temp · Warm after 2 PM'], { sunny: true, stepFree: true, space: true }),
-      T(3, 278, 96, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Sunny', 'Temp · Cool, by the AC vent'], { sunny: true, ac: true }),
+      T(1, 16, 96, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], { stepFree: true }),
+      T(2, 127, 96, 110, 56, 2, 2, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { sunny: true, stepFree: true, space: true }),
+      T(3, 278, 96, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { sunny: true, ac: true }),
       T(4, 16, 222, 110, 60, 2, 2, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild, away from AC', 'Far from speaker'], { stepFree: true, space: true }),
-      T(5, 196, 222, 150, 60, 2, 2, ['Sound · Lively', 'Light · Sunny', 'Temp · Mild', 'Close to speaker'], { speaker: true, sunny: true, space: true, stepFree: true }),
-      T(6, 16, 348, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild', 'By the side gate'], { exit: true, stepFree: true }),
-      T(7, 150, 348, 70, 56, 1, 1, ['Sound · Lively', 'Light · Shaded', 'Temp · Mild', 'Next to speaker'], { speaker: true, exit: true }),
+      T(5, 196, 222, 150, 60, 2, 2, ['Sound · Lively', 'Light · Natural', 'Temp · Mild'], { speaker: true, sunny: true, space: true, stepFree: true }),
+      T(6, 16, 348, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], { exit: true, stepFree: true }),
+      T(7, 150, 348, 70, 56, 1, 1, ['Sound · Lively', 'Light · Shaded', 'Temp · Mild'], { speaker: true, exit: true }),
     ],
     marks: [
       { kind: 'tag', x: 20, y: 28, text: 'Garden pond this way →', go: 'Garden pond' },
@@ -64,45 +69,43 @@ export const ZONES = {
   },
   'Garden pond': {
     tables: [
-      T(8, 16, 70, 70, 56, 1, 1, ['Sound · Quiet, water sounds', 'Light · Dappled shade', 'Temp · Mild', 'By the pond'], { stepFree: false }),
-      T(9, 294, 70, 70, 56, 1, 1, ['Sound · Quiet', 'Light · Dappled shade', 'Temp · Mild', 'By the pond'], {}),
-      T(10, 16, 316, 110, 60, 2, 2, ['Sound · Quiet', 'Light · Shaded', 'Temp · Mild', 'Under the oak'], { space: true }),
-      T(11, 236, 316, 110, 60, 2, 2, ['Sound · Easy to talk', 'Light · Sunny', 'Temp · Warm after 2 PM', 'Pond view'], { sunny: true, space: true }),
+      T(8, 16, 70, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], { stepFree: false }),
+      T(9, 294, 70, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], {}),
+      T(10, 16, 316, 110, 60, 2, 2, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], { space: true }),
+      T(11, 236, 316, 110, 60, 2, 2, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { sunny: true, space: true }),
     ],
     marks: [
       { kind: 'pond', x: 106, y: 150, w: 180, h: 120 },
-      { kind: 'tag', x: 20, y: 420, text: '← Patio this way', go: 'Patio' },
-      { kind: 'note', x: 232, y: 424, text: 'Gravel path, one step' },
     ],
   },
   Indoor: {
     tables: [
-      T(12, 16, 120, 70, 56, 1, 1, ['Sound · Lively', 'Light · Natural, by the window', 'Temp · Cool', 'Next to speaker'], { speaker: true, ac: true, stepFree: true }),
-      T(13, 150, 120, 70, 56, 1, 1, ['Sound · Lively', 'Light · Natural', 'Temp · Cool, by the counter vent'], { ac: true, stepFree: true }),
-      T(14, 16, 240, 110, 60, 2, 2, ['Sound · Easy to talk', 'Light · Warm & cozy', 'Temp · Mild', 'By the art wall'], { soft: true, stepFree: true, space: true }),
-      T(15, 196, 240, 150, 60, 2, 2, ['Sound · Easy to talk', 'Light · Warm & cozy', 'Temp · Mild', 'Sofa seating'], { soft: true, stepFree: true, space: true }),
-      T(16, 16, 360, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild', 'Near the exit'], { exit: true, stepFree: true }),
-      T(17, 150, 360, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Warm & cozy', 'Temp · Mild', 'Near the exit'], { exit: true, soft: true, stepFree: true }),
+      T(12, 16, 120, 70, 56, 1, 1, ['Sound · Lively', 'Light · Natural', 'Temp · Mild'], { speaker: true, ac: true, stepFree: true }),
+      T(13, 150, 120, 70, 56, 1, 1, ['Sound · Lively', 'Light · Natural', 'Temp · Mild'], { ac: true, stepFree: true }),
+      T(14, 16, 240, 110, 60, 2, 2, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], { soft: true, stepFree: true, space: true }),
+      T(15, 196, 240, 150, 60, 2, 2, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], { soft: true, stepFree: true, space: true }),
+      T(16, 16, 360, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { exit: true, stepFree: true }),
+      T(17, 150, 360, 70, 56, 1, 1, ['Sound · Easy to talk', 'Light · Shaded', 'Temp · Mild'], { exit: true, soft: true, stepFree: true }),
     ],
     marks: [
-      { kind: 'block', x: 20, y: 20, w: 260, h: 40, text: 'Counter' },
+      { kind: 'block', x: 20, y: 20, w: 260, h: 40, text: '' },
       { kind: 'icon', x: 300, y: 16, icon: 'ac', label: 'AC vent' },
       { kind: 'icon', x: 300, y: 112, icon: 'speakerHigh', label: 'Speaker' },
-      { kind: 'icon', x: 300, y: 368, icon: 'arrowUpRight', label: 'Exit' },
+      { kind: 'icon', x: 300, y: 368, icon: 'arrowUpRight', label: '' },
     ],
   },
   Bar: {
     tables: [
-      T(18, 16, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Bright', 'Temp · Cool, by the counter vent', 'Bar stools'], { ac: true, sunny: true, bar: true }),
-      T(19, 147, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Bright', 'Temp · Cool', 'Bar stools'], { ac: true, sunny: true, bar: true }),
-      T(20, 278, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Bright', 'Temp · Cool', 'Bar stools', 'Close to speaker'], { speaker: true, sunny: true, bar: true }),
-      T(21, 16, 300, 98, 44, 0, 2, ['Sound · Easy to talk', 'Light · Natural, window', 'Temp · Mild', 'Window bar'], { bar: true, exit: true }),
-      T(22, 147, 300, 98, 44, 0, 2, ['Sound · Easy to talk', 'Light · Natural, window', 'Temp · Mild', 'Window bar'], { bar: true }),
-      T(23, 278, 300, 98, 44, 0, 2, ['Sound · Easy to talk', 'Light · Natural, window', 'Temp · Mild', 'Window bar'], { bar: true }),
+      T(18, 16, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Natural', 'Temp · Mild'], { ac: true, sunny: true, bar: true }),
+      T(19, 147, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Natural', 'Temp · Mild'], { ac: true, sunny: true, bar: true }),
+      T(20, 278, 96, 98, 44, 2, 0, ['Sound · Lively', 'Light · Natural', 'Temp · Mild'], { speaker: true, sunny: true, bar: true }),
+      T(21, 16, 300, 98, 44, 0, 2, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { bar: true, exit: true }),
+      T(22, 147, 300, 98, 44, 0, 2, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { bar: true }),
+      T(23, 278, 300, 98, 44, 0, 2, ['Sound · Easy to talk', 'Light · Natural', 'Temp · Mild'], { bar: true }),
     ],
     marks: [
-      { kind: 'block', x: 20, y: 196, w: 352, h: 48, text: 'Bar counter' },
-      { kind: 'block', x: 20, y: 404, w: 352, h: 24, text: 'Window', thin: true },
+      { kind: 'block', x: 20, y: 196, w: 352, h: 48, text: '' },
+      { kind: 'block', x: 20, y: 404, w: 352, h: 24, text: '', thin: true },
     ],
   },
 };
@@ -125,7 +128,7 @@ const RULES = {
   'Space for a stroller': [(tb) => tb.space, 'tight for a stroller'],
 };
 
-export const emptyDraft = () => ({ guests: null, date: null, time: null, zone: 'Patio', table: null, comfort: [], note: '', name: 'Your name', phone: '(000) 000-0000', email: 'name@email.com', remind: true });
+export const emptyDraft = () => ({ guests: null, date: null, time: null, zone: 'Patio', table: null, comfort: [], note: '', name: 'Nora', phone: '(912) 555-0148', email: 'nora@email.com', remind: true });
 
 function useNudge() {
   const c = useAnimationControls();
@@ -216,7 +219,7 @@ function StepWhen({ draft, set, refs, ctl }) {
         <Section icon="cal" title="Date" note={
           <div style={{ position: 'relative' }}>
             <motion.button whileTap={{ scale: 0.95 }} transition={TAP} onClick={() => setMenu((m) => !m)} className="gl-solid"
-              style={{ height: 40, padding: '0 14px 0 16px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 6, border: 0 }}>
+              style={{ height: 40, padding: '0 14px 0 16px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 8, border: 0 }}>
               <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span key={month} style={t(14, 500)} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.18 }}>{month}</motion.span>
               </AnimatePresence>
@@ -241,9 +244,11 @@ function StepWhen({ draft, set, refs, ctl }) {
               const on = date === x.i;
               return (
                 <G key={x.i} as="button" r={24} on={on} onClick={() => pickDate(x.i)} whileTap={{ scale: 0.94 }} transition={TAP}
-                  style={{ width: 76, height: 88, flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, ...(on ? { border: 0, background: 'rgba(255,255,255,0.85)' } : null) }}>
-                  <span style={t(13, on ? 600 : 400)}>{x.label}</span>
-                  <span style={t(24, 600, NAVY, { lineHeight: '29px' })}>{x.num}</span>
+                  aria-pressed={on}
+                  style={{ width: 76, height: 88, flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, transition: 'background-color .2s, border-color .2s',
+                    ...(on ? { borderColor: NAVY, background: NAVY, boxShadow: '0 10px 22px rgba(94,90,126,0.28)' } : null) }}>
+                  <span style={t(13, on ? 600 : 400, on ? 'rgba(255,255,255,0.85)' : NAVY)}>{x.label}</span>
+                  <span style={t(24, 600, on ? '#fff' : NAVY, { lineHeight: '29px' })}>{x.num}</span>
                 </G>
               );
             })}
@@ -252,7 +257,7 @@ function StepWhen({ draft, set, refs, ctl }) {
       </motion.div>
 
       <motion.div ref={refs.time} animate={ctl.time}>
-        <Section icon="clock" title="Time" note={date == null ? 'Pick a date first' : undefined}>
+        <Section icon="clock" title="Time" >
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 122px)', columnGap: 12, rowGap: 14, justifyContent: 'space-between' }}>
             {slots.map((s, i) => {
               const on = time === s.time && s.ok;
@@ -260,8 +265,10 @@ function StepWhen({ draft, set, refs, ctl }) {
                 <G key={s.time} as="button" r={22} on={on} disabled={!s.ok} aria-disabled={!s.ok}
                   onClick={() => s.ok && set({ time: s.time })} whileTap={s.ok ? { scale: 0.95 } : undefined}
                   initial={false} animate={{ opacity: s.ok ? 1 : 0.45 }} transition={{ duration: 0.25, delay: date == null ? 0 : i * 0.03 }}
-                  style={{ height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: s.ok ? 'pointer' : 'default', ...(on ? { border: 0 } : null) }}>
-                  <span style={t(15, 600)}>{s.time}</span>
+                  aria-pressed={on}
+                  style={{ height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: s.ok ? 'pointer' : 'default', transition: 'background-color .2s, border-color .2s',
+                    ...(on ? { borderColor: NAVY, background: NAVY, boxShadow: '0 10px 22px rgba(94,90,126,0.28)' } : null) }}>
+                  <span style={t(15, 600, on ? '#fff' : NAVY)}>{s.time}</span>
                 </G>
               );
             })}
@@ -317,7 +324,7 @@ function Mark({ m, onGo }) {
     return (
       <div className="abs" style={{ left: m.x, top: m.y, width: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
         <div style={{ width: 48, height: 48, borderRadius: 24, background: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <VIcon name={m.icon} size={m.icon === 'arrowUpRight' ? 22 : 26} />
+          {m.icon === 'speakerHigh' ? <SpeakerWaves size={26} /> : <VIcon name={m.icon} size={m.icon === 'arrowUpRight' ? 22 : 26} />}
         </div>
         <span className="nowrap" style={t(12, 500)}>{m.label}</span>
       </div>
@@ -496,7 +503,7 @@ function StepFor({ draft, set, goStep, existing, onCancelBooking }) {
         </G>
       </Section>
 
-      <p style={t(13, 400)}>Free to cancel up to 2 hours before. Foxy Loxy holds tables for 15 minutes.</p>
+      <p style={t(13, 400)}>Free to cancel up to 2 hours before. Fern & Fable holds tables for 15 minutes.</p>
       {existing && (
         <motion.button whileTap={{ scale: 0.96 }} onClick={onCancelBooking} style={{ ...t(15, 500, '#b4413c'), alignSelf: 'center', height: 32, marginTop: -12 }}>
           Cancel booking
@@ -548,7 +555,7 @@ export default function BookTable({ draft, setDraft, step, setStep, onClose, onB
 
   const cta = step === 1 ? { label: 'Next · Where to sit', ok: ok1, go: () => go(2) }
     : step === 2 ? { label: 'Next · Booking for', ok: ok2, go: () => go(3) }
-    : { label: existing ? 'Update booking' : 'Confirm booking', ok: ok2, go: confirm };
+    : { label: 'Confirm booking', ok: ok2, go: confirm };
 
   return (
     <div className="abs" style={{ inset: 0, background: '#f7f5f1' }}>
@@ -570,7 +577,7 @@ export default function BookTable({ draft, setDraft, step, setStep, onClose, onB
           </div>
         </motion.div>
       </AnimatePresence>
-      <PrimaryCTA label={cta.label} enabled={!!cta.ok} onClick={cta.go} onBlocked={blocked} busy={busy ? 'Booking…' : null} />
+      <PrimaryCTA top={RESERVE_TOP} label={cta.label} enabled={!!cta.ok} onClick={cta.go} onBlocked={blocked} busy={busy ? cta.label : null} />
     </div>
   );
 }
@@ -579,45 +586,67 @@ export default function BookTable({ draft, setDraft, step, setStep, onClose, onB
 const mins = (s) => { const [hm, ap] = s.split(' '); let [h, m] = hm.split(':').map(Number); if (ap === 'PM' && h !== 12) h += 12; return h * 60 + m; };
 const fmt = (m) => { const h = Math.floor(m / 60), mm = m % 60; return `${h % 12 || 12}:${String(mm).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`; };
 
-export function BookingConfirmed({ booking, onClose, onChange }) {
+// Ticket (Figma 1000:15090): 340 x 468, side notches at the perforation line.
+const BARS = [[26,2],[31,3],[35,1],[38,1],[42,2],[45,3],[50,1],[54,4],[59,3],[64,2],[69,2],[72,4],[78,3],[84,1],[86,2],[90,1],[94,3],[98,1],[101,3],[107,2],[110,1],[113,1],[117,4],[122,4],[128,1],[132,2],[135,4],[141,1],[145,2],[148,3],[153,3],[159,2],[162,1],[165,4],[172,2],[175,1],[178,3],[184,2],[187,1],[190,4],[197,2],[200,2],[204,1],[208,4],[213,1],[216,4],[223,2],[226,1],[229,3],[235,2],[238,4],[244,3],[250,1],[252,1],[255,2],[260,1],[262,1],[265,2],[270,3],[274,3],[279,4],[286,2],[289,2],[293,2],[298,2],[301,4],[307,2],[312,2]];
+const NOTCH = 'radial-gradient(circle 16px at 0 318px, transparent 15.5px, #000 16px) left / 51% 100% no-repeat, radial-gradient(circle 16px at 100% 318px, transparent 15.5px, #000 16px) right / 51% 100% no-repeat';
+export const TICKET_THEMES = {
+  fern: { bg: '#a18a7a', art: ticketArt, ink: '#f6f4f0', perf: '#fff', bar: '#f4f3ef', big: true },
+  grey: { bg: '#e9ddf2', art: greyArt, ink: '#2a2650', perf: '#2a2650', bar: 'rgba(42,38,80,0.8)' },
+  willow: { bg: '#c2e8d9', art: willowArt, ink: '#2a2650', perf: '#45b6a2', bar: 'rgba(42,38,80,0.8)' },
+};
+export const bookingWhen = (b) => `${b.dayLong.replace('Today, ', '').replace(/^(\w{3}) /, '$1, ')} · ${b.time}`;
+export function Ticket({ name = VENUE.name, when, guests, seat, held, theme = 'fern', motionProps, animatedArt = false, art, showArtText = true, nameTop = false }) {
+  const th = TICKET_THEMES[theme];
+  const field = (x, label, value) => (
+    <div className="abs" style={{ left: x, top: 338, display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <span style={t(12, 500, th.ink)}>{label}</span>
+      <span className="nowrap" style={t(17, 700, th.ink)}>{value}</span>
+    </div>
+  );
+  return (
+    <motion.div {...motionProps} style={{ alignSelf: 'center', width: 340, height: 468, filter: 'drop-shadow(0 24px 30px rgba(27,42,68,0.1))', ...motionProps?.style }}>
+      <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: 26, background: th.bg, WebkitMask: NOTCH, mask: NOTCH }}>
+        <div className="abs" style={{ left: 14, top: 14, width: 312, height: 290, borderRadius: 18, overflow: 'hidden', background: `#6b5a4e url(${art ?? th.art}) center / cover` }}>
+          {animatedArt && <TicketArtwork src={th.art} tone={theme} />}
+          {showArtText && (th.big && !nameTop ? <>
+            <span className="abs nowrap" style={{ left: 0, right: 0, top: 26, textAlign: 'center', ...t(11, 700, '#fcfcfb'), letterSpacing: '0.14em' }}>TABLE FOR {guests}</span>
+            <span className="abs nowrap" style={{ left: 41, top: 108, ...t(34, 600, '#fcfcfb'), letterSpacing: '-0.03em', lineHeight: '41px' }}>{name}</span>
+            <span className="abs nowrap" style={{ left: 90, top: 156, ...t(15, 500, '#fcfcfb') }}>{when}</span>
+          </> : <>
+            <span className="abs nowrap" style={{ left: 14, top: 7, ...t(19, 600, '#fefeff'), lineHeight: '23px' }}>{name}</span>
+            <span className="abs nowrap" style={{ left: 14, top: 30, ...t(13, 500, '#fefeff') }}>{when}</span>
+          </>)}
+        </div>
+        <div className="abs" style={{ left: 24, right: 21, top: 318, height: 2, backgroundImage: `linear-gradient(90deg, ${th.perf} 5px, transparent 5px)`, backgroundSize: '10px 2px' }} />
+        {field(26, 'Seat', seat)}
+        {field(150, 'Party', guests)}
+        {field(232, 'Held Until', held)}
+        {BARS.map(([x, w]) => <div key={x} className="abs" style={{ left: x, top: 404, width: w, height: 44, background: th.bar }} />)}
+      </div>
+    </motion.div>
+  );
+}
+export const ticketFor = (b) => ({ when: bookingWhen(b), guests: b.guests, seat: `${b.zone} · Table ${b.table}`, held: fmt(mins(b.time) + 15) });
+
+export function BookingConfirmed({ booking, onClose, onDone, onChange }) {
   const [scrolled, setScrolled] = useState(false);
   const [added, setAdded] = useState(false);
   const b = booking;
-  const tableText = [`Table ${b.table}`, b.zone, ...b.comfort].join(' · ');
   const rise = (i) => ({ initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { ...GENTLE, delay: 0.25 + i * 0.07 } });
 
   return (
     <div className="abs" style={{ inset: 0, background: '#f7f5f1' }}>
       <TopBar title="Booking confirmed" onClose={onClose} scrolled={scrolled} right={<CircleBtn icon="export" label="Share booking" />} />
       <div className="scroll" onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 8)}>
-        <div style={{ padding: '128px 24px 60px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ padding: '132px 24px 36px', display: 'flex', flexDirection: 'column', gap: 18 }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '12px 0 8px' }}>
-            <div style={{ position: 'relative', width: 88, height: 88 }}>
-              <motion.div className="abs" style={{ inset: 0, borderRadius: 44, border: `2px solid ${NAVY}` }}
-                initial={{ scale: 0.8, opacity: 0.5 }} animate={{ scale: 1.7, opacity: 0 }} transition={{ duration: 1.1, delay: 0.35, ease: 'easeOut' }} />
-              <motion.div className="abs" style={{ inset: 0, borderRadius: 44, background: 'rgba(255,255,255,0.92)', boxShadow: '0 14px 36px rgba(42,38,80,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                initial={{ scale: 0.3, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 16, delay: 0.1 }}>
-                <motion.span initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 400, damping: 14, delay: 0.3 }}>
-                  <VIcon name="check" size={40} />
-                </motion.span>
-              </motion.div>
-            </div>
             <motion.h2 {...rise(0)} style={t(28, 600, NAVY, { letterSpacing: -0.4 })}>You're booked</motion.h2>
             <motion.p {...rise(1)} style={t(15, 400)}>We sent the details to {b.phone}</motion.p>
           </div>
 
-          <motion.div {...rise(2)}>
-            <InfoList rows={[
-              { icon: 'storefront', text: tableText },
-              { icon: 'mapPin', text: VENUE.address },
-              { icon: 'clock', text: `${b.dayLong} · ${b.time} · ${b.guests} ${b.guests === 1 ? 'guest' : 'guests'}` },
-              { icon: 'phone', text: VENUE.phone },
-            ]} />
-          </motion.div>
-
-          <motion.p {...rise(3)} style={t(13, 400)}>
-            Held Until · {fmt(mins(b.time) + 15)}
-          </motion.p>
+          <TicketInteraction color={TICKET_THEMES.fern.bg} mask={NOTCH} back={<Ticket {...ticketFor(b)} art={CAROUSEL[0]} showArtText={false} motionProps={{ style: { filter: 'none' } }} />}>
+          <Ticket {...ticketFor(b)} animatedArt motionProps={{ initial: { opacity: 0, y: 28, scale: 0.94, rotate: -2 }, animate: { opacity: 1, y: 0, scale: 1, rotate: 0 }, transition: { type: 'spring', stiffness: 170, damping: 20, delay: 0.15 }, style: { filter: 'none' } }} />
+          </TicketInteraction>
 
           <motion.div {...rise(4)} style={{ display: 'flex', gap: 12 }}>
             <G as="button" r={26} on={added} onClick={() => setAdded(true)} whileTap={{ scale: 0.96 }} transition={TAP}
@@ -627,7 +656,7 @@ export function BookingConfirmed({ booking, onClose, onChange }) {
                   <VIcon name={added ? 'check' : 'cal'} size={20} />
                 </motion.span>
               </AnimatePresence>
-              <span style={t(15, 600)}>{added ? 'Added' : 'Add to calendar'}</span>
+              <span style={t(15, 600)}>Add to calendar</span>
             </G>
             <G as="button" r={26} whileTap={{ scale: 0.96 }} transition={TAP}
               style={{ flex: '1 0 0', height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
@@ -641,7 +670,7 @@ export function BookingConfirmed({ booking, onClose, onChange }) {
           </motion.button>
 
           <motion.div {...rise(6)}>
-            <PrimaryCTA inline label="Done" onClick={onClose} />
+            <PrimaryCTA inline label="Done" onClick={onDone || onClose} />
           </motion.div>
         </div>
       </div>

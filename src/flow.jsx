@@ -1,7 +1,7 @@
 // Shared building blocks for the Venue page and its flows (Figma section 789:3120).
 // v2 palette: all venue text, icons and accents use #5e5a7e.
-import { useState, useRef, useEffect } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { useState, useRef, useEffect, useContext, createContext } from 'react';
+import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/react';
 import { GENTLE, Icon } from './ui.jsx';
 import { paths } from './svgs.js';
 import { VIcon, vi } from './venueIcons.jsx';
@@ -35,7 +35,7 @@ export function CircleBtn({ icon, label, onClick, style, children }) {
 }
 
 // Top bar: close or back / title + venue / optional right action. Frosts once content scrolls under it.
-export function TopBar({ title, sub = 'Foxy Loxy Cafe', onClose, back, right, scrolled }) {
+export function TopBar({ title, sub = 'Fern & Fable', onClose, back, right, scrolled }) {
   return (
     <div className="abs" style={{ left: 0, top: 0, width: 440, zIndex: 20, padding: '52px 24px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <motion.div className="abs" style={{ inset: 0, background: 'rgba(247,245,241,0.82)', WebkitBackdropFilter: 'blur(14px)', backdropFilter: 'blur(14px)', borderBottom: `1px solid ${DIV}` }}
@@ -134,6 +134,9 @@ export function ChipGroup({ options, value, onChange, single, other = true }) {
   );
 }
 
+// Reserve / booking buttons sit a little higher than the default so they clear the phone's bottom edge
+export const RESERVE_TOP = 849;
+
 // Glass / Primary button: a hugging pill (h63, r30, 36px side padding) centred at the bottom.
 // Its width springs between labels. Disabled = faded; tapping it then calls onBlocked.
 export function PrimaryCTA({ label, icon, enabled = true, onClick, onBlocked, busy, top = 865, inline, color }) {
@@ -216,10 +219,10 @@ export function InfoList({ rows }) {
   );
 }
 
-export function Stars({ n = 5, size = 14, gap = 2 }) {
+export function Stars({ n = 5, size = 14, gap = 2, fill = NAVY }) {
   return (
     <div style={{ display: 'flex', gap }}>
-      {Array.from({ length: 5 }, (_, i) => <VIcon key={i} name="starFill" size={size} fill={i < n ? NAVY : 'rgba(94,90,126,0.22)'} />)}
+      {Array.from({ length: 5 }, (_, i) => <VIcon key={i} name="starFill" size={size} fill={i < n ? fill : 'rgba(94,90,126,0.22)'} />)}
     </div>
   );
 }
@@ -249,7 +252,14 @@ export function ReviewSummary({ onClick }) {
   );
 }
 
-export function AISummary() {
+// Review keywords (Google Maps style): tapping one filters the reviews and highlights the word in each review
+export const KEYWORDS = [
+  { label: 'Window tables', re: /tables?/gi },
+  { label: 'Daylight', re: /lights?|bright/gi },
+  { label: 'Warm lighting', re: /wall lights|warm|soft/gi },
+  { label: 'Counter noise', re: /counter|chatter|espresso machine/gi },
+];
+export function AISummary({ keyword, onKeyword }) {
   return (
     <G r={28} style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -257,41 +267,66 @@ export function AISummary() {
         <span style={t(15, 600)}>Review summary</span>
       </div>
       <p style={t(15, 400, NAVY, { lineHeight: 1.4 })}>
-        People love the cozy, artsy feel, the back patio and garden pond, and the pastries — kolaches and chai come up often. Many say it gets busy on weekends and seating and parking can be tight, so mornings are calmer.
+        Daylight filters through the glass blocks, while wall lights give the booths a warmer glow. The espresso counter can get lively, and the window tables are easier for conversation.
       </p>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-        {['Patio · 310', 'Kolache · 180', 'Chai · 150', 'Busy weekends · 120'].map((m) => <Pill key={m}>{m}</Pill>)}
+        {KEYWORDS.map((k) => onKeyword
+          ? <motion.button key={k.label} type="button" aria-pressed={keyword === k.label} whileTap={{ scale: 0.95 }} transition={TAP}
+              onClick={() => onKeyword(keyword === k.label ? null : k.label)} style={{ padding: 0, borderRadius: 14 }}>
+              <Pill on={keyword === k.label}>{k.label}</Pill>
+            </motion.button>
+          : <Pill key={k.label}>{k.label}</Pill>)}
       </div>
       <span style={t(12, 400)}>Summarized by AI from 2,600 reviews</span>
     </G>
   );
 }
 
-export function Pill({ children, strong }) {
-  return <span className="nowrap" style={{ ...t(12, strong ? 600 : 500), background: 'rgba(255,255,255,0.8)', padding: '6px 12px', borderRadius: 14, display: 'inline-block' }}>{children}</span>;
+// Review text with the picked keyword marked
+export function Marked({ text, re }) {
+  if (!re) return text;
+  const parts = []; let last = 0; const rx = new RegExp(re.source, 'gi'); let m;
+  while ((m = rx.exec(text))) {
+    if (m.index > last) parts.push(text.slice(last, m.index));
+    parts.push(<mark key={m.index} style={{ background: 'rgba(94,90,126,0.16)', color: NAVY, fontWeight: 700, borderRadius: 4, padding: '0 2px', margin: '0 -2px' }}>{m[0]}</mark>);
+    last = m.index + m[0].length;
+  }
+  parts.push(text.slice(last));
+  return parts;
 }
 
-export function ReviewCard({ r }) {
-  const [helpful, setHelpful] = useState(false);
+export function Pill({ children, strong, on }) {
+  return <span className="nowrap" style={{ ...t(12, strong || on ? 600 : 500, on ? '#fff' : NAVY), background: on ? NAVY : 'rgba(255,255,255,0.8)', padding: '6px 12px', borderRadius: 14, display: 'inline-block', transition: 'background-color .2s, color .2s' }}>{children}</span>;
+}
+
+export function ReviewCard({ r, mark }) {
+  const [liked, setLiked] = useState(false);
+  const ink = '#2a2650';
   return (
-    <G r={28} style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ width: 40, height: 40, borderRadius: 20, background: r.mine ? NAVY : '#E6E6E8', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: 15 }}>{r.mine ? 'R' : ''}</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <span style={t(15, 600)}>{r.name}</span>
-          <span style={t(13, 400)}>{r.meta}</span>
+    <G r={28} style={{ padding: '26px 25px 23px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{ width: 44, height: 44, borderRadius: 22, flex: 'none', background: r.mine ? NAVY : r.avatar ? `url(${r.avatar}) center / cover` : 'rgba(94,90,126,0.12)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: 15 }}>{r.mine ? 'R' : ''}</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <span style={t(15, 600, ink)}>{r.name}</span>
+          <span style={t(12, 400)}>{r.meta}</span>
         </div>
       </div>
-      <Stars n={r.stars ?? 5} />
-      {r.text && <p style={t(15, 400, NAVY, { lineHeight: 1.4 })}>{r.text}</p>}
-      {r.tags?.length > 0 && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>{r.tags.map((x) => <Pill key={x}>{x}</Pill>)}</div>}
+      <Stars n={r.stars ?? 5} size={14} fill={ink} />
+      {r.text && <p style={t(15, 400, ink, { lineHeight: 1.4 })}><Marked text={r.text} re={mark} /></p>}
+      {r.tags?.length > 0 && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>{r.tags.map((x) => <span key={x} className="nowrap" style={{ ...t(12, 500, ink), background: 'rgba(42,38,80,0.05)', padding: '6px 12px', borderRadius: 14 }}>{x}</span>)}</div>}
       {!r.mine && (
-        <motion.button whileTap={{ scale: 0.92 }} onClick={() => setHelpful((h) => !h)} style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 6, height: 28 }}>
-          <motion.span animate={helpful ? { rotate: [0, -18, 0], scale: [1, 1.2, 1] } : {}} transition={{ duration: 0.4 }}>
-            <VIcon name="thumbsUp" fill={NAVY} />
-          </motion.span>
-          <span style={t(13, helpful ? 600 : 500)}>{helpful ? 'Helpful · 1' : 'Helpful'}</span>
-        </motion.button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24, height: 22 }}>
+          <motion.button whileTap={{ scale: 0.9 }} aria-pressed={liked} aria-label="Like review" onClick={() => setLiked((v) => !v)} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <motion.span animate={liked ? { scale: [1, 1.25, 1] } : {}} transition={{ duration: 0.35 }} style={{ display: 'flex' }}>
+              <VIcon name={liked ? 'heartFill' : 'heart'} size={18} fill={NAVY} />
+            </motion.span>
+            <span style={t(13, 500)}>{(r.likes ?? 0) + (liked ? 1 : 0)}</span>
+          </motion.button>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <VIcon name="chat" size={18} fill={NAVY} />
+            <span style={t(13, 500)}>{r.replies ?? 0}</span>
+          </span>
+        </div>
       )}
     </G>
   );
@@ -326,13 +361,22 @@ export function Toast({ text, icon = 'check' }) {
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const AXIS = [['9a', 54], ['12p', 105], ['3p', 161], ['6p', 215], ['9p', 268]];
 export const hourLabel = (i) => { const h = 6 + i; return `${h % 12 || 12} ${h < 12 ? 'AM' : 'PM'}`; };
+export const InfoContext = createContext(null);
 export function DayChart({ icon, title, week, nowIdx = 11, liveText, info, describe, footnote }) {
   const [day, setDay] = useState('Sun');
   const [menu, setMenu] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const openInfo = useContext(InfoContext);
   const [sel, setSel] = useState(null);
   const bars = week[day];
   const live = day === 'Sun';
+  // Bars rise from empty like a thermometer the first time the chart scrolls into view.
+  const chartRef = useRef(null);
+  const inView = useInView(chartRef, { once: true, amount: 0.5 });
+  const reduce = useReducedMotion();
+  const [intro, setIntro] = useState(true);
+  useEffect(() => { if (!inView) return; const id = setTimeout(() => setIntro(false), 2200); return () => clearTimeout(id); }, [inView]);
+  const grown = reduce || inView;
   const status = sel != null ? `${hourLabel(sel)} · ${describe(bars[sel], sel)}` : live ? liveText : `Usually on ${day}s · tap a bar`;
   return (
     <G r={28} style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16, zIndex: menu ? 5 : 1 }}>
@@ -341,7 +385,7 @@ export function DayChart({ icon, title, week, nowIdx = 11, liveText, info, descr
         <span style={{ ...t(17, 600), flex: '1 0 0' }}>{title}</span>
         <div style={{ position: 'relative' }}>
           <motion.button whileTap={{ scale: 0.95 }} transition={TAP} onClick={() => setMenu((m) => !m)}
-            style={{ height: 44, padding: '0 12px 0 16px', borderRadius: 22, background: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            style={{ height: 44, padding: '0 12px 0 16px', borderRadius: 22, background: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={t(14, 500)}>{day}</span>
             <motion.span animate={{ rotate: menu ? 180 : 0 }} transition={GENTLE}><VIcon name="caretDown" size={16} /></motion.span>
           </motion.button>
@@ -352,14 +396,14 @@ export function DayChart({ icon, title, week, nowIdx = 11, liveText, info, descr
                 {DAYS.map((d) => (
                   <button key={d} onClick={() => { setDay(d); setSel(null); setMenu(false); }}
                     style={{ width: '100%', height: 36, borderRadius: 14, padding: '0 12px', display: 'flex', alignItems: 'center', background: d === day ? 'rgba(94,90,126,0.1)' : 'transparent' }}>
-                    <span style={t(14, d === day ? 600 : 500)}>{d === 'Sun' ? 'Sun · Today' : d}</span>
+                    <span style={t(14, d === day ? 600 : 500)}>{d}</span>
                   </button>
                 ))}
               </motion.div>
             )}
           </AnimatePresence>
         </div>
-        <motion.button aria-label={`About ${title.toLowerCase()}`} whileTap={{ scale: 0.9 }} onClick={() => setShowInfo((i) => !i)}
+        <motion.button aria-label={`About ${title.toLowerCase()}`} whileTap={{ scale: 0.9 }} onClick={() => (openInfo ? openInfo(title) : setShowInfo((i) => !i))}
           style={{ width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 22, background: showInfo ? 'rgba(255,255,255,0.85)' : 'transparent' }}>
           <VIcon name="info" />
         </motion.button>
@@ -378,13 +422,15 @@ export function DayChart({ icon, title, week, nowIdx = 11, liveText, info, descr
         </motion.span>
       </AnimatePresence>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <div style={{ width: 318, height: 104, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+        <div ref={chartRef} style={{ width: 318, height: 104, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
           {bars.map((h, i) => {
             const hot = sel != null ? sel === i : live && i === nowIdx;
             return (
               <button key={i} aria-label={hourLabel(i)} onClick={() => setSel(sel === i ? null : i)} style={{ width: 14, height: 104, display: 'flex', alignItems: 'flex-end', padding: 0 }}>
-                <motion.div initial={{ height: 0 }} animate={{ height: h, backgroundColor: hot ? NAVY : 'rgba(94,90,126,0.16)' }}
-                  transition={{ ...GENTLE, delay: i * 0.015 }} style={{ width: 14, borderRadius: 7 }} />
+                <motion.div initial={{ height: reduce ? h : 0 }} animate={{ height: grown ? h : 0, backgroundColor: hot ? NAVY : 'rgba(94,90,126,0.16)' }}
+                  transition={intro && !reduce
+                    ? { height: { duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.15 + i * 0.055 }, backgroundColor: { duration: 0.5, delay: 0.15 + i * 0.055 + 0.7 } }
+                    : { ...GENTLE, delay: i * 0.015 }} style={{ width: 14, borderRadius: 7 }} />
               </button>
             );
           })}

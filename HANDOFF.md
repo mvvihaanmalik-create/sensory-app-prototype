@@ -1,3 +1,43 @@
+## Morphing ticket gradients - November 15, 2026
+
+- TicketArtwork now uses TicketFluid: a spatially varying shader bends the artwork within fixed panel bounds. Removed the whole-image drift/rotation animation. Ticket text stays outside the canvas.
+- Green and purple use a soft sampling kernel and stationary fine grain to match the brown ticket's finish. All three wallet cards and the confirmation front share the effect.
+- Rendering is capped at 30fps and 2.5x pixel density, pauses offscreen/in hidden tabs, and freezes for app or OS reduced motion. The source image remains as a fallback if WebGL is unavailable.
+
+## Photo-only screenshots and onboarding completion - November 15, 2026
+
+- Ten captured screenshots now have SVG viewports that clip the original JPEG pixels to the photo. Menu, gallery, review reuse and the full-screen viewer share those assets. Original JPEGs remain available.
+- Updated all 27 matching image fills on Final flow with photo-only crops, preserving frame geometry.
+- Completion matches Figma 978:5767: illustration y114, heading y318, preferences y378, plain background, Start exploring primary action and Add another mode secondary action. Both actions retain their intended flow.
+
+## Navigation and Edit mode spacing - November 15, 2026
+
+- Navigation starts screen scroll areas at the top, including repeated taps on the active Home or Search tab and returns from overlays. Profile subpages also reset on entry and return. Existing component state is preserved.
+- Edit mode back button now starts at y=70, title y=80 and content scroller y=130, matching the Figma header spacing and clearing the 62px status bar.
+- Checked navigation resets, Explore return, and the back button's visible/clickable top edge in both builds.
+- Removed the extra Any toggle from the shared onboarding preference card (Sound, Lighting, Crowd and Temperature), matching the final Figma flow. Sliders and Skip retain their existing behavior.
+
+## Status bar and confirmation spacing - November 15, 2026
+
+- Final flow audit: all 87 full-screen UI designs have one visible iOS/iPadOS 26 Status bar - iPhone instance, component key `51ddb19de206b67eae2d554b1d20c018feb754f4`. Eight gradient-only background variants are not screens.
+- Added six missing bars on Save/Share overlay frames and Modes selection; hid the older clock/battery inside the Modes background instance. Dark standalone overlays reuse the existing light-ink variant.
+- Both Figma confirmation frames (884:694, 1466:11440) now fit 956px, with tighter content gaps and safe bottom spacing. Ticket and touch-target sizes remain unchanged.
+- `src/assets/status-ios26.svg` is exported directly from the existing Figma component with outlined text. The laptop preview uses it across all 38 routes, retaining light/dark ink. The phone build retains the device's actual native status bar to avoid duplicate system chrome.
+
+## Interactive confirmation ticket
+
+- BookingConfirmed wraps its existing Ticket in TicketInteraction. The stacked wallet tickets retain their tap/reorder behavior.
+- Drag moves and rotates the ticket. Release uses measured angular velocity, exponential drag and a damped spring to settle facing forward. Touch/pen, keyboard arrows and Escape/Home are supported. MotionConfig reduced motion disables spinning.
+- Both builds and mouse/emulated-touch checks passed, including settling, gallery-independent booking buttons, Add to calendar and Done. Physical-device feel still needs user review.
+
+## Current photo updates - November 15, 2026
+
+- Venue pass: `src/venueFinalPhotos.js` maps 22 exports to carousel, menu, highlights and Photos grid, with Final flow crops.
+- Remaining pass: `src/remainingPhotos.js` maps 34 more exports to Home cards/rankings/Explore, Map recommendations, Saved and Liked, category lists, Discover's Sentient photo, and sensory review photos. Existing venue-grid images are reused for matching sensory reviews.
+- All 59 JPGs in the seven supplied ZIPs are accounted for: 56 placed; three left unplaced in the coded screens: `01-06-venue-big-photo-img-5796.jpg` (visible in separate venue references 1401:21713 and 1429:23274), `04-09-review-photo-placeholder.jpg` (older standalone Explore layout), and `06-01-home-for-you-card-a.jpg` (visible in full-bleed Home variants, hidden in outlined card 1163:8037 which uses the `06-04` inset).
+- People/avatars and reservation ticket photo ZIPs were not supplied. Those assets and unrelated screens remain unchanged.
+- This pass preserves all existing copy, card dimensions, event handlers, state, routing and motion. Figma has other pre-existing copy/layout differences; they are outside this photo-only update.
+
 # Sensory app (UXDG 370): coded prototype handoff
 
 React + Vite prototype of the finalised Figma screens (Home, Map, Profile) inside an iPhone 18 Pro Max frame (440 × 956 pt screen). The code prototype is now the main prototype. Figma remains the design source; the Figma click-through prototype is no longer being maintained.

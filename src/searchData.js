@@ -1,28 +1,30 @@
 import { PAGES } from './listData.js';
+import { PHOTO } from './remainingPhotos.js';
+import { CAROUSEL } from './venueFinalPhotos.js';
 import { PLACES as DISCOVERY_PLACES, rankPlaces, SOUND_W, LIGHT_W, CROWD_W } from './discoverData.js';
 
 // Search fixtures for interaction testing, not live hours or sensory measurements.
 export const SEARCH_GROUPS = [
   { name: 'Made for you', cards: [
-    ['Fits you tonight', 'FitsYouTonight', '#c7cedf', 'Fits you\ntonight'],
-    ['Like your saved places', 'LikeYourSavedPlaces', '#b6d6cf', 'Like your\nsaved\nplaces'],
-    ['New in Savannah', 'NewInSavannah', '#efcbc6', 'New in\nSavannah'],
+    ['Fits you tonight', 'FitsYouTonight', '#8d97bf', 'Fits you\ntonight'],
+    ['Like your saved places', 'LikeYourSavedPlaces', '#65a9a0', 'Like your\nsaved\nplaces'],
+    ['New in Savannah', 'NewInSavannah', '#d58c8e', 'New in\nSavannah'],
   ] },
   { name: 'Moods', cards: [
-    ['Cozy', 'Cozy', '#e7cfba'], ['Low-key', 'LowKey', '#cfd7bb'],
-    ['Buzzing', 'Buzzing', '#bedbe8'], ['Romantic', 'Romantic', '#e9c2cd'],
+    ['Cozy', 'Cozy', '#c89679'], ['Low-key', 'LowKey', '#99a675'],
+    ['Buzzing', 'Buzzing', '#6aa8c1'], ['Romantic', 'Romantic', '#ca84a2'],
   ] },
   { name: 'Activities', cards: [
-    ['Brunch', 'Brunch', '#eddbad'], ['Catchup', 'Catchup', '#c2ddd2'],
-    ['Study & work', 'StudyWork', '#c8d6e4', 'Study &\nwork'], ['Live music', 'LiveMusic', '#d8cae2'],
+    ['Brunch', 'Brunch', '#c2a15c'], ['Catchup', 'Catchup', '#73ad9a'],
+    ['Study & work', 'StudyWork', '#87a1c0', 'Study &\nwork'], ['Live music', 'LiveMusic', '#ac8ec4'],
   ] },
   { name: 'Sensory picks', cards: [
-    ['Quiet now', 'QuietNow', '#c4dcd5'], ['Natural light', 'NaturalLight', '#eee0ba', 'Natural\nlight'],
-    ['Outdoor seating', 'OutdoorSeating', '#ccddbe', 'Outdoor\nseating'], ['Booths & corners', 'BoothsCorners', '#e3cdbf', 'Booths &\ncorners'],
+    ['Quiet now', 'QuietNow', '#6cada7'], ['Natural light', 'NaturalLight', '#c0a569', 'Natural\nlight'],
+    ['Outdoor seating', 'OutdoorSeating', '#90ad7a', 'Outdoor\nseating'], ['Booths & corners', 'BoothsCorners', '#c19682', 'Booths &\ncorners'],
   ] },
   { name: 'Place types', cards: [
-    ['Cafés', 'Cafes', '#dccdbc'], ['Restaurants', 'Restaurants', '#eccbbf'],
-    ['Bakeries', 'Bakeries', '#ebd7b4'], ['Events', 'Events', '#d9cbe6'],
+    ['Cafés', 'Cafes', '#b2977e'], ['Restaurants', 'Restaurants', '#d18d79'],
+    ['Bakeries', 'Bakeries', '#c59e6d'], ['Events', 'Events', '#a78dc9'],
   ] },
 ];
 
@@ -37,6 +39,11 @@ for (const [key, page] of Object.entries(PAGES)) {
     inventory.set(row.id, { ...discovered, ...row, page: key, type: row.type || (key === 'cafes' ? 'Café' : key === 'dining' ? 'Restaurant' : key === 'nightlife' ? 'Bar' : key === 'events' ? 'Event' : discovered?.cat || row.meta?.split(' · ')[0] || 'Place') });
   }
 }
+// Real photos from the Figma image cluster, matched by place. Places without a supplied photo borrow a sample.
+const PHOTO_BY_ID = { foxy: CAROUSEL[0], sentient: PHOTO.p0609, graveface: PHOTO.p0908, gallery: PHOTO.p0608, bean: PHOTO.p0602, grey: PHOTO.p0610, husk: PHOTO.p0801, cotton: PHOTO.p0802, kitchen: PHOTO.p0803, rocks: PHOTO.p0804, lanie: PHOTO.p0805, alligator: PHOTO.p0806, treehouse: PHOTO.p0807 };
+const SAMPLES = [PHOTO.p0603, PHOTO.p0604, PHOTO.p0602, PHOTO.p0908];
+let sampleAt = 0;
+const photoFor = (p) => PHOTO_BY_ID[p.id] || p.img || SAMPLES[sampleAt++ % SAMPLES.length];
 const artwork = { cafes: ['Cafes', '#dccdbc'], dining: ['Restaurants', '#eccbbf'], nightlife: ['Romantic', '#e9c2cd'], events: ['Events', '#d9cbe6'], more: ['LowKey', '#cfd7bb'], foryou: ['StudyWork', '#c8d6e4'] };
 export const PLACES = [...inventory.values()].map(p => {
   // Foxy's venue screen explicitly describes Natural light and Patio seating.
@@ -57,14 +64,24 @@ export const PLACES = [...inventory.values()].map(p => {
   add(p.l != null && p.l <= 2 && p.s != null && p.s <= 3, 'Romantic');
   add(p.s != null && p.s <= 2 && ['Café', 'Bookstore'].includes(p.type), 'Study & work');
   add(p.id === 'opening', 'New in Savannah');
-  return { ...p, l: lightLevel, tags, art, color, area: p.type === 'Event' ? p.meta?.split(' · ')[0] || 'Savannah' : 'Savannah', distance: p.dist || p.meta?.match(/[0-9.]+ mi/)?.[0] || 'Nearby', sound: SOUND_W[p.s] || 'Unknown', light: LIGHT_W[lightLevel] || 'Unknown', crowd: CROWD_W[p.c] || 'Unknown', seating: p.seat?.includes('outdoor') ? p.type === 'Event' ? 'Outdoor' : 'Patio' : p.seat?.includes('booth') ? 'Booths' : p.seat?.includes('indoor') ? 'Indoor' : 'Unknown' };
+  return { ...p, photo: photoFor(p), l: lightLevel, tags, art, color, area: p.type === 'Event' ? p.meta?.split(' · ')[0] || 'Savannah' : 'Savannah', distance: p.dist || p.meta?.match(/[0-9.]+ mi/)?.[0] || 'Nearby', sound: SOUND_W[p.s] || 'Unknown', light: LIGHT_W[lightLevel] || 'Unknown', crowd: CROWD_W[p.c] || 'Unknown', seating: p.seat?.includes('outdoor') ? p.type === 'Event' ? 'Outdoor' : 'Patio' : p.seat?.includes('booth') ? 'Booths' : p.seat?.includes('indoor') ? 'Indoor' : 'Unknown' };
 });
 // Figma includes Bakeries; the existing inventory has none. One explicit fixture
 // keeps this card usable until bakery data is supplied.
-PLACES.push({ id: 'bakery-demo', name: 'Auspicious Baking Co.', type: 'Bakery', area: 'Savannah', distance: '2.1 mi', s: 2, l: 4, c: 2, seat: ['outdoor'], sound: 'Quiet', light: 'Natural', crowd: 'Calm', seating: 'Patio', art: 'Bakeries', color: '#ebd7b4', tags: ['Bakeries', 'Brunch', 'Low-key', 'Cozy', 'Quiet now', 'Outdoor seating', 'Natural light', 'New in Savannah'] });
+PLACES.push({ id: 'bakery-demo', name: 'Auspicious Baking Co.', type: 'Bakery', area: 'Savannah', distance: '2.1 mi', s: 2, l: 4, c: 2, seat: ['outdoor'], sound: 'Quiet', light: 'Natural', crowd: 'Calm', seating: 'Patio', art: 'Bakeries', photo: PHOTO.p0603, color: '#ebd7b4', tags: ['Bakeries', 'Brunch', 'Low-key', 'Cozy', 'Quiet now', 'Outdoor seating', 'Natural light', 'New in Savannah'] });
 
 export function matchesFilters(place, filters) {
-  return filters.every(f => f === 'Quiet' ? place.s != null && place.s <= 2 : f === 'Natural light' ? place.tags.includes('Natural light') : f === 'Outdoor seating' ? ['Patio', 'Outdoor'].includes(place.seating) : f === 'Less crowded' && place.c != null && place.c <= 2);
+  return filters.every(f => {
+    if (f === 'Quiet') return place.s != null && place.s <= 2;
+    if (f === 'Lively') return place.s != null && place.s >= 4;
+    if (f === 'Natural light') return place.tags.includes('Natural light');
+    if (f === 'Soft light') return place.l != null && place.l <= 3;
+    if (f === 'Bright light') return place.l != null && place.l >= 4;
+    if (f === 'Outdoor seating') return ['Patio', 'Outdoor'].includes(place.seating);
+    if (f === 'Less crowded') return place.c != null && place.c <= 2;
+    if (f === 'Busy') return place.c != null && place.c >= 4;
+    return true;
+  });
 }
 export function searchPlaces(query, category, filters, hasSavedPlace, mode) {
   const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();

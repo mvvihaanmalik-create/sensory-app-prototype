@@ -1,13 +1,20 @@
-import { useRef, useState } from 'react';
-import { motion, useTransform } from 'motion/react';
+import { Ph } from './phosphor.jsx';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion, useTransform } from 'motion/react';
 import { uri } from './svgs.js';
 import { drops, ripples, toTransition, LOOP } from './fountain.js';
 import { LAMP, lampCore, lampGlow, lampHalo } from './lamp.js';
 import { GENTLE, INK, INK2, useScale } from './ui.jsx';
-import sceneMorning from './assets/scene-morning.jpg';
+import { SCENES } from './scenes.js';
 import { usePullDown } from './Discover.jsx';
 import { H } from './homeUpdateAssets.js';
+import { RippleIcon } from './venueIcons.jsx';
+import { VP } from './venuePhotos.js';
+import { PHOTO } from './remainingPhotos.js';
+import { CAROUSEL } from './venueFinalPhotos.js';
+import { photoBackground } from './venueFinalPhotos.js';
 import { ExploreFeed } from './Explore.jsx';
+import cafeCopper from './assets/home-update/fy-copper.jpg';
 
 const lightGlass = {
   background: 'rgba(255,255,255,0.62)', border: '1px solid rgba(255,255,255,0.7)', boxShadow: '0 4px 14px rgba(27,42,68,0.1)',
@@ -15,110 +22,194 @@ const lightGlass = {
 const cardGlass = {
   background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(20,24,31,0.08)', boxShadow: '0 4px 14px rgba(27,42,68,0.05)',
 };
+const DK = createContext(false); // Settings > App comfort > Theme > Dark: the whole Home goes dark, not just the hero
 const h2 = { fontSize: 24, fontWeight: 600, lineHeight: '28px', letterSpacing: -0.36, color: INK };
 
-function Hero({ reduce, pull }) {
+function Layer({ l }) {
+  const initial = {}, animate = {}, transition = {};
+  for (const k of ['opacity', 'x', 'y', 'scale']) {
+    const t = l.t?.[k];
+    if (t) { initial[k] = t.values[0]; animate[k] = t.values; transition[k] = toTransition(t); }
+  }
+  return (
+    <motion.div className="abs" initial={initial} animate={animate} transition={transition}
+      style={{ left: l.x, top: l.y, width: l.w, height: l.h, borderRadius: l.round ? '50%' : l.cr, background: l.bg, border: l.border, boxShadow: l.glow, rotate: l.rot, filter: l.blur ? `blur(${l.blur}px)` : undefined, transformOrigin: l.rot ? '0 0' : '50% 50%', pointerEvents: 'none' }}>
+      {l.k?.map((c, i) => <Layer key={i} l={c} />)}
+    </motion.div>
+  );
+}
+
+function MorningMotion() {
+  return (
+    <>
+      {drops.map((d) => (
+        <motion.div key={d.id} className="abs" data-node-id={d.id}
+          style={{ left: d.left, top: d.top, width: d.size, height: d.size, borderRadius: '50%', background: '#fff' }}
+          initial={{ x: 0, y: 0, opacity: 0 }}
+          animate={{ x: d.t.x.values, y: d.t.y.values, opacity: d.t.opacity.values }}
+          transition={{ x: toTransition(d.t.x), y: toTransition(d.t.y), opacity: toTransition(d.t.opacity) }} />
+      ))}
+      {ripples.map((r) => (
+        <motion.div key={r.id} className="abs" data-node-id={r.id}
+          style={{ left: 130, top: 305, width: 34, height: 6, borderRadius: '50%', border: '1.2px solid #fff', transformOrigin: '50% 50%' }}
+          initial={{ scale: 0.35, opacity: 0 }}
+          animate={{ scale: r.t.scale.values, opacity: r.t.opacity.values }}
+          transition={{ scale: toTransition(r.t.scale), opacity: toTransition(r.t.opacity) }} />
+      ))}
+      {/* Motion · street lamp: warm halo, glow and lantern light swelling slowly on the same 6 s loop */}
+      {[
+        { id: '1067:5930', size: 96, color: '#ff9a1f', blur: 12, t: lampHalo, rest: 0.3 },
+        { id: '1067:5931', size: 54, color: '#ffb82e', blur: 6, t: lampGlow, rest: 0.45 },
+      ].map((l) => (
+        <motion.div key={l.id} className="abs" data-node-id={l.id}
+          style={{ left: LAMP.x - l.size / 2, top: LAMP.y - l.size / 2, width: l.size, height: l.size, borderRadius: '50%', background: l.color, filter: `blur(${l.blur}px)`, pointerEvents: 'none' }}
+          initial={{ opacity: l.rest, scale: 1 }}
+          animate={{ opacity: l.t.opacity.values, scale: l.t.scale.values }}
+          transition={{ opacity: toTransition(l.t.opacity), scale: toTransition(l.t.scale) }} />
+      ))}
+      <motion.div className="abs" data-node-id="1067:5932"
+        style={{ left: LAMP.x - 5, top: LAMP.y - 7, width: 10, height: 14, borderRadius: 5, background: '#ffd17a', filter: 'blur(2px)', pointerEvents: 'none' }}
+        initial={{ opacity: 0.6 }}
+        animate={{ opacity: lampCore.opacity.values }}
+        transition={{ opacity: toTransition(lampCore.opacity) }} />
+    </>
+  );
+}
+
+function Hero({ reduce, pull, scene }) {
   const fade = useTransform(pull, [0, 120], [1, 0]);
   const pulse = reduce ? {} : {
     animate: { scale: [1, 1.025, 1] },
     transition: { duration: LOOP, times: [0, 0.5, 1], ease: 'easeInOut', repeat: Infinity },
   };
+  const { off } = scene;
   return (
-    <motion.div className="abs" style={{ left: 0, top: 0, width: 440, height: 314, overflow: 'hidden', borderRadius: '0 0 32px 32px', boxShadow: '0 8px 12px rgba(13,15,26,0.12)', opacity: fade }}>
-      {/* Scene art + Motion · fountain share one 440x550 frame at y -130, pulsing about its centre */}
-      <motion.div className="abs" style={{ left: 0, top: -130, width: 440, height: 550, transformOrigin: '50% 50%' }} {...pulse}>
-        <img src={sceneMorning} alt="" className="abs" style={{ left: 0, top: 130, width: 440, height: 314, display: 'block' }} />
-        {!reduce && (
-          <div className="abs" style={{ left: 0, top: 130, width: 440, height: 314 }}>
-            {drops.map((d) => (
-              <motion.div key={d.id} className="abs" data-node-id={d.id}
-                style={{ left: d.left, top: d.top, width: d.size, height: d.size, borderRadius: '50%', background: '#fff' }}
-                initial={{ x: 0, y: 0, opacity: 0 }}
-                animate={{ x: d.t.x.values, y: d.t.y.values, opacity: d.t.opacity.values }}
-                transition={{ x: toTransition(d.t.x), y: toTransition(d.t.y), opacity: toTransition(d.t.opacity) }} />
-            ))}
-            {ripples.map((r) => (
-              <motion.div key={r.id} className="abs" data-node-id={r.id}
-                style={{ left: 130, top: 305, width: 34, height: 6, borderRadius: '50%', border: '1.2px solid #fff', transformOrigin: '50% 50%' }}
-                initial={{ scale: 0.35, opacity: 0 }}
-                animate={{ scale: r.t.scale.values, opacity: r.t.opacity.values }}
-                transition={{ scale: toTransition(r.t.scale), opacity: toTransition(r.t.opacity) }} />
-            ))}
-            {/* Motion · street lamp: warm halo, glow and lantern light swelling slowly on the same 6 s loop */}
-            {[
-              { id: '1067:5930', size: 96, color: '#ff9a1f', blur: 12, t: lampHalo, rest: 0.3 },
-              { id: '1067:5931', size: 54, color: '#ffb82e', blur: 6, t: lampGlow, rest: 0.45 },
-            ].map((l) => (
-              <motion.div key={l.id} className="abs" data-node-id={l.id}
-                style={{ left: LAMP.x - l.size / 2, top: LAMP.y - l.size / 2, width: l.size, height: l.size, borderRadius: '50%', background: l.color, filter: `blur(${l.blur}px)`, pointerEvents: 'none' }}
-                initial={{ opacity: l.rest, scale: 1 }}
-                animate={{ opacity: l.t.opacity.values, scale: l.t.scale.values }}
-                transition={{ opacity: toTransition(l.t.opacity), scale: toTransition(l.t.scale) }} />
-            ))}
-            <motion.div className="abs" data-node-id="1067:5932"
-              style={{ left: LAMP.x - 5, top: LAMP.y - 7, width: 10, height: 14, borderRadius: 5, background: '#ffd17a', filter: 'blur(2px)', pointerEvents: 'none' }}
-              initial={{ opacity: 0.6 }}
-              animate={{ opacity: lampCore.opacity.values }}
-              transition={{ opacity: toTransition(lampCore.opacity) }} />
-          </div>
-        )}
+    <motion.div className="abs" style={{ left: 0, top: 0, width: 440, height: 314, overflow: 'hidden', borderRadius: '0 0 32px 32px', opacity: fade }}>
+      <AnimatePresence initial={false}>
+      <motion.div key={scene.id} className="abs" style={{ inset: 0 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 1, transition: { duration: 0.35 } }} transition={{ duration: 0.3 }}>
+      {/* Scene art + its Motion layer share one 440x550 frame at y -off, pulsing about its centre */}
+      <motion.div className="abs" style={{ left: 0, top: -off, width: 440, height: 550, transformOrigin: '50% 50%' }} {...pulse}>
+        <img src={scene.art} alt="" className="abs" style={{ left: 0, top: off, width: 440, height: 314, display: 'block' }} />
+        {!reduce && (scene.layers
+          ? <div className="abs" style={{ left: 0, top: 0, width: 440, height: 550 }}>{scene.layers.map((l, i) => <Layer key={i} l={l} />)}</div>
+          : (
+            <div className="abs" style={{ left: 0, top: off, width: 440, height: 314 }}>
+              <MorningMotion />
+            </div>
+          ))}
       </motion.div>
-      <div className="abs" style={{ left: 0, top: 0, width: 440, height: 240, background: 'linear-gradient(180deg, rgba(255,252,247,0.85) 0%, rgba(255,252,247,0.62) 60%, rgba(255,252,247,0) 100%)' }} />
+      <div className="abs" style={{ left: 0, top: 0, width: 440, height: 240, background: `linear-gradient(180deg, rgba(${scene.scrim},0.85) 0%, rgba(${scene.scrim},0.62) 60%, rgba(${scene.scrim},0) 100%)` }} />
+      </motion.div>
+      </AnimatePresence>
     </motion.div>
   );
 }
 
+// Swipe on the hero: right to left goes to the next scene, left to right to the previous one
+function useHeroSwipe(el, onStep) {
+  const scale = useScale();
+  const sc = useRef(scale); sc.current = scale;
+  const cb = useRef(onStep); cb.current = onStep;
+  useEffect(() => {
+    const node = el.current;
+    if (!node) return undefined;
+    let g = null;
+    const ts = (e) => {
+      if (e.touches.length !== 1) { g = null; return; }
+      const t = e.touches[0], r = node.getBoundingClientRect();
+      g = (t.clientY - r.top) / sc.current + node.scrollTop < 314 ? { x: t.clientX, y: t.clientY } : null;
+    };
+    const tm = (e) => { if (g && e.touches.length) { g.lx = e.touches[0].clientX; g.ly = e.touches[0].clientY; } };
+    const te = (e) => {
+      if (!g) return;
+      const t = e.changedTouches[0] || { clientX: g.lx ?? g.x, clientY: g.ly ?? g.y };
+      const dx = (t.clientX - g.x) / sc.current, dy = (t.clientY - g.y) / sc.current;
+      g = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) cb.current?.(dx < 0 ? 1 : -1);
+    };
+    const tc = () => { g = null; };
+    // mouse drag (laptop): same gesture, and swallow the click that follows a swipe
+    let m = null, swiped = false;
+    const md = (e) => {
+      if (e.button !== 0) return;
+      const r = node.getBoundingClientRect();
+      m = (e.clientY - r.top) / sc.current + node.scrollTop < 314 ? { x: e.clientX, y: e.clientY } : null;
+      swiped = false;
+    };
+    const mu = (e) => {
+      if (!m) return;
+      const dx = (e.clientX - m.x) / sc.current, dy = (e.clientY - m.y) / sc.current;
+      m = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) { swiped = true; cb.current?.(dx < 0 ? 1 : -1); }
+    };
+    const ck = (e) => { if (swiped) { swiped = false; e.stopPropagation(); e.preventDefault(); } };
+    node.addEventListener('mousedown', md);
+    window.addEventListener('mouseup', mu);
+    node.addEventListener('click', ck, true);
+    node.addEventListener('touchstart', ts, { passive: true });
+    node.addEventListener('touchmove', tm, { passive: true });
+    node.addEventListener('touchend', te, { passive: true });
+    node.addEventListener('touchcancel', tc, { passive: true });
+    return () => { node.removeEventListener('mousedown', md); window.removeEventListener('mouseup', mu); node.removeEventListener('click', ck, true); node.removeEventListener('touchstart', ts); node.removeEventListener('touchmove', tm); node.removeEventListener('touchend', te); node.removeEventListener('touchcancel', tc); };
+  }, [el]);
+}
+
 const CATS = [
-  {k:'Cafe',label:'Café',page:'cafes',x:8.5,y:3.98,size:58.438},
+  {k:'Cafe',label:'Cafés',page:'cafes',x:8.5,y:3.98,size:58.438},
   {k:'Dining',label:'Dining',page:'dining',x:0,y:-1.7,size:68},
   {k:'Nightlife',label:'Nightlife',page:'nightlife',x:7.28,y:6.43,size:54.188},
   {k:'Events',label:'Events',page:'events',x:2.13,y:-1.06,size:63.75},
   {k:'More',label:'More',page:'more',x:2.76,y:3.98,size:60.031},
 ];
 function Categories({onOpen}) {
- return <div className="abs" style={{left:24,top:322,width:392,display:'flex',justifyContent:'space-between'}}>{CATS.map(c=><motion.button key={c.k} onClick={()=>onOpen?.(c.page)} whileTap={{scale:.92}} transition={GENTLE} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:7.685}}><div style={{width:68,height:68,position:'relative',overflow:'hidden'}}><div style={{position:'absolute',left:c.x,top:c.y,width:c.size,height:c.size,overflow:'hidden'}}><img src={H['himg'+c.k+'TransparentPng']} alt="" style={{position:'absolute',width:c.k==='Cafe'?'110%':'100%',height:c.k==='Cafe'?'110%':'100%',left:c.k==='Cafe'?'-5%':c.k==='Events'?'0.15%':0,top:c.k==='Cafe'?'-5%':c.k==='Events'?'10.26%':0,objectFit:'contain'}}/></div></div><span style={{fontSize:12,color:INK2,lineHeight:'normal'}}>{c.label}</span></motion.button>)}</div>;
+ const dk = useContext(DK);
+ return <div className="abs" style={{left:24,top:322,width:392,display:'flex',justifyContent:'space-between'}}>{CATS.map(c=><motion.button key={c.k} onClick={()=>onOpen?.(c.page)} whileTap={{scale:.92}} transition={GENTLE} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:7.685}}><div style={{width:68,height:68,position:'relative',overflow:'hidden'}}><div style={{position:'absolute',left:c.x,top:c.y,width:c.size,height:c.size,overflow:'hidden'}}><img src={H['himg'+c.k+'TransparentPng']} alt="" style={{position:'absolute',width:c.k==='Cafe'?'110%':'100%',height:c.k==='Cafe'?'110%':'100%',left:c.k==='Cafe'?'-5%':c.k==='Events'?'0.15%':0,top:c.k==='Cafe'?'-5%':c.k==='Events'?'10.26%':0,objectFit:'contain'}}/></div></div><span style={{fontSize:12,color:dk?'rgba(244,245,249,0.75)':INK2,lineHeight:'normal'}}>{c.label}</span></motion.button>)}</div>;
 }
 
 function SectionHeader({ top, title, onSeeAll }) {
+  const dk = useContext(DK);
   return (
     <div className="abs" style={{ left: 24, top, width: 392, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      <p className="nowrap" style={h2}>{title}</p>
-      <button className="nowrap" onClick={onSeeAll} style={{ fontSize: 13, fontWeight: 700, color: INK }}>See all</button>
+      <p className="nowrap" style={dk ? { ...h2, color: '#f4f5f9' } : h2}>{title}</p>
+      {onSeeAll && <button className="nowrap" onClick={onSeeAll} style={{ fontSize: 13, fontWeight: 700, color: dk ? '#f4f5f9' : INK }}>See all</button>}
     </div>
   );
 }
 
 /* ---------- For you stack (component 685:328, variants Front=A/B/C) ---------- */
 const VENUES = {
-  A: { name: 'Foxy Loxy Café', meta: 'Café · 0.5 mi', level: 'Level 2', photo: H.himgPhotoSlot5 },
-  B: { name: 'Gallery Espresso', meta: 'Café · 1.1 mi', level: 'Level 1', photo: H.himgPhotoSlot4 },
-  C: { name: 'The Sentient', meta: 'Café · 0.8 mi', level: 'Level 2' , photo: H.himgPhotoSlot3 },
+  A: { name: 'Fern & Fable', meta: 'Café · 0.5 mi', level: 'Level 2', photo: CAROUSEL[0] }, // same photo as the venue page hero
+  B: { name: 'Gallery Espresso', meta: 'Café · 1.1 mi', level: 'Level 1', photo: PHOTO.p0602 },
+  C: { name: 'The Sentient', meta: 'Café · 0.8 mi', level: 'Level 2' , photo: PHOTO.p0603 },
+  D: { name: 'Juniper Coffee', meta: 'Café · 1.1 mi', level: 'Level 3', photo: PHOTO.p0608 },
+  E: { name: 'Copper Window Café', meta: 'Café · 1.4 mi', level: 'Level 1', photo: cafeCopper },
 };
-const KEYS = ['A', 'B', 'C'];
+const KEYS = ['A', 'B', 'D', 'E', 'C'];
 const ROLE = {
   front: { x: 0, y: 0, rotate: 0, scale: 1, opacity: 1 },
   right: { x: 99.53, y: 11.25, rotate: 3, scale: 0.8, opacity: 0.55 },
   left: { x: -99.82, y: 0.36, rotate: -3, scale: 0.8, opacity: 0.55 },
+  hidden: { x: 0, y: 11.25, rotate: 0, scale: 0.8, opacity: 0 },
 };
-const Z = { front: 3, right: 2, left: 1 };
-const DOT_FOR = { A: 1, B: 2, C: 0 };
+const Z = { front: 3, right: 2, left: 1, hidden: 0 };
 
+// Venue card / Feature, outlined version (Figma 1275:7232): cream card, inset photo, navy text below
 function VenueCard({ v }) {
+  const dk = useContext(DK);
   return (
     <>
-      <img src={v.photo} alt="" className="abs" style={{inset:0,width:260,height:350,objectFit:'cover'}} />
-      <div className="abs" style={{ left: 10, top: 10, display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 999,
-        background: '#f7f5f1', boxShadow: '0 4px 14px rgba(27,42,68,0.05)' }}>
-        <img src={uri('rippleCard')} alt="" style={{ width: 28, height: 28, display: 'block' }} />
-        <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: INK }}>{v.level}</span>
+      <div className="abs" style={{ left: 8, top: 9, width: 244, height: 222, borderRadius: 25, ...photoBackground(v.photo, v.crop) }} />
+      <div className="abs" style={{ left: 14, top: 15, height: 32, display: 'flex', alignItems: 'center', gap: 2, padding: '0 12px 0 4px', borderRadius: 999,
+        background: 'rgba(255,248,240,0.2)', boxShadow: '0 4px 14px rgba(27,42,68,0.05)', WebkitBackdropFilter: 'blur(16px)', backdropFilter: 'blur(16px)' }}>
+        <RippleIcon k="rippleCard" size={28} color="#fff" />
+        <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{v.level}</span>
       </div>
-      <div className="abs" style={{ left: 10, top: 224, width: 236, height: 112, borderRadius: 20, border: '1px solid rgba(20,24,31,0.08)',
-        background:'rgba(255,255,255,0.8)', WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)', padding: 16, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
-        <p className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: INK }}>{v.name}</p>
-        <p className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: INK2 }}>{v.meta}</p>
+      <div className="abs" style={{ left: 14, top: 248, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+        <p className="nowrap" style={{ fontSize: 17, fontWeight: 700, lineHeight: '20px', color: dk ? '#fff' : '#2a2650' }}>{v.name}</p>
+        <p className="nowrap" style={{ fontSize: 13, fontWeight: 500, lineHeight: '16px', color: dk ? 'rgba(255,255,255,0.85)' : '#2a2650' }}>{v.meta}</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '2px 0' }}>
-          <img src={uri('dot')} alt="" style={{ width: 8, height: 8, display: 'block' }} />
-          <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: INK }}>Good fit</span>
+          <span style={{ width: 8, height: 8, borderRadius: 4, background: dk ? '#fff' : '#5e5a7e', display: 'block' }} />
+          <span className="nowrap" style={{ fontSize: 13, fontWeight: 700, color: dk ? '#fff' : '#5e5a7e' }}>Fits you</span>
         </div>
       </div>
     </>
@@ -126,12 +217,18 @@ function VenueCard({ v }) {
 }
 
 function ForYouStack({ onOpenVenue }) {
+  const dk = useContext(DK);
   const [front, setFront] = useState('A');
   const scale = useScale();
   const drag = useRef(null);
   const [dx, setDx] = useState(0);
+  // Cards are painted once at full size (scale 1), then settle into their roles. The browser keeps that sharp full-size
+  // raster for the card's layer, so shrinking and growing never swaps in a blurry low-res copy.
+  const [ready, setReady] = useState(false);
+  useEffect(() => { let a = requestAnimationFrame(() => { a = requestAnimationFrame(() => setReady(true)); }); return () => cancelAnimationFrame(a); }, []);
   const fi = KEYS.indexOf(front);
-  const roleOf = (k) => (k === front ? 'front' : k === KEYS[(fi + 1) % 3] ? 'right' : 'left');
+  const n = KEYS.length;
+  const roleOf = (k) => { const o = (KEYS.indexOf(k) - fi + n) % n; return o === 0 ? 'front' : o === 1 ? 'right' : o === n - 1 ? 'left' : 'hidden'; };
 
   const dragged = useRef(false);
   const onDown = (e) => { dragged.current = false; drag.current = { x: e.clientX, y: e.clientY, moved: false, id: e.pointerId }; };
@@ -147,7 +244,7 @@ function ForYouStack({ onOpenVenue }) {
   const onUp = () => {
     const d = drag.current; drag.current = null; if (!d) return;
     dragged.current = d.moved;
-    if (d.moved && Math.abs(dx) > 50) setFront(dx < 0 ? KEYS[(fi + 1) % 3] : KEYS[(fi + 2) % 3]);
+    if (d.moved && Math.abs(dx) > 50) setFront(dx < 0 ? KEYS[(fi + 1) % n] : KEYS[(fi + n - 1) % n]);
     setDx(0);
   };
 
@@ -158,25 +255,29 @@ function ForYouStack({ onOpenVenue }) {
         const isFront = role === 'front';
         return (
           <motion.div key={k} className="abs"
-            style={{ left: 90, top: 0, width: 260, height: 350, zIndex: Z[role], transformOrigin: '50% 50%', cursor: isFront ? 'grab' : 'pointer', touchAction: 'pan-y' }}
+            style={{ left: 90, top: 0, width: 260, height: 350, zIndex: Z[role], transformOrigin: '50% 50%', willChange: 'transform', cursor: isFront ? 'grab' : 'pointer', pointerEvents: role === 'hidden' ? 'none' : 'auto', touchAction: 'pan-y' }}
             initial={false}
-            animate={{ ...ROLE[role], x: ROLE[role].x + (isFront ? dx : 0), rotate: ROLE[role].rotate + (isFront ? dx / 40 : 0) }}
-            transition={isFront && dx !== 0 ? { type: 'spring', stiffness: 600, damping: 40 } : GENTLE}
+            animate={{ ...ROLE[role], scale: ready ? ROLE[role].scale : 1, x: ROLE[role].x + (isFront ? dx : 0), rotate: ROLE[role].rotate + (isFront ? dx / 40 : 0) }}
+            transition={!ready ? { duration: 0 } : isFront && dx !== 0 ? { type: 'spring', stiffness: 600, damping: 40 } : GENTLE}
             onClick={() => { if (dragged.current) return; if (!isFront) setFront(k); else if (k === 'A') onOpenVenue?.(); }}
             onPointerDown={isFront ? onDown : undefined} onPointerMove={isFront ? onMove : undefined}
             onPointerUp={isFront ? onUp : undefined} onPointerCancel={isFront ? onUp : undefined}
             whileTap={!isFront ? { scale: 0.78 } : undefined}>
-            <div className="abs" style={{ inset: 0, borderRadius: 32, overflow: 'hidden', background: 'rgba(255,255,255,0.85)',
-              border: '1px solid rgba(20,24,31,0.08)', boxShadow: '0 12px 32px rgba(27,42,68,0.06)' }}>
+            {/* shadow lives on its own layer: the card below is masked, which would clip a shadow set on it */}
+            <div className="abs" aria-hidden style={{ inset: 0, borderRadius: 32, pointerEvents: 'none',
+              boxShadow: isFront ? `0 18px 44px rgba(${dk ? '0,0,0,0.55' : '27,42,68,0.2'})` : `0 12px 32px rgba(${dk ? '0,0,0,0.3' : '27,42,68,0.06'})`, transition: 'box-shadow 0.3s' }} />
+            <div className="abs" style={{ inset: 0, borderRadius: 32, overflow: 'hidden', background: dk ? '#171a26' : '#f7f5f1',
+              boxShadow: `0 0 0 1px ${dk ? 'rgba(255,255,255,0.22)' : 'rgba(94,90,126,0.22)'}`,
+              isolation: 'isolate', transform: 'translateZ(0)', WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
               <VenueCard v={VENUES[k]} />
             </div>
           </motion.div>
         );
       })}
-      <div className="abs" style={{ left: 196, top: 364, display: 'flex', gap: 6 }}>
-        {[0, 1, 2].map((i) => {
-          const on = DOT_FOR[front] === i;
-          return <motion.div key={i} initial={false} animate={{ width: on ? 22 : 7, backgroundColor: on ? '#14181f' : '#c9d2de' }} transition={GENTLE}
+      <div className="abs" style={{ left: 183, top: 364, display: 'flex', gap: 6 }}>
+        {KEYS.map((_, i) => {
+          const on = fi === i;
+          return <motion.div key={i} initial={false} animate={{ width: on ? 22 : 7, backgroundColor: on ? (dk ? '#fff' : '#14181f') : (dk ? 'rgba(255,255,255,0.28)' : '#c9d2de') }} transition={GENTLE}
             style={{ height: 7, borderRadius: 4 }} />;
         })}
       </div>
@@ -184,76 +285,104 @@ function ForYouStack({ onOpenVenue }) {
   );
 }
 
+// Sound level badge for ranking rows: speaker icon on a tier-coloured disc (same green / amber as the map pins) with a soft pulse.
+const SOUND_TIER = ['#3FA06B', '#F29A3A', '#D84B43'];
+function SoundBadge({ level }) {
+  const dk = useContext(DK);
+  const c = SOUND_TIER[Math.min(Math.max(level, 1), 3) - 1];
+  return (
+    <span aria-label={`Sound level ${level}`} style={{ position: 'relative', width: 44, height: 44, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <motion.span aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: 22, boxShadow: `0 0 0 1.5px ${c}` }}
+        animate={{ scale: [1, 1.45], opacity: [0.5, 0] }} transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }} />
+      <span style={{ position: 'absolute', inset: 0, borderRadius: 22, background: dk ? '#171a26' : '#fff', boxShadow: `inset 0 0 0 2px ${c}` }} />
+      <motion.span style={{ position: 'relative', display: 'flex' }} animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}>
+        <Ph n={level === 1 ? 'speaker-low' : 'speaker-high'} size={22} fill={dk ? '#fff' : '#1b2a44'} />
+      </motion.span>
+    </span>
+  );
+}
+
 function RankingRow({ top, n, name, meta, level, onClick, photo, wordmark }) {
+  const dk = useContext(DK);
   return (
     <motion.button className="abs" onClick={onClick} whileTap={{ scale: 0.985 }} transition={GENTLE}
-      style={{ left: 24, top, width: 392, height: 92, borderRadius: 24, ...cardGlass, display: 'flex', alignItems: 'center', gap: 16, padding: '0 20px', textAlign: 'left' }}>
-      <span style={{ ...h2, width: 22 }}>{n}</span>
-      {wordmark ? <div style={{width:56,height:56,borderRadius:28,background:'#fff8ef',color:'#c62f29',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',fontWeight:700,flex:'none'}}><span style={{fontSize:11,lineHeight:'11px',textAlign:'center'}}>FOXY<br/>LOXY</span><span style={{fontSize:6}}>CAFÉ</span></div> : <img src={photo} alt="" style={{width:56,height:56,objectFit:'cover',borderRadius:12,display:'block'}}/>}
+      style={{ left: 24, top, width: 392, height: 92, borderRadius: 24, ...(dk ? { background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.12)', boxShadow: 'none' } : cardGlass), display: 'flex', alignItems: 'center', gap: 16, padding: '0 20px', textAlign: 'left' }}>
+      <span style={{ ...h2, width: 22, color: dk ? '#f4f5f9' : INK }}>{n}</span>
+      {wordmark ? <div style={{width:56,height:56,borderRadius:28,background:'#fff8ef',color:'#c62f29',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',fontWeight:700,flex:'none'}}><span style={{fontSize:11,lineHeight:'11px',textAlign:'center'}}>FOXY<br/>LOXY</span><span style={{fontSize:6}}>CAFÉ</span></div> : <span style={{width:56,height:56,borderRadius:12,display:'block',...photoBackground(photo, n === 3 ? [.8695651889,.8695651889,.0652174279,.0652174279] : null)}}/>}
       <span style={{ flex: '1 0 0', display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
-        <span className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: INK }}>{name}</span>
-        <span className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: INK2 }}>{meta}</span>
+        <span className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: dk ? '#fff' : INK }}>{name}</span>
+        <span className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: dk ? 'rgba(255,255,255,0.75)' : INK2 }}>{meta}</span>
       </span>
-      <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <img src={uri(level === 1 ? 'ripple1' : 'ripple2')} alt="" style={{ width: 36, height: 36, display: 'block' }} />
-        <span style={{ fontSize: 17, fontWeight: 700, color: INK }}>{level}</span>
-      </span>
+      <SoundBadge level={level} />
     </motion.button>
   );
 }
 
-export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, reduceMotion, pull, onDiscover, pullOn = true, onOpenExplore, exploreLiked }) {
+export default function Home({ onOpenMap, onOpenSearch, onOpenVenue, onOpenPage, onOpenModes, modeLabel = 'Study mode', onScroll, scrollTopKey, reduceMotion, pull, onDiscover, pullOn = true, onOpenSaved, onOpenExplore, exploreLiked, scene = 'morning', dark = false, onStepScene }) {
+  const sc = SCENES.find((x) => x.id === scene) || SCENES[0];
+  const sub = sc.sub, left = sub ? 24 : 23;
+  const promo = sc.promo || { tag: 'Quiet hour', title: 'The Sentient', detail: '2 – 4 pm · 10% off pastries' };
+  const off = promo.cta ? 26 : 0;
+  const pill = modeLabel === 'Study mode' && sc.pill ? sc.pill : modeLabel;
   const scrollRef = useRef(null);
+  // Coming back to Home from another tab starts at the top instead of where it was left
+  useEffect(() => { if (scrollTopKey && scrollRef.current) { scrollRef.current.scrollTop = 0; onScroll?.(0); } }, [scrollTopKey]); // eslint-disable-line react-hooks/exhaustive-deps
   usePullDown({ el: scrollRef, pull, enabled: pullOn, onCommit: onDiscover });
+  useHeroSwipe(scrollRef, onStepScene);
   const r = useTransform(pull, [0, 24], [0, 32]);
   const sh = useTransform(pull, [0, 24], ['0 -10px 28px rgba(42,38,80,0)', '0 -10px 28px rgba(42,38,80,0.12)']);
   return (
-    <motion.div className="abs" style={{ inset: 0, y: pull, overflow: 'hidden', background: '#f7f5f1', borderTopLeftRadius: r, borderTopRightRadius: r, boxShadow: sh, zIndex: 1, userSelect: 'none', WebkitUserSelect: 'none' }} onDragStart={(e) => e.preventDefault()}>
-    <div ref={scrollRef} className="scroll" style={{ background: '#f7f5f1' }} onScroll={(e) => onScroll?.(e.currentTarget.scrollTop)}>
-      <div style={{ position: 'relative', width: 440, height: 2663 }}>
-        <Hero reduce={reduceMotion} pull={pull} />
-        <p className="abs nowrap" style={{ left: 24, top: 59, fontSize: 15, fontWeight: 500, color: INK2 }}>Savannah, GA</p>
+    <motion.div className="abs" style={{ inset: 0, y: pull, overflow: 'hidden', background: dark ? '#0e1119' : '#f7f5f1', borderTopLeftRadius: r, borderTopRightRadius: r, boxShadow: sh, zIndex: 1, userSelect: 'none', WebkitUserSelect: 'none' }} onDragStart={(e) => e.preventDefault()}>
+    <div ref={scrollRef} className="scroll" style={{ background: dark ? '#0e1119' : '#f7f5f1' }} onScroll={(e) => onScroll?.(e.currentTarget.scrollTop)}>
+      <DK.Provider value={dark}>
+      <div className={dark ? 'home-dk' : undefined} style={{ position: 'relative', width: 440, height: 2500 + off }}>
+        <Hero reduce={reduceMotion} pull={pull} scene={sc} />
+        <p className="abs nowrap" style={{ left: 24, top: 59, fontSize: 15, fontWeight: 500, color: sc.dark ? 'rgba(255,255,255,0.8)' : INK2 }}>Savannah, GA</p>
         <motion.button className="abs nowrap" onClick={onOpenModes} whileTap={{ scale: 0.95 }} transition={GENTLE}
-          style={{ right: 22, top: 46, height: 44, padding: '0 16px', borderRadius: 999, ...lightGlass, fontSize: 15, fontWeight: 500, color: INK }}>
-          {modeLabel}
+          style={{ right: 22, top: 56, height: 44, padding: '0 16px', borderRadius: 999, ...lightGlass, fontSize: 15, fontWeight: 500, color: INK }}>
+          {pill}
         </motion.button>
-        <p className="abs nowrap" style={{ left: 24, top: 90, fontSize: 40, fontWeight: 600, lineHeight: '44px', letterSpacing: -1, color: INK }}>Good morning</p>
-        <button type="button" onClick={onOpenSearch} className="abs" style={{ left: 23, top: 145, width: 334, height: 52, borderRadius: 999, ...lightGlass, display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px' }}>
+        <p className="abs nowrap" style={{ left: 24, top: 90, fontSize: 40, fontWeight: 600, lineHeight: '44px', letterSpacing: -1, color: sc.dark ? '#fff' : INK }}>{sc.greeting}</p>
+        {sub && <p className="abs nowrap" style={{ left: 24, top: 140, fontSize: 16, color: sc.dark ? 'rgba(255,255,255,0.8)' : INK2 }}>{sub}</p>}
+        <button type="button" onClick={onOpenSearch} className="abs" style={{ left, top: sub ? 175 : 145, width: 334, height: 52, borderRadius: 999, ...lightGlass, display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px' }}>
           <img src={uri('searchHome')} alt="" style={{ width: 20, height: 20, display: 'block' }} />
-          <span style={{ fontSize: 16, color: '#000' }}>Search places</span>
+          <span style={{ fontSize: 16, color: sc.ph }}>Search places</span>
         </button>
-        <motion.button className="abs" whileTap={{ scale: 0.92 }} transition={GENTLE}
-          style={{ left: 367, top: 147, width: 48, height: 48, borderRadius: 24, ...lightGlass }}>
-          <img src={uri('filterHome')} alt="" className="abs" style={{ left: 11, top: 11, width: 24, height: 24 }} />
+        <motion.button className="abs" aria-label="Saved" onClick={onOpenSaved} whileTap={{ scale: 0.92 }} transition={GENTLE}
+          style={{ left: sub ? 368 : 367, top: sub ? 177 : 147, width: 48, height: 48, borderRadius: 24, ...lightGlass }}>
+          <span className="abs" style={{ left: 12, top: 12, display: 'block' }}><Ph n="bookmark-simple" size={24} fill={sc.dark ? '#fff' : INK} /></span>
         </motion.button>
 
         <Categories onOpen={onOpenPage} />
-        <SectionHeader top={421.17} title="For you" onSeeAll={() => onOpenPage?.('foryou')} />
+        <SectionHeader top={421.17} title="For you" />
         <ForYouStack onOpenVenue={onOpenVenue} />
 
-        <SectionHeader top={946} title="Popular Around you" onSeeAll={() => onOpenPage?.('popular')} />
-        <RankingRow top={998} n={1} photo={H.himgPhotoSlot} name="Gallery Espresso" meta="Café · 1.1 mi" level={1} />
-        <RankingRow top={1106} n={2} wordmark name="Foxy Loxy Café" meta="Café · 0.5 mi" level={2} onClick={onOpenVenue} />
-        <RankingRow top={1214} n={3} photo={H.himgPhotoSlot2} name="The Sentient" meta="Café · 0.8 mi" level={2} />
+        {/* everything below For you sits 40px higher to tighten the gap above Popular */}
+        <div className="abs" style={{ left: 0, top: -40, width: 440, height: 0 }}>
+        <SectionHeader top={964} title="Popular around you" onSeeAll={() => onOpenPage?.('popular')} />
+        <RankingRow top={1016} n={1} photo={PHOTO.p0605} name="Gallery Espresso" meta="Café · 1.1 mi" level={1} />
+        <RankingRow top={1124} n={2} wordmark name="Fern & Fable" meta="Café · 0.5 mi" level={2} onClick={onOpenVenue} />
+        <RankingRow top={1232} n={3} photo={PHOTO.p0606} name="The Sentient" meta="Café · 0.8 mi" level={2} />
 
-        <div className="abs" style={{ left: 24, top: 1346, width: 392, height: 164, borderRadius: 24, overflow: 'hidden', background: '#c2ddd2', boxShadow: '0 12px 32px rgba(27,42,68,0.06)' }}>
-          <span className="abs nowrap" style={{ left: 24, top: 24, padding: '4px 12px', borderRadius: 999, background: INK, color: '#fff', fontSize: 13, fontWeight: 700, boxShadow: '0 6px 18px rgba(27,42,68,0.12)' }}>Quiet hour</span>
-          <p className="abs nowrap" style={{ ...h2, left: 24, top: 60 }}>The Sentient</p>
-          <p className="abs nowrap" style={{ left: 24, top: 96, fontSize: 15, fontWeight: 500, color: INK2 }}>2 – 4 pm · 10% off pastries</p>
-          <button className="abs nowrap" style={{ left: 24, top: 122, fontSize: 13, fontWeight: 700, color: INK }}>Plan a calm visit</button>
+        <div className="abs" style={{ left: 24, top: 1364, width: 392, height: 138 + off, borderRadius: 24, overflow: 'hidden', background: dark ? '#24402f' : '#c2ddd2', boxShadow: '0 12px 32px rgba(27,42,68,0.06)' }}>
+          <span className="abs nowrap" style={{ left: 24, top: 24, padding: '4px 12px', borderRadius: 999, background: dark ? '#fff' : INK, color: dark ? INK : '#fff', fontSize: 13, fontWeight: 700, boxShadow: '0 6px 18px rgba(27,42,68,0.12)' }}>{promo.tag}</span>
+          <p className="abs nowrap" style={{ ...h2, left: 24, top: 60, color: dark ? '#fff' : INK }}>{promo.title}</p>
+          <p className="abs nowrap" style={{ left: 24, top: 96, fontSize: 15, fontWeight: 500, color: dark ? 'rgba(255,255,255,0.8)' : INK2 }}>{promo.detail}</p>
+          {promo.cta && <button className="abs nowrap" style={{ left: 24, top: 122, fontSize: 13, fontWeight: 700, color: dark ? '#fff' : INK }}>{promo.cta}</button>}
         </div>
 
-        <img src={H.himgIllustrationCatchup} alt="" className="abs" style={{left:267,top:1346,width:164,height:164,objectFit:'contain',pointerEvents:'none'}}/>
-        <ExploreFeed onOpen={onOpenExplore} liked={exploreLiked}/>
-        <motion.button className="abs" onClick={onOpenMap} whileTap={{ scale: 0.98 }} transition={GENTLE}
-          style={{ left: 24, top: 1550, width: 392, height: 80, borderRadius: 24, ...cardGlass, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 16px 18px 20px', textAlign: 'left' }}>
-          <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: INK }}>Rather see a map?</span>
-            <span className="nowrap" style={{ fontSize: 13, fontWeight: 500, color: INK2 }}>Calm spots around you, by noise level</span>
-          </span>
-          <span className="nowrap" style={{ border: '1.5px solid rgba(20,24,31,0.08)', borderRadius: 999, padding: '10px 16px', fontSize: 13, fontWeight: 700, color: INK, whiteSpace: 'pre' }}>{'Open map  →'}</span>
-        </motion.button>
+        <img src={H.himgIllustrationCatchup} alt="" className="abs" style={{left:267,top:1364,width:164,height:164,objectFit:'contain',pointerEvents:'none'}}/>
+        <ExploreFeed onOpen={onOpenExplore} liked={exploreLiked} top={1662 + off}/>
+        <div className="abs" style={{ left: 24, top: 1542 + off, width: 392, height: 47, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p className="nowrap" style={{ fontSize: 17, fontWeight: 700, color: dark ? '#f4f5f9' : INK }}>Rather see a map?</p>
+          <motion.button className="nowrap" onClick={onOpenMap} whileTap={{ scale: 0.97 }} transition={GENTLE}
+            style={{ width: 156, height: 47, borderRadius: 999, border: dark ? '1.5px solid rgba(255,255,255,0.7)' : '1.5px solid rgba(20,24,31,0.08)', fontSize: 13, fontWeight: 700, color: dark ? '#fff' : INK, whiteSpace: 'pre' }}>
+            {'Open map  →'}
+          </motion.button>
+        </div>
+        </div>
       </div>
+      </DK.Provider>
     </div>
     </motion.div>
   );

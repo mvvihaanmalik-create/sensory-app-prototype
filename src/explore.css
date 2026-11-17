@@ -1,2 +1,35 @@
 .explore-feed-card{position:relative;width:189px;padding:0;border:0;color:#14181f;flex:none;text-align:left;background:none}.explore-feed-card>.glass{position:relative!important}.explore-feed-card .g-c{position:relative!important;inset:auto!important}
 .explore-post main{padding:56px 24px 48px;display:flex;flex-direction:column;gap:22px;width:440px;color:#14181f;line-height:1.4}.explore-post nav{display:flex;gap:14px;align-items:center;height:25.2px}.explore-post nav h1{font-size:18px;font-weight:600;width:306px}.explore-author{display:flex;gap:12px;align-items:center}.explore-author strong{font-size:16px;font-weight:600}.explore-author p{font-size:12px;color:#6c667b}.explore-tint{background:#e6f1eb;color:#267f70;border-radius:100px;padding:7px 12px;font-size:12px;white-space:nowrap}.explore-author button{padding:8px 15px;font-size:13px}.explore-hero{width:392px;height:354px;object-fit:cover;border-radius:16px}.explore-caption{display:flex;flex-direction:column;gap:10px}.explore-caption h2{font-size:24px;font-weight:600}.explore-caption p{font-size:15px}.explore-tags,.explore-actions{display:flex;align-items:center;gap:8px}.explore-actions{font-size:14px}.explore-actions button{flex:none;display:flex;align-items:center}.explore-share{gap:8px;font-size:13px}.explore-post hr{height:1px;background:#e6e2dd;width:392px;border:0;margin:0}.explore-place{display:flex;flex-direction:column;gap:12px}.explore-place h3{font-size:13px;font-weight:600;color:#6c667b}.explore-place-card{border:1px solid #e6e2dd;border-radius:16px;overflow:hidden;background:white;width:392px;text-align:left}.explore-place-card>div{padding:16px;display:flex;flex-direction:column;gap:7px}.explore-place-card h2{font-size:22px;font-weight:600}.explore-place-card p{font-size:15px;color:#6c667b}.explore-place-card span{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;color:#267f70}.explore-replies{display:flex;flex-direction:column;gap:20px}.explore-replies header{display:flex;align-items:center;justify-content:space-between}.explore-replies h2{font-size:20px;font-weight:600}.explore-replies header span{font-size:12px;color:#6c667b}.explore-reply{display:flex;gap:10px;align-items:flex-start}.explore-reply>img{border-radius:16px;flex:none}.explore-reply>div{display:flex;flex-direction:column;gap:5px;min-width:0}.explore-reply strong{font-size:13px;font-weight:600}.explore-reply p{font-size:14px}.explore-reply small{font-size:12px;color:#6c667b}.explore-all-replies{font-size:13px;font-weight:600;color:#267f70;text-align:left}.explore-reply-form{display:flex;align-items:center;gap:10px}.explore-reply-form>img{border-radius:16px}.explore-reply-form>div{background:white;border-radius:100px;padding:12px 16px;display:flex;align-items:center;gap:8px;width:350px}.explore-reply-form input{width:270px;min-width:0;background:none;border:0;outline:none;font-size:14px;color:#14181f}.explore-reply-form input::placeholder{color:#6c667b}
+
+/* Explore feed · outlined photo cards (Figma Photo review: 190 x 325, photo on top, caption and author row below) */
+
+.explore-feed-card.ef-outline{width:190px;height:325px;box-sizing:border-box;padding:7px 7px 15px;border-radius:32px;background:#f8f5f2;border:1px solid rgba(21,23,31,.08);box-shadow:0 12px 32px rgba(27,42,68,.06);display:flex;flex-direction:column;gap:7px;text-align:left}
+.ef-photo{width:176px;height:241px;border-radius:25px;object-fit:cover;display:block;flex:none}
+.ef-copy{width:162px;margin:0 7px;display:flex;flex-direction:column;gap:10px}
+.ef-text{font-size:13px;font-weight:500;line-height:16px;color:#2a2650}
+.ef-meta{display:flex;align-items:center;height:13px;gap:5px;font-size:11px;line-height:13px;color:#5e5a7e}
+.ef-meta img{border-radius:50%}
+.ef-meta svg+span{margin-left:0}
+.ef-meta span+svg{margin-left:auto}
+
+/* Post detail, new version (Figma 1099:7428) */
+.explore-post main{padding-top:74px}
+.explore-post nav h1{color:#2a2650}
+.ep-card{position:relative;width:392px;box-sizing:border-box;padding:24px 24px 22px;border-radius:28px;border:1.5px solid rgba(255,255,255,.95);background:linear-gradient(127.8deg,rgba(255,255,255,.55) 14%,rgba(255,255,255,.08) 86%),rgba(255,255,255,.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 14px 18px rgba(42,38,80,.1),inset 0 1px 0 rgba(255,255,255,.9);display:flex;flex-direction:column;gap:16px;color:#2a2650}
+.ep-author{display:flex;gap:14px;align-items:center}.ep-author strong{display:block;font-size:15px;font-weight:600;color:#2a2650}.ep-author p{font-size:12px;color:#5e5a7e;margin-top:3px}
+.ep-dot{width:32px;height:32px;border-radius:16px;background:#e5e3f0;flex:none;display:block}.ep-author .ep-dot{width:44px;height:44px;border-radius:22px}
+.ep-photo{width:344px;height:200px;border-radius:20px;object-fit:cover;display:block}
+.ep-card h2{font-size:17px;font-weight:600;line-height:22px}.ep-body{font-size:15px;line-height:21px}
+.ep-tags{display:flex;gap:8px}.ep-tags span{background:rgba(42,38,80,.05);border-radius:14px;padding:6px 12px;font-size:12px;font-weight:500;white-space:nowrap}
+.ep-actions{display:flex;gap:24px;align-items:center;padding-top:4px}.ep-actions button{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:#5e5a7e}
+.explore-post hr{background:#e6e2dd}.explore-place h3{color:#5e5a7e}
+.ep-place{border:1.5px solid rgba(255,255,255,.95);border-radius:24px;background:linear-gradient(140.5deg,rgba(255,255,255,.55) 14%,rgba(255,255,255,.08) 86%),rgba(255,255,255,.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 14px 36px rgba(42,38,80,.1),inset 0 1px 0 rgba(255,255,255,.9)}
+.ep-place h2{color:#2a2650}.ep-place p{color:#5e5a7e}.explore-place-card.ep-place span{color:#2a2650}
+.explore-replies h2,.explore-reply strong,.explore-reply p{color:#2a2650}.explore-replies header span,.explore-reply small{color:#5e5a7e}.explore-all-replies{color:#2a2650}
+
+/* Dark theme (Settings > App comfort): Home explore feed */
+.home-dk .explore-feed h2{color:#f4f5f9!important}
+.home-dk .explore-feed-card.ef-outline{background:#171a26;border-color:rgba(255,255,255,.18);box-shadow:0 12px 32px rgba(0,0,0,.35)}
+.home-dk .ef-text{color:#fff!important}
+.home-dk .ef-meta{color:rgba(255,255,255,.75)}
+.home-dk .ef-meta svg{fill:rgba(255,255,255,.75)}

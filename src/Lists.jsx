@@ -7,6 +7,8 @@ import { G, TAP } from './flow.jsx';
 import { VIcon } from './venueIcons.jsx';
 import { SheetFrame, CloseX, DarkCTA, TextBtn } from './sheets.jsx';
 import { PAGES, SORTS, SORT_ORDER, chipText, sortRows } from './listData.js';
+import { PHOTO } from './remainingPhotos.js';
+const VENUE_THUMBS = { foxy: PHOTO.p0602, sentient: PHOTO.p0607, gallery: PHOTO.p0608, grey: PHOTO.p0610, husk: PHOTO.p0801, cotton: PHOTO.p0802, kitchen: PHOTO.p0803, rocks: PHOTO.p0804, lanie: PHOTO.p0805, alligator: PHOTO.p0806, treehouse: PHOTO.p0807 };
 
 const cardRow = { background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(20,24,31,0.08)', boxShadow: '0 12px 32px rgba(27,42,68,0.06)' };
 const TONES = {
@@ -36,7 +38,7 @@ function Row({ h, r = 28, pad = 16, gap = 16, shadow, onClick, children }) {
 function VenueRow({ v, onOpen }) {
   return (
     <Row h={112} onClick={() => onOpen(v)}>
-      <Thumb />
+      <Thumb src={v.thumb || VENUE_THUMBS[v.id]} />
       <span style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
         <span className="nowrap" style={nm}>{v.name}</span>
         <span className="nowrap" style={mt}>{v.meta}</span>
@@ -102,8 +104,8 @@ function RankRow({ v, n, onOpen }) {
   return (
     <Row h={120} onClick={() => onOpen(v)}>
       <span style={{ width: 36, height: 36, borderRadius: 18, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 700,
-        background: n === 1 ? INK : 'rgba(20,24,31,0.06)', color: n === 1 ? '#fff' : INK }}>{n}</span>
-      <Thumb size={64} r={12} />
+        background: 'rgba(20,24,31,0.06)', color: INK }}>{n}</span>
+      <Thumb size={64} r={12} src={v.thumb || VENUE_THUMBS[v.id]} />
       <span style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
         <span className="nowrap" style={nm}>{v.name}</span>
         <span className="nowrap" style={mt}>{v.meta}</span>
@@ -116,14 +118,14 @@ const ROWS = { venue: VenueRow, event: EventRow, more: MoreRow, pick: PickRow, r
 
 function FilterChips({ sorts, openSense, onOpen }) {
   return (
-    <div className="abs hide-sb" style={{ left: 0, top: 119, width: 440, height: 80, overflowX: 'auto', overflowY: 'hidden', padding: '6px 24px 30px', display: 'flex', gap: 8, zIndex: 6, pointerEvents: 'none', alignItems: 'flex-start' }}>
+    <div className="abs hide-sb" style={{ left: 0, top: 119, width: 440, height: 80, overflowX: 'auto', overflowY: 'hidden', padding: '6px 24px 30px', display: 'flex', gap: 8, zIndex: 6, pointerEvents: 'auto', touchAction: 'pan-x', alignItems: 'flex-start' }}>
       {SORT_ORDER.map((sense) => {
         const cur = (sorts.find((s) => s[0] === sense) || [])[1];
         return (
           <G key={sense} as="button" r={22} on={!!cur} onClick={() => onOpen(sense, cur)} whileTap={{ scale: 0.95 }} transition={TAP}
             style={{ height: 44, minWidth: SORTS[sense].minW, padding: '0 22px', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none', pointerEvents: 'auto', boxShadow: '0 6px 14px rgba(42,38,80,0.08), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
             <span className="nowrap" style={{ fontSize: 15, fontWeight: 600, color: NAVY }}>{chipText(sense, cur)}</span>
-            <motion.span animate={{ rotate: openSense === sense ? 180 : 0 }} transition={GENTLE} style={{ display: 'flex', marginLeft: 0 }}>
+            <motion.span animate={{ rotate: openSense === sense ? 180 : 0 }} transition={GENTLE} style={{ display: 'flex', marginLeft: 6 }}>
               <VIcon name="caretDown" size={15} fill={NAVY} />
             </motion.span>
           </G>
@@ -177,25 +179,22 @@ export function SortSheet({ sense, value, onApply, onClose }) {
   const cfg = SORTS[sense];
   const opts = [['any', cfg.any], ...cfg.opts];
   const [pick, setPick] = useState(value || 'any');
-  const actionsTop = 136 + 36 * opts.length;
+  const actionsTop = 143 + 48 * opts.length;
   const apply = (k) => { onApply(k === 'any' ? null : k); onClose(); };
   return (
-    <SheetFrame height={actionsTop + 63 + 40} onClose={onClose}>
+    <SheetFrame height={actionsTop + 90} onClose={onClose}>
       <p className="abs nowrap" style={{ left: 24, top: 40, fontSize: 24, fontWeight: 600, color: INK, lineHeight: '28px' }}>{cfg.label}</p>
       <CloseX onClick={onClose} />
-      <p className="abs nowrap" style={{ left: 24, top: 84, fontSize: 17, fontWeight: 600, color: INK2, lineHeight: '20px' }}>Sort by</p>
-      <div className="abs" style={{ left: 24, top: 120, width: 392 }}>
+      <p className="abs nowrap" style={{ left: 24, top: 84, fontSize: 14, fontWeight: 600, color: INK, lineHeight: '17px' }}>Sort by</p>
+      <div className="abs" style={{ left: 24, top: 108, width: 392, padding: '4px 0' }}>
         {opts.map(([k, label]) => {
           const on = pick === k;
           return (
-            <button key={k} onClick={() => setPick(k)} style={{ width: 392, height: 36, display: 'flex', alignItems: 'center', gap: 16, padding: '0 20px', textAlign: 'left' }}>
-              <motion.span initial={false} animate={{ backgroundColor: on ? INK : 'rgba(20,24,31,0)', borderColor: on ? INK : INK2 }} transition={{ duration: 0.18 }}
-                style={{ width: 24, height: 24, borderRadius: 12, border: '1.5px solid', flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <motion.svg width="14" height="14" viewBox="0 0 14 14" fill="none" initial={false} animate={{ opacity: on ? 1 : 0, scale: on ? 1 : 0.6 }} transition={{ duration: 0.18 }}>
-                  <path d="M2.5 7.4L5.6 10.4L11.5 4.2" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </motion.svg>
-              </motion.span>
-              <span style={{ fontSize: 15, fontWeight: on ? 700 : 500, color: INK }}>{label}</span>
+            <button key={k} onClick={() => setPick(k)} style={{ width: 392, height: 48, display: 'flex', alignItems: 'center', padding: '0 18px 0 20px', textAlign: 'left' }}>
+              <span style={{ flex: '1 0 0', fontSize: 15, fontWeight: on ? 600 : 400, color: INK }}>{label}</span>
+              <motion.svg width="20" height="20" viewBox="0 0 20 20" fill="none" initial={false} animate={{ opacity: on ? 1 : 0, scale: on ? 1 : 0.6 }} transition={{ duration: 0.18 }}>
+                <path d="M4 10.5L8 14.5L16 5.5" stroke={INK} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </motion.svg>
             </button>
           );
         })}

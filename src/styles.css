@@ -32,7 +32,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webki
 .device::before{content:'';position:absolute;inset:3px;border-radius:73px;background:#0b0b0d}
 .device .btn{position:absolute;width:4px;border-radius:2px;background:linear-gradient(90deg,#8f8c87,#c9c6c0)}
 .screen{position:absolute;left:14px;top:14px;width:440px;height:956px;border-radius:62px;overflow:clip;background:#f7f5f1;isolation:isolate}
-.island{position:absolute;left:50%;top:12px;width:86px;height:30px;margin-left:-43px;border-radius:15px;background:#000;z-index:60;pointer-events:none}
+.island{position:absolute;left:50%;top:11px;width:125px;height:37px;margin-left:-62.5px;border-radius:18.5px;background:#000;z-index:60;pointer-events:none}
 
 /* Phone build (vite --mode phone): the screen is the whole page */
 html.phone,html.phone body{background:#f7f5f1;overscroll-behavior:none;-webkit-touch-callout:none;touch-action:manipulation}
@@ -71,3 +71,18 @@ textarea.field::placeholder{color:#5e5a7e;opacity:1}
 
 img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
 
+
+/* Dark theme: tab bar over the dark Home */
+.glass.glass-dk{border-color:rgba(255,255,255,.22);box-shadow:0 14px 24px rgba(0,0,0,.4)}
+.glass.glass-dk>.g-bg{background:rgba(40,44,60,.72)!important}
+.glass.glass-dk>.g-in{box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+
+/* Dark theme for Search, Map and Profile: invert the light UI, keep photos and map true to colour */
+.dk-screen{filter:invert(1) hue-rotate(180deg)}
+.dk-screen img,.dk-screen [style*="url("]{filter:invert(1) hue-rotate(180deg)}
+.dk-screen img[src*="map-tiles"]{filter:brightness(40%) invert(1) hue-rotate(180deg)}
+/* Same page colour as the dark Home (#0e1119) once the inversion is applied */
+.dk-screen [style*="247, 245, 241"]{background:#e9eef6!important}
+.dk-screen .s-page,.dk-screen .s-recent,.dk-screen .s-sheet,.dk-screen [data-map-sheet]{background:#e9eef6!important}
+
+.dk-screen img.mp-tile{filter:brightness(40%) invert(1) hue-rotate(180deg)}

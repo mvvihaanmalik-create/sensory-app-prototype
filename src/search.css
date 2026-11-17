@@ -1,16 +1,15 @@
 .s-page{position:absolute;inset:0;background:#f7f5f1;color:#2a2650;overflow:clip}
-.s-search{position:absolute;left:24px;top:62px;width:328px;height:52px}
+.s-search{position:absolute;z-index:7;left:24px;top:80px;width:328px;height:52px}
 .s-search input{font:500 16px Figtree,sans-serif;color:#2a2650;background:transparent;border:0;outline:0;min-width:0;width:100%;height:100%}
 .s-search input::placeholder{color:#2a2650;opacity:1}
-.s-search:focus-within .glass{outline:2px solid #5e5a7e;outline-offset:2px}
 .s-clear{font-size:25px;min-width:24px;height:32px;line-height:28px}
-.s-filter{position:absolute;left:364px;top:62px;width:52px;height:52px}
-.s-badge{position:absolute;right:-3px;top:-5px;min-width:20px;height:20px;line-height:20px;background:#2a2650;color:#fff8ef;border-radius:10px;font-size:12px}
-.s-chips{position:absolute;left:0;top:120px;width:440px;height:73px}
+.s-filter{position:absolute;z-index:7;left:364px;top:80px;width:52px;height:52px}
+.s-badge{position:absolute;z-index:2;text-align:center;padding:0 5px;right:-3px;top:-5px;min-width:20px;height:20px;line-height:20px;background:#2a2650;color:#fff8ef;border-radius:10px;font-size:12px}
+.s-chips{position:absolute;left:0;top:138px;width:440px;height:73px}
 .s-chips>div{display:flex;gap:8px;padding:8px 24px 21px;width:max-content}
 .s-pill{position:relative;height:44px;flex:none;font-size:15px;font-weight:500;white-space:nowrap;border-radius:22px}
 .s-pill .g-c{white-space:nowrap}.s-pill.selected{font-weight:600}.s-pill.selected .g-bg{background:rgba(255,255,255,.92)}
-.s-viewport.scroll{inset:193px 0 0}
+.s-viewport.scroll{inset:211px 0 0}
 .s-groups{padding:0 20px 100px;width:440px;display:flex;flex-direction:column;gap:24px}
 .s-groups h2,.s-results h2,.s-sheet h2{font-size:18px;font-weight:600;line-height:24px}
 .s-groups section{width:400px}.s-groups h2{margin-bottom:12px}
@@ -45,3 +44,21 @@
 .s-place-art{height:120px;border-radius:20px;margin-top:16px;display:flex;align-items:center;justify-content:center}.s-place-art img{width:120px;height:120px;object-fit:contain}
 .s-place-senses{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}.s-place-senses div{display:flex;flex-direction:column;gap:4px}.s-place-senses span{font-size:13px;color:#5e5a7e}.s-place-senses strong{font-size:16px;font-weight:600}
 .s-sheet-footer{flex:none;margin-top:20px}.s-sheet-footer>.s-pill{width:100%}
+.s-recent{position:absolute;left:0;right:0;top:146px;bottom:0;background:#f7f5f1;padding:0 24px;z-index:6;overflow:auto}
+.s-recent h2{font-size:22px;font-weight:600;line-height:26px;color:#2a2650;margin:14px 0 17px}
+.s-recent-list{display:flex;flex-direction:column;gap:8px}
+.s-recent-list button{position:relative;display:flex;align-items:center;gap:10px;width:392px;height:46px;padding:0 14px;border:1.5px solid rgba(255,255,255,.95);border-radius:15px;background:linear-gradient(173.3deg,rgba(255,255,255,.55) 14.3%,rgba(255,255,255,.08) 85.7%),rgba(255,255,255,.55);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 14px 36px rgba(42,38,80,.1),inset 0 1px 0 rgba(255,255,255,.9);font:500 16px Figtree,sans-serif;color:#2a2650;text-align:left}
+.s-recent-list button span{flex:1 0 0}
+.s-recent-list button i{font-style:normal;font-size:18px;font-weight:500;color:#2a2650}
+.s-recent-list button i.go{font-size:15px;color:#5e5a7e;margin-right:2px}
+.s-sugg-h{margin-top:39px!important;margin-bottom:18px!important}
+.s-sugg{display:grid;grid-template-columns:192px 192px;gap:8px}
+.s-sugg button{height:46px;border-radius:22px;background:rgba(255,255,255,.8);box-shadow:0 2px 8px rgba(42,38,80,.06);color:#2a2650;font:600 15px Figtree,sans-serif;text-align:left;padding:0 14px}
+/* Category illustrations: a gentle wiggle on hover / press */
+@keyframes s-wiggle{0%{transform:translate(0,0) rotate(0)}22%{transform:translate(-1.5px,-3px) rotate(-3.5deg)}48%{transform:translate(1px,-1.5px) rotate(2.8deg)}72%{transform:translate(-.5px,-.5px) rotate(-1.4deg)}100%{transform:translate(0,0) rotate(0)}}
+.s-category img{transform-origin:70% 85%}
+.s-category:hover img,.s-category:active img,.s-category:focus-visible img{animation:s-wiggle .7s cubic-bezier(.36,.07,.19,.97) both}
+@media (prefers-reduced-motion:reduce){.s-category:hover img,.s-category:active img{animation:none}}
+
+.s-result-art.photo{overflow:hidden}.s-result-art.photo img{width:76px;height:76px;object-fit:cover}
+.s-place-art.photo{overflow:hidden}.s-place-art.photo img{width:100%;height:120px;object-fit:cover}

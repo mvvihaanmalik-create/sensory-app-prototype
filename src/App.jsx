@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { AnimatePresence, animate, motion, MotionConfig, useMotionValue, useIsPresent } from 'motion/react';
 import Home from './Home.jsx';
 import ExplorePost from './Explore.jsx';
@@ -14,15 +15,16 @@ import SenseReviews from './SenseReviews.jsx';
 import ListPage, { SortSheet } from './Lists.jsx';
 import { ModesSheet, EditMode, INITIAL_MODES, modeLabel } from './Modes.jsx';
 import { PAGE_IDS, PAGES } from './listData.js';
+import { SCENES } from './scenes.js';
 import { Toast } from './flow.jsx';
 import { GENTLE, ScaleCtx, StatusBar, TabBar } from './ui.jsx';
 
 const DEVICE_W = 468, DEVICE_H = 984, SCREEN_W = 440;
 const TAB_TOP = { home: 852, search: 852, map: 852, profile: 852 };
 const SCREEN_IN = {
-  home: { initial: { opacity: 0, scale: 0.985 }, animate: { opacity: 1, scale: 1 } },
-  map: { initial: { opacity: 0, scale: 1.04 }, animate: { opacity: 1, scale: 1 } },
-  profile: { initial: { opacity: 0, x: 24 }, animate: { opacity: 1, x: 0 } },
+  home: { initial: false, animate: { opacity: 1 } },
+  map: { initial: false, animate: { opacity: 1 } },
+  profile: { initial: false, animate: { opacity: 1 } },
 };
 const EASE = { duration: 0.42, ease: [0.22, 1, 0.36, 1] };
 
@@ -98,9 +100,9 @@ const START = (() => {
 const ONB_VIEWS = VIEWS.filter((v) => v.id.startsWith('onboarding')).map((v) => v.id);
 const onbStep = (id) => Math.max(0, ONBOARDING_STEPS.indexOf(id.replace('onboarding-', '')));
 const SEARCH_ROUTES = ['search', 'search-results', 'search-filters', 'search-place'];
-function ScreenLayer({ screen, children }) {
+function ScreenLayer({ screen, children, dk }) {
   const present = useIsPresent();
-  return <motion.div className="abs" aria-hidden={!present || undefined} style={{ inset: 0, pointerEvents: present ? 'auto' : 'none' }} initial={SCREEN_IN[screen].initial} animate={SCREEN_IN[screen].animate} exit={{ opacity: 0, transition: { duration: .28 } }} transition={EASE}>{children}</motion.div>;
+  return <motion.div className={dk ? 'abs dk-screen' : 'abs'} aria-hidden={!present || undefined} style={{ inset: 0, pointerEvents: present ? 'auto' : 'none' }} initial={SCREEN_IN[screen].initial} animate={SCREEN_IN[screen].animate} exit={{ opacity: 0, transition: { duration: 0 } }} transition={{ duration: 0 }}>{children}</motion.div>;
 }
 const MODE_VIEWS = ['modes', 'edit-study', 'edit-party', 'add-mode'];
 const HOME_VIEWS = [...PAGE_IDS, ...MODE_VIEWS, 'sort-sound', 'discover', 'explore-post', ...ONB_VIEWS];
@@ -130,9 +132,8 @@ export default function App() {
   const [exploreOpen, setExploreOpen] = useState(initial === 'explore-post');
   const [exploreLiked, setExploreLiked] = useState(false), [exploreSaved,setExploreSaved] = useState(false);
   const [exploreFollow,setExploreFollow]=useState(false),[exploreReplies,setExploreReplies]=useState([]);
-  const openExplore = () => { setExploreOpen(true); history.pushState({explore:true},'', '#explore-post'); };
-  const closeExplore = () => { setExploreOpen(false); if(history.state?.explore) history.back(); else history.replaceState(null,'','#home'); };
-  useEffect(()=>{ const back=()=>setExploreOpen(location.hash === '#explore-post'); window.addEventListener('popstate',back); return()=>window.removeEventListener('popstate',back); },[]);
+  const openExplore = () => { setExploreOpen(true); try { history.replaceState(null, '', '#explore-post'); } catch (_) {} };
+  const closeExplore = () => { setExploreOpen(false); try { history.replaceState(null, '', '#home'); } catch (_) {} };
   const [venueOpen, setVenueOpen] = useState(VENUE_VIEWS.includes(initial));
   const [flow, setFlow] = useState(flowOf(initial));
   const [bookStep, setBookStep] = useState(initial === 'book-2' ? 2 : initial === 'book-3' ? 3 : 1);
@@ -149,9 +150,25 @@ export default function App() {
   const openVenue = () => { setVenueOpen(true); setVenueTab('overview'); setVenueScroll(0); setFlow(null); setSense(null); };
   const closeVenue = () => { if (screen === 'search') { try { history.replaceState(null, '', '#' + searchRoute); } catch (_) {} } setVenueOpen(false); setFlow(null); setSense(null); setVenueScroll(0); };
   const reserve = () => { if (booking) setFlow('confirmed'); else { setBookStep(1); setFlow('book'); } };
+  const [mapOverlay, setMapOverlay] = useState(false);
+  const [profileOverlay, setProfileOverlay] = useState(false);
   const [sheetCmd, setSheetCmd] = useState(initial.startsWith('map-') && initial !== 'map-half' ? { state: initial.slice(4), n: 0 } : null);
   const [homeScroll, setHomeScroll] = useState(0);
+  const [homeTop, setHomeTop] = useState(0); // resets Home on every Home tab tap
+  const viewportRef = useRef(null);
+  const [navigationRequest, setNavigationRequest] = useState(0);
+  const [typing, setTyping] = useState(false); // the keyboard is up: tuck the tab bar away so it does not ride above the keyboard
+  useEffect(() => {
+    const on = (e) => { if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) setTyping(true); };
+    const off = () => setTimeout(() => setTyping(/^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName || '')), 50);
+    document.addEventListener('focusin', on); document.addEventListener('focusout', off);
+    return () => { document.removeEventListener('focusin', on); document.removeEventListener('focusout', off); };
+  }, []);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [sceneBase, setScene] = useState('morning');
+  const [darkTheme, setDarkTheme] = useState(false); // Settings > App comfort > Theme > Dark
+  const scene = darkTheme ? 'night' : sceneBase;
+  const stepScene = (d) => setScene((cur) => SCENES[(SCENES.findIndex((x) => x.id === cur) + d + SCENES.length) % SCENES.length].id);
   // Hidden Discovery Mode: Home slides down by `pull`, Discover sits underneath it
   const [discoverOpen, setDiscoverOpen] = useState(initial === 'discover');
   const pull = useMotionValue(initial === 'discover' ? SCREEN_H : 0);
@@ -163,8 +180,12 @@ export default function App() {
   const closeDiscover = () => { setDiscoverOpen(false); animate(pull, 0, CLOSE_SPRING); };
   const showPassed = () => setDecided((m) => Object.fromEntries(Object.entries(m).filter(([, v]) => v === 'save')));
 
-  const nav = (to) => {
-    if (screen === 'search' && to !== 'search') { try { history.pushState(null, '', '#' + (to === 'map' ? 'map-half' : to)); } catch (_) {} }
+  const [profileStart, setProfileStart] = useState(null);
+  const nav = (to, fromSaved) => {
+    if (!fromSaved) setProfileStart(null);
+    setNavigationRequest(n => n + 1);
+    if (screen === 'search' && to !== 'search') { setSearchRoute('search'); try { history.replaceState(null, '', '#' + (to === 'map' ? 'map-half' : to)); } catch (_) {} }
+    if (to === 'home') setHomeTop((n) => n + 1);
     if (discoverOpen) closeDiscover();
     setExploreOpen(false);
     if (page) setPage(null);
@@ -172,15 +193,61 @@ export default function App() {
   };
   const navigateSearch = (route, replace = false) => {
     setSearchRoute(route); setScreen('search');
-    const modal = route === 'search-filters' || route === 'search-place';
-    try { if (location.hash !== '#' + route) history[replace ? 'replaceState' : 'pushState']({ search: true, ...(modal ? { searchReturn: searchRoute } : {}) }, '', '#' + route); } catch (_) {}
+    try { if (location.hash !== '#' + route) history.replaceState(null, '', '#' + route); } catch (_) {}
   };
-  const backSearch = fallback => { if (history.state?.searchReturn === fallback) history.back(); else navigateSearch(fallback, true); };
-  const openSearchVenue = () => { openVenue(); try { history.pushState({ search: true }, '', '#venue'); } catch (_) {} };
+  const backSearch = fallback => navigateSearch(fallback, true);
+  // Home / Map "Search places": land on Search with the field focused so the keyboard comes up in the same tap
+  const searchFocus = useRef(null);
+  const openSearchTyping = () => { flushSync(() => { nav('search'); navigateSearch('search'); }); searchFocus.current?.(); };
+  const openSearchVenue = () => { openVenue(); try { history.replaceState(null, '', '#venue'); } catch (_) {} };
+  // Back swipe (browser / iOS edge swipe) returns to the previous screen. In-app navigation keeps its own stack of
+  // screen states; one guard history entry is kept while there is somewhere to go back to, and popping it restores the last state.
+  const atHome = screen === 'home' && !venueOpen && !flow && !sense && !page && !sortSheet && !modesOpen && !editing && !exploreOpen && !discoverOpen;
+  const armed = useRef(false);
+  const goHome = () => {
+    setVenueOpen(false); setFlow(null); setSense(null); setVenueScroll(0); setPage(null); setSortSheet(null); setModesOpen(false); setEditing(null);
+    nav('home');
+    try { history.replaceState(null, '', '#home'); } catch (_) {}
+  };
+  const snap = { screen, searchRoute, venueOpen, flow, bookStep, sense, page, sortSheet, modesOpen, editing, exploreOpen, discoverOpen, venueTab, hash: typeof location !== 'undefined' ? location.hash : '' };
+  // Reset scrolling on navigation, including a repeat tap on the active tab.
+  // Keep component state (bookings, filters, drafts) intact.
+  useLayoutEffect(() => {
+    viewportRef.current?.querySelectorAll('.scroll, .s-sheet-body').forEach(el => { el.scrollTop = 0; });
+    setHomeScroll(0); setVenueScroll(0);
+  }, [navigationRequest, screen, searchRoute, venueOpen, flow, bookStep, sense, page, editing, exploreOpen, discoverOpen]);
+  const sameSnap = (x, y) => ['screen', 'searchRoute', 'venueOpen', 'flow', 'bookStep', 'sense', 'page', 'sortSheet', 'modesOpen', 'editing', 'exploreOpen', 'discoverOpen'].every((k) => x[k] === y[k]);
+  const stack = useRef([]);
+  const restoring = useRef(false);
   useEffect(() => {
-    const restore = () => { const id = location.hash.slice(1); if (SEARCH_ROUTES.includes(id)) { setSearchRoute(id); setScreen('search'); setVenueOpen(false); setFlow(null); setSense(null); } else if (['home','map-half','profile'].includes(id)) { setScreen(id === 'map-half' ? 'map' : id); } };
-    window.addEventListener('popstate', restore); window.addEventListener('hashchange', restore);
-    return () => { window.removeEventListener('popstate', restore); window.removeEventListener('hashchange', restore); };
+    if (onboarding) return;
+    const st = stack.current, top = st[st.length - 1];
+    if (restoring.current) { restoring.current = false; return; }
+    if (atHome) { stack.current = [snap]; return; }
+    if (!top || !sameSnap(top, snap)) st.push(snap);
+    else st[st.length - 1] = snap;
+  });
+  const backRef = useRef(null);
+  backRef.current = () => {
+    armed.current = false;
+    if (onboarding) { try { history.pushState({ guard: true }, '', location.href); armed.current = true; } catch (_) {} return; }
+    const st = stack.current;
+    if (st.length < 2) { if (!atHome) goHome(); return; }
+    st.pop();
+    const p = st[st.length - 1];
+    restoring.current = true;
+    setScreen(p.screen); setSearchRoute(p.searchRoute); setVenueOpen(p.venueOpen); setFlow(p.flow); setBookStep(p.bookStep); setSense(p.sense);
+    setPage(p.page); setSortSheet(p.sortSheet); setModesOpen(p.modesOpen); setEditing(p.editing); setExploreOpen(p.exploreOpen); setDiscoverOpen(p.discoverOpen); setVenueTab(p.venueTab);
+    try { history.replaceState(null, '', p.hash || '#home'); } catch (_) {}
+  };
+  useEffect(() => {
+    if (atHome || armed.current || onboarding) return;
+    try { history.pushState({ guard: true }, '', location.href); armed.current = true; } catch (_) {}
+  });
+  useEffect(() => {
+    const back = () => backRef.current();
+    window.addEventListener('popstate', back);
+    return () => window.removeEventListener('popstate', back);
   }, []);
   const activeM = modes.find((m) => m.id === activeMode) || modes[0];
   const sortsFor = (k) => sortsBy[k] || [];
@@ -234,10 +301,15 @@ export default function App() {
     <MotionConfig reducedMotion={reduceMotion ? 'always' : 'never'}>
       <ScaleCtx.Provider value={scale}>
         <div className={PHONE ? 'stage phone' : 'stage'}>
-          {!PHONE && <aside className="panel">
+          {/* side panel (hero buttons, tools) hidden for the laptop presentation: only the phone frame shows */}
+          {false && <aside className="panel">
             <div>
               <div className="label">UXDG 370 · Final flow</div>
               <h1>Calm places,<br />Savannah</h1>
+            </div>
+            <div>
+              <div className="label">Home hero</div>
+              <div className="jump">{SCENES.map((x) => <button key={x.id} className={x.id === sceneBase ? 'on' : ''} onClick={() => { setScene(x.id); jump('home'); }}>{x.label}</button>)}</div>
             </div>
             <div className="tools"><button onClick={() => { nav('search'); navigateSearch('search'); }}>Search</button>
               <button onClick={() => { try { history.replaceState(null, '', location.pathname); } catch (_) {} location.reload(); }}>Restart</button>
@@ -251,18 +323,18 @@ export default function App() {
               <div className="btn" style={{ left: -3, top: 256, height: 64 }} />
               <div className="btn" style={{ left: -3, top: 334, height: 64 }} />
               <div className="btn" style={{ right: -3, top: 290, height: 104 }} />
-              <div className="screen">
+              <div className="screen" ref={viewportRef}>
                 <div className="abs" style={{ inset: 0, display: screen === 'home' ? 'block' : 'none' }} aria-hidden={screen !== 'home'}>
                     {<DiscoverLayer pull={pull} open={discoverOpen} onClose={closeDiscover} mode={activeM} decided={decided}
                       onDecide={(id, d) => setDecided((m) => ({ ...m, [id]: d }))} onShowPassed={showPassed} onOpenVenue={openVenue} blocked={venueOpen || !!sense || !!flow} />}
-                    {<Home pull={pull} onOpenExplore={openExplore} exploreLiked={exploreLiked} pullOn={screen === 'home' && !discoverOpen && !exploreOpen} onDiscover={() => setDiscoverOpen(true)} onOpenMap={() => nav('map')} onOpenSearch={() => { nav('search'); navigateSearch(searchRoute); }} onOpenVenue={openVenue} onOpenPage={setPage} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} reduceMotion={reduceMotion} />}
+                    {<Home pull={pull} onOpenExplore={openExplore} exploreLiked={exploreLiked} pullOn={screen === 'home' && !discoverOpen && !exploreOpen} onDiscover={() => setDiscoverOpen(true)} onOpenMap={() => nav('map')} onOpenSearch={openSearchTyping} onOpenVenue={openVenue} onOpenPage={setPage} onOpenSaved={() => { nav('profile', true); setProfileStart('collections'); }} onOpenModes={() => setModesOpen(true)} modeLabel={modeLabel(activeM)} onScroll={setHomeScroll} scrollTopKey={homeTop} reduceMotion={reduceMotion} scene={scene} dark={darkTheme} onStepScene={stepScene} />}
                 </div>
-                <AnimatePresence>{!['home', 'search'].includes(screen) && <ScreenLayer key={screen} screen={screen}>
-                  {screen === 'map' && <MapScreen command={sheetCmd} onOpenVenue={openVenue} onOpenSearch={() => { nav('search'); navigateSearch(searchRoute); }} savedIds={Object.keys(decided).filter(id => decided[id] === 'save')} onToggleSaved={toggleSaved} />}
-                  {screen === 'profile' && <Profile onScroll={setHomeScroll} savedCount={savedCount} savedPlaces={savedPlaces} modes={modes} activeId={activeMode} onPickMode={setActiveMode} onEditMode={id => editMode(id, 'profile')} onAddMode={() => editMode('new', 'profile')} onOpenVenue={openVenue} />}
+                <AnimatePresence>{!['home', 'search'].includes(screen) && <ScreenLayer key={screen} screen={screen} dk={darkTheme}>
+                  {screen === 'map' && <MapScreen command={sheetCmd} onOpenVenue={openVenue} onOpenSearch={openSearchTyping} savedIds={Object.keys(decided).filter(id => decided[id] === 'save')} onToggleSaved={toggleSaved} onOverlay={setMapOverlay} />}
+                  {screen === 'profile' && <Profile startPage={profileStart} onExitToHome={() => nav('home')} onTheme={setDarkTheme} onScroll={setHomeScroll} savedCount={savedCount} savedPlaces={savedPlaces} modes={modes} activeId={activeMode} onPickMode={setActiveMode} onEditMode={id => editMode(id, 'profile')} onAddMode={() => editMode('new', 'profile')} onOpenVenue={openVenue} onOpenPost={openExplore} booking={booking || toBooking(SAMPLE_DRAFT)} onOverlay={setProfileOverlay} />}
                 </ScreenLayer>}</AnimatePresence>
-                <motion.div className="abs" style={{ inset: 0, display: screen === 'search' ? 'block' : 'none' }} aria-hidden={screen !== 'search'} initial={false} animate={{ opacity: screen === 'search' ? 1 : 0 }} transition={GENTLE}>
-                  <Search route={searchRoute} active={screen === 'search' && !venueOpen} onNavigate={navigateSearch} onBack={backSearch} onOpenVenue={openSearchVenue} hasSaved={decided.foxy === 'save'} activeMode={activeM} booking={booking} />
+                <motion.div className={darkTheme ? 'abs dk-screen' : 'abs'} style={{ inset: 0, display: screen === 'search' ? 'block' : 'none' }} aria-hidden={screen !== 'search'} initial={false} animate={{ opacity: screen === 'search' ? 1 : 0 }} transition={GENTLE}>
+                  <Search route={searchRoute} active={screen === 'search' && !venueOpen} shown={screen === 'search'} onNavigate={navigateSearch} onBack={backSearch} onOpenVenue={openSearchVenue} hasSaved={decided.foxy === 'save'} activeMode={activeM} booking={booking} focusRef={searchFocus} />
                 </motion.div>
                 {exploreOpen && <ExplorePost onBack={closeExplore} onOpenVenue={openVenue} liked={exploreLiked} setLiked={setExploreLiked} saved={exploreSaved} setSaved={setExploreSaved} follow={exploreFollow} setFollow={setExploreFollow} replies={exploreReplies} setReplies={setExploreReplies}/>}
                 <AnimatePresence>
@@ -300,6 +372,7 @@ export default function App() {
                             onBooked={(b) => { setBooking(b); setFlow('confirmed'); }} />}
                           {flow === 'confirmed' && booking && <BookingConfirmed booking={booking}
                             onClose={() => { setFlow(null); setSense(null); setVenueTab('overview'); }}
+                            onDone={() => { setVenueTab('overview'); goHome(); }}
                             onChange={() => { setDraft({ ...booking }); setBookStep(3); setFlow('book'); }} />}
                           {flow === 'review' && <WriteReview mine={mine} onClose={() => setFlow(null)}
                             onPosted={(r) => { setMine(r); setVenueTab('reviews'); setFlow(null); }} />}
@@ -345,8 +418,8 @@ export default function App() {
                   )}
                 </AnimatePresence>
                 <div className="abs" style={{ inset: 0, zIndex: 60, pointerEvents: 'none' }}><Toast text={note} icon={note && /Only|later/.test(note) ? 'info' : 'check'} /></div>
-                {!PHONE && <StatusBar shade={screen === 'search' && !venueOpen ? 0 : flow || sense ? 0 : venueOpen ? (venueScroll > 270 ? 1 : 0) : screen !== 'map' && homeScroll > 24 ? 1 : 0} />}
-                <TabBar active={screen} onNav={to => { nav(to); if (to === 'search') navigateSearch(searchRoute); }} top={exploreOpen || venueOpen || modesOpen || editing || (screen === 'search' && ['search-filters','search-place'].includes(searchRoute)) ? 1000 : page ? TAB_TOP.home : TAB_TOP[screen]} yMV={screen === 'home' ? pull : undefined} />
+                {!PHONE && <StatusBar pull={pull} light={screen === 'home' && SCENES.find((x) => x.id === scene)?.dark && homeScroll <= 24 && !(venueOpen || exploreOpen || modesOpen || editing || flow || sense || page || onboarding)} shade={screen === 'search' && !venueOpen ? 0 : flow || sense ? 0 : venueOpen ? (venueScroll > 270 ? 1 : 0) : screen !== 'map' && homeScroll > 24 ? 1 : 0} />}
+                <TabBar dark={darkTheme && ['home', 'search', 'map', 'profile'].includes(screen)} active={screen} onNav={to => { nav(to); if (to === 'search') navigateSearch(searchRoute); }} top={typing || exploreOpen || venueOpen || modesOpen || editing || (screen === 'map' && mapOverlay) || (screen === 'profile' && profileOverlay) || (screen === 'search' && ['search-filters','search-place'].includes(searchRoute)) ? 1000 : page ? TAB_TOP.home : TAB_TOP[screen]} yMV={screen === 'home' ? pull : undefined} />
                 {!PHONE && <div className="abs" style={{ left: 150, top: editing || (screen === 'home' && discoverOpen) ? 935 : 943, width: 140, height: 5, borderRadius: 3, background: screen === 'home' && discoverOpen ? '#2a2650' : screen === 'map' ? 'rgba(20,24,31,0.85)' : '#14181f', zIndex: 55 }} />}
                 {!PHONE && <div className="island" />}
               </div>

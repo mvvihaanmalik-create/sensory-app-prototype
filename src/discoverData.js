@@ -11,7 +11,7 @@ export const PLACES = [
   { id: 'gallery', name: 'Gallery Café', cat: 'Café', dist: '1.1 mi', level: 1, s: null, l: 4, c: 3, seat: ['booth'], scene: 'gallery', tone: 'warm' },
   { id: 'graveface', name: 'Graveface Books', cat: 'Bookstore', dist: '0.6 mi', level: 1, s: 1, l: null, c: null, seat: ['indoor'], scene: 'books', tone: 'cool', illustrative: true },
   { id: 'grey', name: 'The Grey', cat: 'Dining', dist: '0.7 mi', level: 2, s: 2, l: 2, c: 2, seat: ['indoor'], scene: 'dining', illustrative: true },
-  { id: 'foxy', name: 'Foxy Loxy Cafe', cat: 'Café', dist: '0.5 mi', level: 2, s: 4, l: 3, c: 4, seat: ['outdoor'], scene: 'awning', venue: true, perk: 'Back patio and a gallery feel' },
+  { id: 'foxy', name: 'Fern & Fable', cat: 'Café', dist: '0.5 mi', level: 2, s: 4, l: 3, c: 4, seat: ['outdoor'], scene: 'awning', venue: true, perk: 'Back patio and a gallery feel' },
   { id: 'rocks', name: 'Rocks on the Roof', cat: 'Nightlife', dist: '0.4 mi', level: 4, s: 5, l: 2, c: 5, seat: ['outdoor'], scene: 'night', tone: 'indigo', illustrative: true, perk: 'Rooftop seating' },
   { id: 'lanie', name: "Lanie's", cat: 'Nightlife', dist: '0.8 mi', level: 3, s: 4, l: null, c: 4, seat: ['booth'], scene: 'night', tone: 'plum', illustrative: true, perk: 'Live jazz' },
 ];
@@ -25,10 +25,10 @@ export const metaOf = (p) => [p.cat, p.dist, p.illustrative ? 'illustrative' : n
 // 1 when v sits inside [lo, hi], otherwise falls off over two steps. null (unknown) is neutral.
 const fit = (v, lo, hi) => (v == null ? null : v >= lo && v <= hi ? 1 : Math.max(0, 1 - (v < lo ? lo - v : v - hi) / 2));
 const RANGE = {
-  sound: { Quiet: [1, 2], 'Easy to talk': [2, 3], Moderate: [3, 3], Lively: [4, 4], Loud: [5, 5] },
-  bright: { Dim: [1, 2], Soft: [3, 3], Bright: [4, 5] },
+  sound: { Quiet: [1, 2], Low: [2, 3], 'Easy to talk': [2, 3], Moderate: [3, 3], Lively: [4, 5], Loud: [5, 5] },
+  bright: { Dim: [1, 2], Soft: [3, 3], Moderate: [3, 4], Bright: [4, 5] },
   src: { 'Natural daylight': [4, 5], 'Indirect light': [2, 3] },
-  crowd: { Relaxed: [1, 2], Moderate: [3, 3], Busy: [4, 5] },
+  crowd: { Empty: [1, 1], Light: [1, 2], Relaxed: [1, 2], Moderate: [3, 3], Busy: [4, 5] },
 };
 
 // One entry per preference the active mode actually sets: { k, fit (null = unknown) }
@@ -39,7 +39,7 @@ function checks(p, prefs) {
   if (prefs.light?.b) add('light', fit(p.l, ...RANGE.bright[prefs.light.b]));
   else if (prefs.light?.src) add('light', fit(p.l, ...RANGE.src[prefs.light.src]));
   if (prefs.crowd) add('crowd', fit(p.c, ...RANGE.crowd[prefs.crowd]));
-  if (prefs.temp) { const t = Object.values(PAGES).flatMap(page => page.rows).find(row => row.id === p.id)?.t; const range = { Cool: [1, 2], Mild: [3, 3], Warm: [4, 5] }[prefs.temp]; add('temp', fit(t, ...range)); }
+  if (prefs.temp) { const t = Object.values(PAGES).flatMap(page => page.rows).find(row => row.id === p.id)?.t; const range = { Cold: [1, 1], Cool: [2, 2], Mild: [3, 3], Warm: [4, 5] }[prefs.temp]; add('temp', fit(t, ...range)); }
   const pos = prefs.seat?.pos;
   if (pos === 'Corner seat' || pos === 'Booth') add('seat', p.seat ? (p.seat.includes('booth') ? 1 : 0.3) : null);
   if (pos === 'Patio') add('seat', p.seat ? (p.seat.includes('outdoor') ? 1 : 0.2) : null);
@@ -75,7 +75,7 @@ const list = (a) => (a.length < 2 ? a[0] : `${[a[0], ...a.slice(1, -1).map(low)]
 // Why this place is on the card: what matches the active mode, what is unknown, and one honest heads-up.
 export function reasonFor(p, prefs, modeName) {
   const cs = checks(p, prefs);
-  if (!cs.length) return { line: 'Picked from places near you. Set preferences in your mode to tune this.', note: null };
+  if (!cs.length) return { line: '', note: null };
   const hit = cs.filter((c) => c.fit != null && c.fit >= 0.85).map((c) => PHRASE[c.k](p, prefs)).slice(0, 3);
   const miss = cs.find((c) => c.fit != null && c.fit < 0.5);
   const unknown = cs.filter((c) => c.fit == null).map((c) => (c.k === 'light' ? 'lighting' : c.k === 'seat' ? 'seating' : c.k));

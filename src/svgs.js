@@ -45,6 +45,7 @@ s.pinFoxy = `<svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="
 
 s.pinSentient = `<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><g filter="url(#f3)"><circle cx="32" cy="28" r="22" fill="white"/><circle cx="32" cy="28" r="20.75" stroke="#F29A3A" stroke-width="2.5"/></g><path d="M22 24.5H25.5L29.5 21V33L25.5 29.5H22V24.5Z" fill="#14181F" stroke="#14181F" stroke-width="1.6" stroke-linejoin="round"/><path d="M33.1133 22.9871C35.4953 25.1321 35.4953 28.8681 33.1133 31.0131" stroke="#14181F" stroke-width="2"/><path d="M35.3883 20.4602C39.2703 23.9562 39.2703 30.0442 35.3883 33.5392" stroke="#14181F" stroke-width="2"/><path d="M37.6634 17.9336C43.0454 22.7796 43.0454 31.2206 37.6634 36.0666" stroke="#14181F" stroke-width="2"/>${filt('f3')}</svg>`;
 
+export const svgSrc = (k) => s[k];
 export const uri = (k) => 'data:image/svg+xml;utf8,' + encodeURIComponent(s[k]);
 
 // Phosphor icon paths (24px) for the glass tab bar and sense switcher; fill is set per state.
