@@ -301,7 +301,8 @@ export default function App() {
     <MotionConfig reducedMotion={reduceMotion ? 'always' : 'never'}>
       <ScaleCtx.Provider value={scale}>
         <div className={PHONE ? 'stage phone' : 'stage'}>
-          {!PHONE && <aside className="panel">
+          {/* side panel (hero buttons, tools) hidden for the laptop presentation: only the phone frame shows */}
+          {false && <aside className="panel">
             <div>
               <div className="label">UXDG 370 · Final flow</div>
               <h1>Calm places,<br />Savannah</h1>
